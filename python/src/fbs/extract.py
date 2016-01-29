@@ -79,11 +79,11 @@ class ExtractSeq(object):
         """
         Indexes metadata in Elasticsearch.
         """
-
         self.es.index(index=self.conf("es-configuration")["es-index"],\
                       doc_type=self.conf("es-configuration")["es-mapping"],\
                       body=body,\
-                      id=es_id)
+                      id=es_id,\
+                      timeout=30)
 
     def process_file_seq(self, filename, level):
 
