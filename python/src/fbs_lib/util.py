@@ -349,7 +349,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         #Find out if other jobs can be submitted.
         try:
             num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit)
-        except CalledProcessError:
+        except  subprocess.CalledProcessError:
             continue
 
         #num_of_running_tasks = 0
