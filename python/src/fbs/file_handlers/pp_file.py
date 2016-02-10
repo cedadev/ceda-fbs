@@ -1,5 +1,6 @@
 import cf
 import os
+import errno
 import fbs_lib.util as util
 
 
@@ -15,6 +16,7 @@ class PpFile(GenericFile):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "PP"
         self.additional_param = additional_param
+        self.handler_id = ""
 
     def get_handler_id(self):
         return self.handler_id
@@ -80,7 +82,7 @@ class PpFile(GenericFile):
                     phenomenon_parameters_dict.clear()
 
             return phenomena_list
-        except Exception:
+        except Exception as ex:
             return None
 
     def get_properties_pp_level2(self):
@@ -106,6 +108,12 @@ class PpFile(GenericFile):
             phenomena = cf.read(self.file_path)
             pp_phenomena = self.phenomena(phenomena)
 
+            try:
+                os.rmdir(file_temp_dir)#This deletes only empty dirs.
+            except OSError as ex:
+                if ex.errno == errno.ENOTEMPTY:
+                    pass
+
             if pp_phenomena is None:
                 return file_info
 
@@ -122,7 +130,7 @@ class PpFile(GenericFile):
         return coord
 
     def get_properties_pp_level3(self):
-         #Get basic file info.
+        #Get basic file info.
         file_info = self.get_properties_generic_level1()
 
         if file_info is not None:

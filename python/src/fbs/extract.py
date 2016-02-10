@@ -148,7 +148,7 @@ class ExtractSeq(object):
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
-                    self.logger.debug("Json for file {}: {} has is .".format(filename, doc, es_id))
+                    self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
 
                     try:
                         self.index_properties_seq(doc, es_id)
