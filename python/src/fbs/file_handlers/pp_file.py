@@ -1,4 +1,5 @@
 import cf
+import os
 import fbs_lib.util as util
 
 
@@ -95,7 +96,13 @@ class PpFile(GenericFile):
 
             self.handler_id = "pp handler level 2."
             #level 2
-            cf.TEMPDIR(self.additional_param)
+            #kltsa 10/02/2016: change for issue 23266, 
+            #every file will have its own directory for stroring temp data.
+            file_temp_dir = os.path.join(self.additional_param, os.path.basename(self.file_path))
+            if not os.path.exists(file_temp_dir):
+                os.makedirs(file_temp_dir)
+
+            cf.TEMPDIR(file_temp_dir) #create derectory for each file
             phenomena = cf.read(self.file_path)
             pp_phenomena = self.phenomena(phenomena)
 
