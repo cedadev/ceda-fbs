@@ -205,10 +205,10 @@ def write_list_to_file(file_list, filename):
     return items_written
 
 def read_file_into_list(filename):
-
+    content = []
     with open(filename) as fd:
-        content = fd.readlines()
-
+        for line in fd:
+            content.append(line)
     return content
 
 def find_in_list(list_str, str_item):
