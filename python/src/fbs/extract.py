@@ -353,6 +353,7 @@ class ExtractSeq(object):
             return
 
         file_list = content[int(start_file):end_file]
+        content = None
 
         self.logger.debug("{} files copied in local file list.".format(len(file_list)))
 
