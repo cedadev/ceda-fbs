@@ -84,7 +84,8 @@ class ExtractSeq(object):
                       doc_type=self.conf("es-configuration")["es-mapping"],\
                       body=body,\
                       id=es_id,\
-                      timeout=60)
+                      request_timeout=60\
+                     )
 
     def process_file_seq(self, filename, level):
 
