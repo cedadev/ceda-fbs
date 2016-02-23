@@ -17,4 +17,4 @@ class ElasticsearchClientFactory(object):
         """
         host = config_args["es-configuration"]["es-host"]
         port = config_args["es-configuration"]["es-port"]
-        return Elasticsearch(hosts=[{"host": host, "port": port}])
+        return Elasticsearch(hosts=[{"host": host, "port": port}], timeout=60)
