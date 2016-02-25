@@ -3,6 +3,7 @@ Module containing useful functions for the command-line interfaces.
 """
 
 import os
+import errno
 import sys
 import subprocess
 
@@ -66,6 +67,12 @@ class FileFormatError(Exception):
     """
     pass
 
+def delete_folder(folder):
+    try:
+        os.rmdir(folder)#This deletes only empty dirs.
+    except OSError as ex:
+        if ex.errno == errno.ENOTEMPTY:
+            pass
 
 def sanitise_args(config):
     """
