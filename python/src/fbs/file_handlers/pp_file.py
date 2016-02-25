@@ -1,6 +1,5 @@
 import cf
 import os
-import errno
 import fbs_lib.util as util
 
 
@@ -100,20 +99,21 @@ class PpFile(GenericFile):
             #level 2
             #kltsa 10/02/2016: change for issue 23266, 
             #every file will have its own directory for stroring temp data.
-            #file_temp_dir = os.path.join(self.additional_param, os.path.basename(self.file_path))
-            #if not os.path.exists(file_temp_dir):
-            #    os.makedirs(file_temp_dir)
+            file_temp_dir = os.path.join(self.additional_param, os.path.basename(self.file_path))
+            if not os.path.exists(file_temp_dir):
+                os.makedirs(file_temp_dir)
 
-            cf.TEMPDIR(self.additional_param) #create derectory for each file
-            phenomena = cf.read(self.file_path)
-            pp_phenomena = self.phenomena(phenomena)
             phenomena = None
-
-            #try:
-            #    os.rmdir(file_temp_dir)#This deletes only empty dirs.
-            #except OSError as ex:
-            #    if ex.errno == errno.ENOTEMPTY:
-            #        pass
+            pp_phenomena = None
+            try:
+                cf.TEMPDIR(file_temp_dir) #create derectory for each file
+                phenomena = cf.read(self.file_path)
+                pp_phenomena = self.phenomena(phenomena)
+                phenomena = None
+            except Exception: #if read fails then delete temporary folder.
+                util.delete_folder(file_temp_dir)
+            else:
+                util.delete_folder(file_temp_dir)
 
             if pp_phenomena is None:
                 return file_info
