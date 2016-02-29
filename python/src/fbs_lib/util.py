@@ -21,7 +21,7 @@ log_levels = {"debug"   : logging.DEBUG,
               "critical": logging.CRITICAL
              }
 
-NETCDF_MAX_PAR_LENGTH = 256
+MAX_PAR_LENGTH = 256
 
 class Parameter(object):
     """
@@ -291,8 +291,8 @@ def find_num_lines_in_file(filename):
 
 
 def check_attributes_length(item):
-    if len(item["value"]) < NETCDF_MAX_PAR_LENGTH\
-        and len(item["name"]) < NETCDF_MAX_PAR_LENGTH:
+    if len(item["value"]) < MAX_PAR_LENGTH\
+        and len(item["name"]) < MAX_PAR_LENGTH:
         return True
     return False
 
