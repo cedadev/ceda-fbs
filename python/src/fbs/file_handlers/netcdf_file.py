@@ -106,8 +106,8 @@ class   NetCdfFile(GenericFile):
                              "units"
                            ]
         if item["name"] in valid_parameters \
-           and len(item["value"]) < util.NETCDF_MAX_PAR_LENGTH\
-           and len(item["name"]) < util.NETCDF_MAX_PAR_LENGTH:
+           and len(item["value"]) < util.MAX_PAR_LENGTH\
+           and len(item["name"]) < util.MAX_PAR_LENGTH:
             return True
         return False
 
