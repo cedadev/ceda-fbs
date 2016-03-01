@@ -35,7 +35,6 @@ class PpFile(GenericFile):
                 phenomenon_parameters_dict = {}
                 list_of_phenomenon_parameters = []
                 phenomenon_attr = {}
-                all_attr = {}
 
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
@@ -43,24 +42,19 @@ class PpFile(GenericFile):
                 #Filter long values and overwrite duplicates.
                 for var_id in var_ids:
                     metadata_dict = pp_file_content[var_id].attributes
+                    list_of_phenomenon_parameters = []
                     for key in metadata_dict.keys():
                         value = str(metadata_dict[key])
 
                         if     len(key) < util.MAX_PAR_LENGTH \
                            and len(value) < util.MAX_PAR_LENGTH:
-                            all_attr[key] = value
+                            phenomenon_attr["name"] = key
+                            phenomenon_attr["value"] = value
+                            list_of_phenomenon_parameters.append(phenomenon_attr.copy())
 
-                #Store each key and value.
-                for key in all_attr.keys():
-                    value = str(all_attr[key])
-                    phenomenon_attr["name"] = key
-                    phenomenon_attr["value"] = value
-                    list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-
-
-                #Dict of phenomenon attributes.
-                phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-                phenomena_list.append(phenomenon_parameters_dict.copy())
+                    #Dict of phenomenon attributes.
+                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                    phenomena_list.append(phenomenon_parameters_dict.copy())
 
                 pp_file_content.close()
                 file_info["phenomena"] = phenomena_list
