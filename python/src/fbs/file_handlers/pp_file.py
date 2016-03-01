@@ -14,7 +14,6 @@ class PpFile(GenericFile):
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "PP"
-        self.additional_param = additional_param
         self.handler_id = ""
 
     def get_handler_id(self):
@@ -67,7 +66,7 @@ class PpFile(GenericFile):
                 file_info["phenomena"] = phenomena_list
                 return file_info
             except Exception as ex:
-                return None
+                return file_info
         else:
             return None
 
