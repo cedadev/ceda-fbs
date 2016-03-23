@@ -1,0 +1,64 @@
+{
+   "mappings" : {
+   "phenomena" : {
+        "properties" : {
+          "phenomenon" : {
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              },
+              "value" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+   },
+      "file" : {
+        "properties" : {
+          "info" : {
+            "properties" : {
+              "directory" : {
+                "type" : "string"
+              },
+              "format" : {
+                "type" : "string"
+              },
+              "md5" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              },
+              "name_auto" : {
+                "type" : "string"
+              },
+              "phenomena" : {
+                "type" : "string"
+              },
+              "size" : {
+                "type" : "long"
+              },
+              "type" : {
+                "type" : "string"
+              }
+            }
+          },
+          "spatial" : {
+            "properties" : {
+               "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
+              }
+          },
+          "temporal" : {
+            "properties" : {
+              "end_time"  : { "type": "date", "format": "dateOptionalTime" },
+              "start_time": { "type": "date", "format": "dateOptionalTime" }
+            }
+          }
+        }
+      }
+    }
+   }
