@@ -1,23 +1,22 @@
 {
-   "mappings" : {
-   "phenomena" : {
-        "properties" : {
-          "phenomenon" : {
-            "properties" : {
-              "id" : {
-                "type" : "string"
-              },
-              "name" : {
-                "type" : "string"
-              },
-              "value" : {
-                "type" : "string"
-              }
-            }
-          }
-        }
-   },
-      "file" : {
+  "mappings" : {
+  "phenomenon" : 
+  {
+   "properties" : 
+   {
+    "id" :{"type" : "string"},
+    "parameters" : 
+    {
+     "type" : "nested",
+     "properties":
+     {
+      "name" : {"type": "string" },
+      "value" : {"type": "string" }
+     }
+    }
+   }
+  },
+  "file" : {
         "properties" : {
           "info" : {
             "properties" : {
@@ -45,6 +44,17 @@
               "type" : {
                 "type" : "string"
               }
+            }
+          },
+          "spatial" : {
+            "properties" : {
+               "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
+              }
+          },
+          "temporal" : {
+            "properties" : {
+              "end_time"  : { "type": "date", "format": "dateOptionalTime" },
+              "start_time": { "type": "date", "format": "dateOptionalTime" }              
             }
           }
         }
