@@ -21,8 +21,8 @@
         "properties" : {
           "info" : {
             "properties" : {
-              "directory" : {
-                "type" : "string"
+              "directory" : { 
+               "type" : "string", "index" : "not_analyzed" 
               },
               "format" : {
                 "type" : "string"
@@ -30,11 +30,11 @@
               "md5" : {
                 "type" : "string"
               },
-              "name" : {
-                "type" : "string"
+              "name" : { 
+                "type" : "string", "index" : "not_analyzed" 
               },
-              "name_auto" : {
-                "type" : "string"
+              "name_auto" : { 
+                "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
               },
               "phenomena" : {
                 "type" : "string"
@@ -55,7 +55,7 @@
           "temporal" : {
             "properties" : {
               "end_time"  : { "type": "date", "format": "dateOptionalTime" },
-              "start_time": { "type": "date", "format": "dateOptionalTime" }
+              "start_time": { "type": "date", "format": "dateOptionalTime" }              
             }
           }
         }
