@@ -1,27 +1,29 @@
 {
-   "mappings" : {
-   "phenomena" : {
-        "properties" : {
-          "phenomenon" : {
-            "properties" : {
-              "id" : {
-                "type" : "string"
-              },
-              "name" : {
-                "type" : "string"
-              },
-              "value" : {
-                "type" : "string"
-              }
-            }
-          }
-        }
-   },
+  "mappings" : {
+ "phenomenon" :
+ {
+ "properties" :
+ {
+  "id" :
+  {
+    "type" : "string"
+  },
+  "parameters" :
+  {
+   "type" : "nested",
+   "properties":
+   {
+    "name" : {"type": "string" },
+    "value" : {"type": "string" }
+   }
+  }
+ }
+},
       "file" : {
         "properties" : {
           "info" : {
             "properties" : {
-              "directory" : { 
+              "directory" : {
                "type" : "string", "index" : "not_analyzed" 
               },
               "format" : {
@@ -30,7 +32,7 @@
               "md5" : {
                 "type" : "string"
               },
-              "name" : { 
+              "name" : {
                 "type" : "string", "index" : "not_analyzed" 
               },
               "name_auto" : { 
