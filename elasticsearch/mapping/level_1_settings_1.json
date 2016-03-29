@@ -1,0 +1,12 @@
+ {
+"info" : 
+{
+  "directory" : "testdir",
+  "format" : "file",
+  "md5" : "234",
+  "name" : "test_file1",
+  "name_auto" :"test_file1",
+  "size" : 100,
+  "type" : "NCDF"
+}
+}
