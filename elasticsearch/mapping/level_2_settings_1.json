@@ -1,22 +1,25 @@
 {
   "mappings" : {
-  "phenomenon" : 
+ "phenomenon" :
+ {
+ "properties" :
+ {
+  "id" :
   {
-   "properties" : 
-   {
-    "id" :{"type" : "string"},
-    "parameters" : 
-    {
-     "type" : "nested",
-     "properties":
-     {
-      "name" : {"type": "string" },
-      "value" : {"type": "string" }
-     }
-    }
-   }
+    "type" : "string"
   },
-  "file" : {
+  "parameters" :
+  {
+   "type" : "nested",
+   "properties":
+   {
+    "name" : {"type": "string" },
+    "value" : {"type": "string" }
+   }
+  }
+ }
+},
+      "file" : {
         "properties" : {
           "info" : {
             "properties" : {
@@ -29,7 +32,7 @@
               "md5" : {
                 "type" : "string"
               },
-              "name" : { 
+              "name" : {
                 "type" : "string", "index" : "not_analyzed" 
               },
               "name_auto" : { 
@@ -44,17 +47,6 @@
               "type" : {
                 "type" : "string"
               }
-            }
-          },
-          "spatial" : {
-            "properties" : {
-               "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
-              }
-          },
-          "temporal" : {
-            "properties" : {
-              "end_time"  : { "type": "date", "format": "dateOptionalTime" },
-              "start_time": { "type": "date", "format": "dateOptionalTime" }              
             }
           }
         }
