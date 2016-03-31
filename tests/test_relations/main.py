@@ -51,8 +51,6 @@ def update_files(file_ids, phen_ids):
         doc = get_file_doc(fname)
         doc["info"]["phenomena"] = phen_ids
         body_l["doc"] = doc
-        #doc = "{\"info\": {\"name_auto\": \"file_01\", \"name\": \"file_01\", \"format\": \"file\", \"directory\": \"testdir\", \"phenomena\": [\"8801316596223403580\", \"8801316596223403580\", \"8801316596223403580\"], \"size\": 100, \"type\": \"NCDF\", \"md5\": 234}}"
-        #print body_l
         es.update(index=INDEX, doc_type="file", id=item, body=body_l)
 
 def main():
