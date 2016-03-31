@@ -7,7 +7,7 @@ from elasticsearch import Elasticsearch
 
 from content import *
 
-HOST = "jasmin-es1.ceda.ac.uk"
+HOST = "mist.badc.rl.ac.uk"
 PORT = "9200"
 INDEX = "agrel"
 es = Elasticsearch(hosts=[{"host": HOST, "port": PORT}])
@@ -44,11 +44,16 @@ def add_phenomena():
     return ids
 
 def update_files(file_ids, phen_ids):
-    doc = {"info": {"phenomena": phen_ids}}
-    fname = "file_%02d" % 1
-    doc = get_file_doc(fname)
-    es.update(index=INDEX, doc_type="file", id=file_ids[0], body=doc)
-
+    #doc = {"info": {"phenomena": phen_ids}}
+    body_l= {}
+    for item in file_ids:
+        fname = "file_%02d" % 1
+        doc = get_file_doc(fname)
+        doc["info"]["phenomena"] = phen_ids
+        body_l["doc"] = doc
+        #doc = "{\"info\": {\"name_auto\": \"file_01\", \"name\": \"file_01\", \"format\": \"file\", \"directory\": \"testdir\", \"phenomena\": [\"8801316596223403580\", \"8801316596223403580\", \"8801316596223403580\"], \"size\": 100, \"type\": \"NCDF\", \"md5\": 234}}"
+        #print body_l
+        es.update(index=INDEX, doc_type="file", id=item, body=body_l)
 
 def main():
     try:
