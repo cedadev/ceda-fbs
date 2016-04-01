@@ -2,6 +2,7 @@ import logging
 import os
 import ntpath
 import json
+from es import ops
 
 class  GenericFile(object):
     """
@@ -56,7 +57,7 @@ class  GenericFile(object):
 
         """
          Wrapper for method get_properties_generic_level1().
-        :returns: A dict containing information compatible with current es index.
+        :returns: A dict containing information compatible with current es ops.
         """
 
         file_info = self.get_properties_generic_level1()
@@ -66,29 +67,12 @@ class  GenericFile(object):
         if file_info is None:
             return None
 
-        """
-        #creates the nested json structure.
-        phenomenon_parameters_dict = {}
-        var_id_dict = {}
-        var_id_dict["name"] = "var_id"
-        var_id_dict["value"] = "None"
-
-        list_of_phenomenon_parameters = []
-        list_of_phenomenon_parameters.append(var_id_dict.copy())
-
-        phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-        phenomena_list = []
-        phenomena_list.append(phenomenon_parameters_dict.copy())
-
-        file_info["phenomena"] = phenomena_list
-        """
-
         return file_info
 
     def get_properties_generic_level3(self):
-        res = self.get_properties_generic_level2()
+        file_info = self.get_properties_generic_level2()
         self.handler_id = "Generic level 3."
-        return res
+        return file_info
 
     def get_properties(self):
 
