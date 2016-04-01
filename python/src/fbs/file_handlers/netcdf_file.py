@@ -4,6 +4,7 @@ import netCDF4
 from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
 import fbs_lib.geojson as geojson
+from es import ops
 
 class   NetCdfFile(GenericFile):
     """
@@ -14,6 +15,7 @@ class   NetCdfFile(GenericFile):
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
         self.FILE_FORMAT = "NetCDF"
+        self.es = additional_param
 
     def get_handler_id(self):
         return self.handler_id
@@ -153,6 +155,17 @@ class   NetCdfFile(GenericFile):
         phenomenon_parameters_dict = {}
 
         for phenomenon_par in netcdf_phenomena:
+            #create the query
+            #search for the phenomenon
+            #if found extract the id
+            #else create the json for the phenomenon
+            #return json needs to be submitted.
+            query = "{\"query\": { \"match_all\": {} }}"
+            try:
+                res = ops.search_phenomenon_level2(self.es, query)
+            except Exception:
+                print Exception.message
+
             phenomenon_parameters_dict["phenomenon_parameters"] = phenomenon_par
             phenomena_list.append(phenomenon_parameters_dict.copy())
             phenomenon_parameters_dict.clear()
