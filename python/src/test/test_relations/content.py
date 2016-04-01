@@ -1,59 +1,78 @@
+import random, string
 
 mapping = {
-  "mappings": {
- "phenomenon":
+ "mappings" : 
  {
- "properties":
- {
-  "id":
+  "phenomenon" :
   {
-    "type": "string"
-  },
-  "parameters":
-  {
-   "type": "nested",
-   "properties":
+   "properties" :
    {
-    "name": {"type": "string" },
-    "value": {"type": "string" }
+    "id" :
+    {
+     "type" : "string"
+    },
+    "attribute_count": 
+    {
+     "type" : "short"
+    },
+    "attributes" :
+    {
+     "type" : "nested",
+     "properties":
+     {
+      "name" : {"type": "string" },
+      "value" : {"type": "string" }
+     }
+    }
+   }
+  },
+  "file" : 
+  {
+   "properties" : 
+   {
+    "info" : 
+    {
+     "properties" : 
+     {
+      "directory" : 
+      {
+       "type" : "string", "index" : "not_analyzed" 
+      },
+      "format" : 
+      {
+       "type" : "string"
+      },
+      "md5" : 
+      {
+       "type" : "string"
+      },
+      "name" : 
+      {
+       "type" : "string", "index" : "not_analyzed" 
+      },
+      "name_auto" : 
+      { 
+       "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": False
+      },
+      "phenomena" : 
+      {
+       "type" : "string"
+      },
+      "size" : 
+      {
+       "type" : "long"
+      },
+      "type" : 
+      {
+       "type" : "string"
+      }
+     }
+    }
    }
   }
  }
-},
-      "file": {
-        "properties": {
-          "info": {
-            "properties": {
-              "directory": {
-               "type": "string", "index": "not_analyzed"
-              },
-              "format": {
-                "type": "string"
-              },
-              "md5": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string", "index": "not_analyzed"
-              },
-              "name_auto": {
-                "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": False
-              },
-              "phenomena": {
-                "type": "string"
-              },
-              "size": {
-                "type": "long"
-              },
-              "type": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    }
-   }
+}
+
 
 test_file_dict = {
 "info":
@@ -83,12 +102,62 @@ OLD_test_phenomenon = {"parameters":
     {"name": "phenomenon attr4", "value": "phenomenon value4"}
   ]}
 
-def get_phenomenon(s):
-    d = {"parameters": []}
-    for i in range(1, 4):
-        d["parameters"].append({"name": "name %d - %s" % (i, s), "value": "value %d - %s" % (i, s)})
+#phenomena that needs to be inserted
+#rainfall: {"long_name": "rainfall", "units": "mm"}
+#temperature:  {"long_name": "temperature", "units": "K"}
+#pressure:  {"long_name": "pressure", "units": "hPa"}
+#pressure subset (subset of (c)):  {"long_name": "pressure"}
 
-    return d 
+
+rainfall =\
+{
+  "id" : "2017",
+  "attribute_count" : "2",
+  "attributes" : [ {"long_name" : "rainfall", "units" : "mm"} ]
+}
+
+temperature =\
+{
+  "id" : "2017",
+  "attribute_count" : "2",
+  "attributes" : [ {"long_name" : "temperature", "units" : "K"} ]
+}
+
+pressure =\
+{
+  "id" : "2017",
+  "attribute_count" : "2",
+  "attributes" : [ {"long_name" : "pressure", "units" : "hPa"} ]
+}
+
+pressure_sub =\
+{
+  "id" : "2017",
+  "attribute_count" : "1",
+  "attributes" : [ {"long_name" : "pressure"} ]
+}
+
+phen = [rainfall, temperature, pressure, pressure_sub]
+
+
+def randomword(length):
+    return ''.join(random.choice(string.lowercase) for i in range(length))
+
+def create_random_phenomenon():
+    name = randomword(10)
+    value = randomword(10)
+
+    phen = {
+            "attribute_count" : "1",
+            "attributes" : [ {"long_name" : name, "units" : value } ]
+           }
+    return phen
+
+def get_file_phenomena():
+    return phen.append(create_random_phenomenon)
+
+def get_phenomenon(s):
+    return phen[s]
 
 """
 curl -XPOST "mist.badc.rl.ac.uk:9200/archive_level2/phenomenon/?pretty=true" -d' {
