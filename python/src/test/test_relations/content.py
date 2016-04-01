@@ -75,7 +75,7 @@ def get_file_doc(name):
     d["info"]["name_auto"] = name
     return d
 
-test_phenomenon = {"parameters":
+OLD_test_phenomenon = {"parameters":
     [
     {"name": "phenomenon attr1", "value": "phenomenon value1"},
     {"name": "phenomenon attr2", "value": "phenomenon value2"},
@@ -83,6 +83,12 @@ test_phenomenon = {"parameters":
     {"name": "phenomenon attr4", "value": "phenomenon value4"}
   ]}
 
+def get_phenomenon(s):
+    d = {"parameters": []}
+    for i in range(1, 4):
+        d["parameters"].append({"name": "name %d - %s" % (i, s), "value": "value %d - %s" % (i, s)})
+
+    return d 
 
 """
 curl -XPOST "mist.badc.rl.ac.uk:9200/archive_level2/phenomenon/?pretty=true" -d' {
