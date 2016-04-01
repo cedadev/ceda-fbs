@@ -12,8 +12,8 @@ import socket
 import fbs_lib.util as util
 import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from es.search import ElasticsearchClientFactory
-from es import index
+from es.factory import ElasticsearchClientFactory
+from es import ops
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
@@ -86,7 +86,7 @@ class ExtractSeq(object):
                       request_timeout=60\
                      )
 
-    def process_file_seq(self, filename, level):
+    def process_file_seq(self, filename, level, es):
 
         """
         Returns metadata from the given file.
@@ -94,7 +94,7 @@ class ExtractSeq(object):
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
-                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level, es) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_properties()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
@@ -121,7 +121,7 @@ class ExtractSeq(object):
         self.es = es_factory.get_client(self.configuration)
 
         try:
-            index.create_index(self.configuration, self.es)
+            ops.create_index(self.configuration, self.es)
         except TransportError as te:
             if te[0] == 400:
                 pass
@@ -141,7 +141,7 @@ class ExtractSeq(object):
                 start = datetime.datetime.now()
 
                 self.logger.debug("Scanning file {} at level {}.".format(filename, level))
-                doc = self.process_file_seq(filename, level)
+                doc = self.process_file_seq(filename, level, self.es)
 
 
                 if doc is not None:
@@ -196,7 +196,7 @@ class ExtractSeq(object):
         #kltsa 15/09/2015 changes for issue :23221.
         #if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
-        #                %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
+        #                %(self.conf("es-configuration")["es-ops"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())
         #else:
         log_fname = "%s_%s_%s.log" \
