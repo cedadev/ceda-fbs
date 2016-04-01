@@ -8,6 +8,8 @@ from elasticsearch import Elasticsearch
 from content import *
 
 HOST = "mist.badc.rl.ac.uk"
+HOST2 = "jasmin-es1.ceda.ac.uk"
+HOST = HOST2
 PORT = "9200"
 INDEX = "agrel"
 es = Elasticsearch(hosts=[{"host": HOST, "port": PORT}])
@@ -26,7 +28,7 @@ def add_files():
     for i in range(1, 11):
         fname = "file_%02d" % i
         doc = get_file_doc(fname)
-        id = get_hash(fname)
+        id = abs(get_hash(fname))
         es.index(index=INDEX, doc_type="file", id=id, body=doc)
         ids.append(id)
 
@@ -34,10 +36,11 @@ def add_files():
 
 def add_phenomena():
     ids = []
+    chars = "abcdefg"
 
     for i in range(3):
-        phen = test_phenomenon
-        id = hash(str(phen))
+        phen = get_phenomenon(chars[i])
+        id = abs(hash(str(phen)))
         es.index(index=INDEX, doc_type="phenomenon", id=id, body=phen)
         ids.append(id)
 
