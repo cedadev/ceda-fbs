@@ -73,7 +73,6 @@ mapping = {
  }
 }
 
-
 test_file_dict = {
 "info":
  {
@@ -113,32 +112,46 @@ rainfall =\
 {
   "id" : "2017",
   "attribute_count" : "2",
-  "attributes" : [ {"long_name" : "rainfall", "units" : "mm"} ]
+  "attributes" : 
+  [ 
+   { "name" : "long_name", "value" : "rainfall" },
+   { "name" : "units", "value" : "mm"} 
+  ]
 }
 
 temperature =\
 {
   "id" : "2017",
   "attribute_count" : "2",
-  "attributes" : [ {"long_name" : "temperature", "units" : "K"} ]
+  "attributes" : 
+  [ 
+   { "name" : "long_name", "value" : "temperature"},
+   { "name" : "units", "value" : "K"}
+  ]
 }
 
 pressure =\
 {
   "id" : "2017",
   "attribute_count" : "2",
-  "attributes" : [ {"long_name" : "pressure", "units" : "hPa"} ]
+  "attributes" : 
+  [ 
+    {"name" : "long_name", "value" : "pressure"},
+    {"name" : "units", "value" : "hPa"}
+  ]
 }
 
 pressure_sub =\
 {
   "id" : "2017",
   "attribute_count" : "1",
-  "attributes" : [ {"long_name" : "pressure"} ]
+  "attributes" : 
+  [ 
+   {"name" : "long_name", "value" : "pressure" }
+  ]
 }
 
 phen = [rainfall, temperature, pressure, pressure_sub]
-
 
 def randomword(length):
     return ''.join(random.choice(string.lowercase) for i in range(length))
@@ -148,13 +161,20 @@ def create_random_phenomenon():
     value = randomword(10)
 
     phen = {
+            "id" : "1",
             "attribute_count" : "1",
             "attributes" : [ {"long_name" : name, "units" : value } ]
            }
     return phen
 
 def get_file_phenomena():
-    return phen.append(create_random_phenomenon)
+    random_phen = create_random_phenomenon()
+    print "Random phenomenon created :"
+    print random_phen
+    file_phenomena = phen[:]
+    file_phenomena.append(random_phen)
+    print file_phenomena
+    return file_phenomena
 
 def get_phenomenon(s):
     return phen[s]
