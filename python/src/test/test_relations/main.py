@@ -1,4 +1,6 @@
 from datetime import datetime
+from copy import deepcopy
+
 import sys
 sys.path.append(".")
 import socket, time
@@ -31,7 +33,7 @@ def add_files():
         id = abs(get_hash(fname))
         es.index(index=INDEX, doc_type="file", id=id, body=doc)
         ids.append(id)
-        time.sleep(0.3)
+        time.sleep(0.1)
 
     return ids
 
@@ -72,15 +74,15 @@ def update_files(file_ids, phen_ids):
             doc["info"]["phenomena"] = phen_ids[3]
         elif count >= 400 and count <= 499:
             tmp = phen_ids[0:2]
-            print tmp
+            #print tmp
             doc["info"]["phenomena"] = tmp
         elif count >= 500 and count <= 599:
             tmp = phen_ids[0:3]
-            print tmp
+            #print tmp
             doc["info"]["phenomena"] = tmp
         elif count >= 600 and count <= 699:
             tmp = [phen_ids[0:2], phen_ids[3]]
-            print tmp
+            #print tmp
             doc["info"]["phenomena"] = tmp
 
         body_l["doc"] = doc
@@ -88,28 +90,137 @@ def update_files(file_ids, phen_ids):
         count = count + 1
         print count
 
-    def add_new_phenomena():
-        file_phen = get_file_phenomena()
-        #check if phens exist in database
-        #if not add them
-        #at the end post also the file
+
+def search_elasticsearch(query):
+    res = es.search( index=INDEX,
+                     doc_type="phenomenon", 
+                     body=query
+                   )
+    print "query result :" + str(res)
+    return str(res)
+
+es_subquery_name_template =\
+{
+  "match_phrase": { "attributes.name" : "phenomenon attr2"  }
+}
+
+es_subquery_value_template =\
+{
+  "match_phrase": { "attributes.value" : "phenomenon attr2"  }
+}
+
+es_subquery_count =\
+{
+"match": { "attribute_count" : "3" }
+}
+
+es_subquery_template =\
+{
+ "nested": 
+ {
+  "path": "attributes", 
+  "query":
+  {
+   "bool": 
+   {
+    "must": 
+    [ ]
+   }
+  }
+ }
+}
+
+es_query_template =\
+{
+ "query": 
+ {
+  "bool": 
+  {
+   "must": 
+   [ ]
+  }
+ } 
+}
+
+
+def is_valid_result(phenomenon, result):
+    phenomenon_attr_count = phenomenon["attribute_count"]
+    #result_atttr_count = result["hits"]
+
+    #if phenomenon_attr_count == result_atttr_count:
+    #    return True
+    #else:
+    #    return False
+
+def create_query(phenomenon):
+    #format of phenomenon
+    #{'attributes': [{'name': 'value'}], 'attribute_count': '1', 'id': '2017'}
+    attributes = phenomenon["attributes"]
+    number_of_attributes = 0
+    for item in attributes:
+        es_query_template_copy = es_query_template.copy()
+        name = True
+        es_subquery_template_copy = deepcopy(es_subquery_template)
+        for key in item:
+            if name :
+                es_subquery_name_template_copy  = deepcopy(es_subquery_name_template)
+                es_subquery_name_template_copy["match_phrase"]["attributes.name"] = item[key]
+                es_subquery_template_copy["nested"]["query"]["bool"]["must"].append(es_subquery_name_template_copy)
+                name = False
+            else:
+                es_subquery_value_template_copy = deepcopy(es_subquery_value_template)
+                es_subquery_value_template_copy["match_phrase"]["attributes.value"] = item[key]
+                es_subquery_template_copy["nested"]["query"]["bool"]["must"].append(es_subquery_value_template_copy)
+                name = True
+
+
+        es_query_template_copy["query"]["bool"]["must"].append(es_subquery_template_copy)
+        number_of_attributes = number_of_attributes +1
+    es_subquery_count_copy = deepcopy(es_subquery_count)
+    es_subquery_count_copy["match"]["attribute_count"] = number_of_attributes
+    es_query_template_copy["query"]["bool"]["must"].append(es_subquery_count_copy)
+
+    return es_query_template_copy
+
+
+def update_phenomena():
+    file_phen = get_file_phenomena()
+    print "phenomena extracted from file:"
+    print file_phen
+    print "Number of phenomena in the list: " + str(len(file_phen))
+    for item in file_phen:
+        #print "checking if phenomenon:"
+        #print item
+        #print "extracted from file exist in database."
+        query = create_query(item)
+        print "Query ctreated : " + str(query)
+        #print "Searching the elasticsearch."
+        res = search_elasticsearch(query)
+        comp_res = is_valid_result(item, res)
+        #print "The result is :" + comp_res
+    #check if phens exist in database
+    #if not add them
+    #at the end post also the file
 
 def main():
-    try:
-        remove_index()
-        print "REMOVED INDEX"
-    except:
-        pass
+    #try:
+    #    remove_index()
+    #    print "REMOVED INDEX."
+    #except:
+    #    pass
 
-    print "CREATING INDEX"
-    create_index()
-    print "ADDING FILES"
-    file_ids = add_files()
-    print "CREATING PHENS"
-    phen_ids = add_phenomena()
+    #print "CREATING INDEX."
+    #create_index()
+    #print "ADDING FILES."
+    #file_ids = add_files()
+    #print "CREATING PHENS."
+    #phen_ids = add_phenomena()
 
-    print "UPDATING"
-    update_files(file_ids, phen_ids)
+    #print "UPDATING FILES."
+    #update_files(file_ids, phen_ids)
+
+    print "UPDATING PHENOMENA."
+    file_phen = update_phenomena()
 
 if __name__ == "__main__":
 
