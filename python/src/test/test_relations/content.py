@@ -1,5 +1,5 @@
 import random, string
-
+#mappings...
 mapping = {
  "mappings" : 
  {
@@ -101,7 +101,7 @@ OLD_test_phenomenon = {"parameters":
     {"name": "phenomenon attr4", "value": "phenomenon value4"}
   ]}
 
-#phenomena that needs to be inserted
+#phenomena contained in the files.
 #rainfall: {"long_name": "rainfall", "units": "mm"}
 #temperature:  {"long_name": "temperature", "units": "K"}
 #pressure:  {"long_name": "pressure", "units": "hPa"}
@@ -163,17 +163,18 @@ def create_random_phenomenon():
     phen = {
             "id" : "1",
             "attribute_count" : "1",
-            "attributes" : [ {"long_name" : name, "units" : value } ]
+            "attributes" : [ {"name" : name, "value" : value } ]
            }
-    return phen
+
+    return phen.copy()
 
 def get_file_phenomena():
     random_phen = create_random_phenomenon()
-    print "Random phenomenon created :"
-    print random_phen
+    #print "Random phenomenon created :"
+    #print random_phen
     file_phenomena = phen[:]
     file_phenomena.append(random_phen)
-    print file_phenomena
+    #print file_phenomena
     return file_phenomena
 
 def get_phenomenon(s):
