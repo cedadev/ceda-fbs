@@ -96,8 +96,8 @@ def search_elasticsearch(query):
                      doc_type="phenomenon", 
                      body=query
                    )
-    print "query result :" + str(res)
-    return str(res)
+    #print "query result :" + str(res)
+    return res
 
 es_subquery_name_template =\
 {
@@ -139,18 +139,18 @@ es_query_template =\
    "must": 
    [ ]
   }
- } 
+ }
 }
 
 
-def is_valid_result(phenomenon, result):
-    phenomenon_attr_count = phenomenon["attribute_count"]
-    #result_atttr_count = result["hits"]
+def is_valid_result(result):
 
-    #if phenomenon_attr_count == result_atttr_count:
-    #    return True
-    #else:
-    #    return False
+    hits = result[u'hits'][u'hits']
+    if len(hits) > 0 :
+        phen_id =  hits[0][u"_source"][u"id"]
+        return phen_id
+    else:
+        return None
 
 def create_query(phenomenon):
     #format of phenomenon
@@ -158,7 +158,7 @@ def create_query(phenomenon):
     attributes = phenomenon["attributes"]
     number_of_attributes = 0
     for item in attributes:
-        es_query_template_copy = es_query_template.copy()
+        es_query_template_copy = deepcopy(es_query_template)
         name = True
         es_subquery_template_copy = deepcopy(es_subquery_template)
         for key in item:
@@ -183,24 +183,47 @@ def create_query(phenomenon):
     return es_query_template_copy
 
 
+def add_phenomenon(phenomenon):
+    #This is what i need to index :
+    #{'attributes': [{'name': 'vwsnmtaqrt', 'value': 'lgedoncmyr'}], 'attribute_count': '1', 'id': '1'}
+    id = abs(hash(str(phenomenon)))
+    phenomenon["id"] = id
+    es.index(index=INDEX, doc_type="phenomenon", id=id, body=phenomenon)
+
 def update_phenomena():
     file_phen = get_file_phenomena()
     print "phenomena extracted from file:"
     print file_phen
     print "Number of phenomena in the list: " + str(len(file_phen))
     for item in file_phen:
-        #print "checking if phenomenon:"
-        #print item
-        #print "extracted from file exist in database."
+
+
+        print "Searching for phenomenon:"
+        print item
+        print " in database."
+
+
         query = create_query(item)
         print "Query ctreated : " + str(query)
-        #print "Searching the elasticsearch."
+
+
         res = search_elasticsearch(query)
-        comp_res = is_valid_result(item, res)
-        #print "The result is :" + comp_res
-    #check if phens exist in database
-    #if not add them
-    #at the end post also the file
+
+        print "Database returned :"
+        print res
+
+
+        #evaluating result.
+        phen_id = is_valid_result(res)
+
+        if phen_id is not None:
+            print ""
+            print "phenomenon: " + str(phen_id) + " exists in database."
+            #Record the id and then index he file
+        else:
+            print "phenomenon needs to be inserted in the database."
+            add_phenomenon(item)
+            #insert phen in database and then insert file.
 
 def main():
     #try:
