@@ -18,6 +18,49 @@ PORT = "9200"
 INDEX = "agrel"
 es = Elasticsearch(hosts=[{"host": HOST, "port": PORT}])
 
+es_subquery_name_template =\
+{
+  "match_phrase": { "attributes.name" : "phenomenon attr2"  }
+}
+
+es_subquery_value_template =\
+{
+  "match_phrase": { "attributes.value" : "phenomenon attr2"  }
+}
+
+es_subquery_count =\
+{
+"match": { "attribute_count" : "3" }
+}
+
+es_subquery_template =\
+{
+ "nested": 
+ {
+  "path": "attributes", 
+  "query":
+  {
+   "bool": 
+   {
+    "must": 
+    [ ]
+   }
+  }
+ }
+}
+
+es_query_template =\
+{
+ "query": 
+ {
+  "bool": 
+  {
+   "must": 
+   [ ]
+  }
+ }
+}
+
 def remove_index():
     res = es.indices.delete(index=INDEX)
 
@@ -92,58 +135,12 @@ def update_files(file_ids, phen_ids):
         count = count + 1
         print count
 
-
 def search_elasticsearch(query):
     res = es.search( index=INDEX,
                      doc_type="phenomenon", 
                      body=query
                    )
-    #print "query result :" + str(res)
     return res
-
-es_subquery_name_template =\
-{
-  "match_phrase": { "attributes.name" : "phenomenon attr2"  }
-}
-
-es_subquery_value_template =\
-{
-  "match_phrase": { "attributes.value" : "phenomenon attr2"  }
-}
-
-es_subquery_count =\
-{
-"match": { "attribute_count" : "3" }
-}
-
-es_subquery_template =\
-{
- "nested": 
- {
-  "path": "attributes", 
-  "query":
-  {
-   "bool": 
-   {
-    "must": 
-    [ ]
-   }
-  }
- }
-}
-
-es_query_template =\
-{
- "query": 
- {
-  "bool": 
-  {
-   "must": 
-   [ ]
-  }
- }
-}
-
 
 def is_valid_result(result):
 
@@ -184,7 +181,6 @@ def create_query(phenomenon):
 
     return es_query_template_copy
 
-
 def add_phenomenon(phenomenon):
     id = abs(hash(str(phenomenon)))
     phenomenon["id"] = id
@@ -195,7 +191,6 @@ def add_phenomenon(phenomenon):
     body = body + json.dumps(phenomenon) + "\n"
 
     es.bulk(index=INDEX, doc_type="phenomenon", body=body)
-
 
 def update_phenomena():
     file_phen = get_file_phenomena()
