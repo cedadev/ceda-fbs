@@ -1,5 +1,7 @@
 from datetime import datetime
 from copy import deepcopy
+import json
+
 
 import sys
 sys.path.append(".")
@@ -184,11 +186,16 @@ def create_query(phenomenon):
 
 
 def add_phenomenon(phenomenon):
-    #This is what i need to index :
-    #{'attributes': [{'name': 'vwsnmtaqrt', 'value': 'lgedoncmyr'}], 'attribute_count': '1', 'id': '1'}
     id = abs(hash(str(phenomenon)))
     phenomenon["id"] = id
-    es.index(index=INDEX, doc_type="phenomenon", id=id, body=phenomenon)
+    index  =  { "index": {"_id": "" }} 
+    index["index"]["_id"] = id
+
+    body = json.dumps(index) + "\n"
+    body = body + json.dumps(phenomenon) + "\n"
+
+    es.bulk(index=INDEX, doc_type="phenomenon", body=body)
+
 
 def update_phenomena():
     file_phen = get_file_phenomena()
