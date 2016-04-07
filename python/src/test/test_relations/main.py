@@ -202,7 +202,6 @@ def create_query(phenomenon):
     attributes = phenomenon["attributes"]
     number_of_attributes = 0
     for item in attributes:
-        es_query_template_copy = deepcopy(es_query_template)
         name = True
         es_subquery_template_copy = deepcopy(es_subquery_template)
         for key in item:
@@ -211,20 +210,20 @@ def create_query(phenomenon):
                 es_subquery_name_template_copy["match_phrase"]["attributes.name"] = item[key]
                 es_subquery_template_copy["nested"]["query"]["bool"]["must"].append(es_subquery_name_template_copy)
                 name = False
+                number_of_attributes = number_of_attributes +1
             else:
                 es_subquery_value_template_copy = deepcopy(es_subquery_value_template)
                 es_subquery_value_template_copy["match_phrase"]["attributes.value"] = item[key]
                 es_subquery_template_copy["nested"]["query"]["bool"]["must"].append(es_subquery_value_template_copy)
                 name = True
 
+        es_query_template["query"]["bool"]["must"].append(es_subquery_template_copy)
 
-        es_query_template_copy["query"]["bool"]["must"].append(es_subquery_template_copy)
-        number_of_attributes = number_of_attributes +1
-    es_subquery_count_copy = deepcopy(es_subquery_count)
-    es_subquery_count_copy["match"]["attribute_count"] = number_of_attributes
-    es_query_template_copy["query"]["bool"]["must"].append(es_subquery_count_copy)
+    #es_subquery_count_copy = deepcopy(es_subquery_count)
+    es_subquery_count["match"]["attribute_count"] = number_of_attributes
+    es_query_template["query"]["bool"]["must"].append(es_subquery_count)
 
-    return es_query_template_copy
+    return es_query_template
 
 bulk_requests = []
 def index_phenomenon(phenomenon = None, threshold=0):
@@ -332,9 +331,9 @@ def simulate_indexing_of_files():
                 #print phen_id
 
         index_phenomenon()
-        if wait_init:
-            time.sleep(1)
-            wait_init = False
+        #if wait_init:
+        #    time.sleep(1)
+        #    wait_init = False
 
         fmeta["info"]["phenomena"] = phen_ids
         index_file(fid, fmeta)
