@@ -297,7 +297,6 @@ def simulate_indexing_of_files():
 
     total_phen_found = 0
     total_phen_new = 0
-    wait_init = True
 
     for i in range(0, 700):
 
