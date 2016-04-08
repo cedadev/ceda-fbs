@@ -13,7 +13,10 @@ import fbs_lib.util as util
 import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es.factory import ElasticsearchClientFactory
-from es import ops
+from es import index
+from copy import deepcopy
+import json
+import time
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
@@ -44,6 +47,9 @@ class ExtractSeq(object):
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
+        #Database connection information.
+        self.index_l = self.conf("es-configuration")["es-index"]
+        self.type_l = self.conf("es-configuration")["es-mapping"]
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -95,7 +101,7 @@ class ExtractSeq(object):
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
                 handler_inst = handler(filename, level, es) #Can this done within the HandlerPicker class.
-                metadata = handler_inst.get_properties()
+                metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
             else:
@@ -104,6 +110,66 @@ class ExtractSeq(object):
         except Exception as ex:
             self.logger.error("Could not process file: {}".format(ex))
             return None
+
+    def is_valid_result(self, result):
+
+        """
+        Validates the result of a DSL query by analizing the 
+        hits list. 
+        """
+
+        hits = result[u'hits'][u'hits']
+        if len(hits) > 0 :
+            phen_id =  hits[0][u"_source"][u"id"]
+            return phen_id
+        else:
+            return None
+
+    def index_metadata(self, es, index_l, type_l, metadata):
+
+        """
+        Implements the following scenario:
+        1. Metadata are extracted for a file (file info and phenomena).
+        2. If phenomena do not exist in database then they are created.
+        3. Phenomena ids are stored in the json representing file info.
+        4. File info is stored in database.
+        5. This is done for all files in the list. Current size is 700.
+        """
+        fmeta = metadata[0]
+        fid = hashlib.sha1(fmeta["info"]["name"]).hexdigest()
+        if len(metadata) == 1:
+            index.index_file( es, index_l, type_l, fid, fmeta)
+            return
+
+        phen_list = metadata[1]
+        phen_ids = []
+        #Test if phenomenon exist in database.
+        #if not create it.
+        for item in phen_list:
+
+            query = index.create_query(item)
+            print "Query created: " + str(query)
+            res = index.search_database(es, index_l, type_l, query)
+            print "Query result: " + str(res)
+
+            phen_id = self.is_valid_result(res)
+            if phen_id is not None:
+                phen_ids.append(phen_id)
+                print "phenomenon found!"
+            else:
+                #print "phenomenon needs to be inserted in the database."
+                phen_id = index.index_phenomenon(es, index_l, "phenomenon", item, 800)
+                phen_ids.append(phen_id)
+                print "Phen created : " + str(phen_id)
+
+            index.index_phenomenon(es, index_l, "phenomenon")
+            #if wait_init:
+            #    time.sleep(1)
+            #    wait_init = False
+
+        fmeta["info"]["phenomena"] = phen_ids
+        index.index_file( es, index_l, type_l, fid, fmeta)
+
 
     def scan_dataset(self):
 
@@ -121,7 +187,7 @@ class ExtractSeq(object):
         self.es = es_factory.get_client(self.configuration)
 
         try:
-            ops.create_index(self.configuration, self.es)
+            index.create_index(self.configuration, self.es)
         except TransportError as te:
             if te[0] == 400:
                 pass
@@ -149,9 +215,10 @@ class ExtractSeq(object):
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
                     self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
-
+                    #this wher ethe new logic will be inserted.
                     try:
-                        self.index_properties_seq(doc, es_id)
+                        #self.index_properties_seq(doc, es_id)
+                        self.index_metadata(self.es, self.index_l, self.type_l, doc)
                     except Exception as ex:
                         end = datetime.datetime.now()
                         self.logger.error(("Database error: %s" %ex))
