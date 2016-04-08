@@ -113,88 +113,88 @@ class   NetCdfFile(GenericFile):
             return True
         return False
 
+    # This is the structure of a phenomenon method. 
+    # 
+    #{
+    # "id" : "2017",
+    # "attribute_count" : "2",
+    # "attributes" : 
+    #[ 
+    # { "name" : "long_name", "value" : "rainfall" },
+    # { "name" : "units", "value" : "mm"} 
+    #]
+    #}
+    # 
+
     def phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
         phens_list = []
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
+
         #for all phenomena list.
         for v_name, v_data in netcdf.variables.iteritems():
-            phen_par_list = []
+            phen_attr_list = []
+
             #for all attributtes in phenomenon.
+            attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
-                phen_par = { "name" : key.strip(),
-                             "value": unicode(value).strip()
-                           }
+                phen_attr = {
+                              "name" : key.strip(),
+                              "value": unicode(value).strip()
+                            }
+                if self.is_valid_parameter(phen_attr):
+                    phen_attr_list.append(phen_attr.copy())
+                    attr_count = attr_count + 1
 
-                if self.is_valid_parameter(phen_par):
-                    phen_par_list.append(phen_par.copy())
 
-            phen_par = { "name" : "var_id",
+            phen_attr = {
+                          "name" : "var_id",
                           "value" : v_name
-                       }
-            phen_par_list.append(phen_par.copy())
+                        }
+            #phen_attr_list.append(phen_attr.copy())
+            #attr_count = attr_count + 1
 
-            phens_list.append(phen_par_list)
+            new_phenomenon = phenomenon.copy() 
+            new_phenomenon["attributes"] = phen_attr_list
+            new_phenomenon["attribute_count"] = attr_count
+
+            phens_list.append(new_phenomenon)
 
         return phens_list
 
-    def get_properties_netcdf_file_level2(self, netcdf, index):
+    def get_metadata_netcdf_file_level2(self, netcdf):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
-        #Get basic file info.
 
         self.handler_id = "Netcdf handler level 2."
-
         netcdf_phenomena = self.phenomena(netcdf)
+        return netcdf_phenomena
 
-        phenomena_list = []
-        phenomenon_parameters_dict = {}
+    def get_metadata_netcdf_level2(self):
 
-        for phenomenon_par in netcdf_phenomena:
-            #create the query
-            #search for the phenomenon
-            #if found extract the id
-            #else create the json for the phenomenon
-            #return json needs to be submitted.
-            query = "{\"query\": { \"match_all\": {} }}"
-            try:
-                res = ops.search_phenomenon_level2(self.es, query)
-            except Exception:
-                print Exception.message
-
-            phenomenon_parameters_dict["phenomenon_parameters"] = phenomenon_par
-            phenomena_list.append(phenomenon_parameters_dict.copy())
-            phenomenon_parameters_dict.clear()
-
-
-        index["phenomena"] = phenomena_list
-
-
-        return index
-
-    def get_properties_netcdf_level2(self):
-
-        #level 1.
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
-
-            #ok basic info exist, lets add level 2 info.
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
-                    level2_meta = self.get_properties_netcdf_file_level2(netcdf_object, file_info)
-                    return level2_meta
-            #Catch all possible errors that can be related to this file and and record the error later.   
+                    netcdf_phenomena = self.phenomena(netcdf_object)
+                return file_info +  (netcdf_phenomena, )
             except Exception:
-                return file_info
+                return (file_info, None)
         else:
             return None
 
-    def get_properties_netcdf_level3(self):
+    def get_metadata_netcdf_level3(self):
 
         """
         Wrapper for method phenomena().
@@ -240,16 +240,16 @@ class   NetCdfFile(GenericFile):
         else:
             return None
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_properties_generic_level1()
+            res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_properties_netcdf_level2()
+            res = self.get_metadata_netcdf_level2()
         elif self.level == "3":
-            res = self.get_properties_netcdf_level3()
+            res = self.get_metadata_netcdf_level3()
 
-        res["info"]["format"] = self.FILE_FORMAT
+        res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
 
