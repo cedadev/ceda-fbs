@@ -19,7 +19,7 @@ INDEX = "agrel"
 #Database object used for communicating with database.
 es = Elasticsearch(hosts=[{"host": HOST, "port": PORT}])
 
-#******************************************************* 
+#*******************************************************
 
 def remove_index():
 
@@ -122,6 +122,53 @@ def update_files(fids, pids):
         count = count + 1
         print count
 
+bulk_requests = []
+def index_phenomenon(phenomenon = None, threshold=0):
+
+    """
+    Indexes a phenomenon of a file.
+    Returns the id that the phenomenon will have in the database.
+    """
+
+    pid = None
+    json_query = ""
+    global bulk_requests
+
+    if phenomenon is not None:
+        pid = abs(hash(str(phenomenon)))
+        phenomenon["id"] = pid
+        index  =  { "index": {"_id": "" }} 
+        index["index"]["_id"] = pid
+
+        json_query = json.dumps(index) + "\n"
+        json_query = json_query + json.dumps(phenomenon) + "\n"
+        bulk_requests.append(json_query)
+
+    if len(bulk_requests) > threshold:
+
+        print "indexing "  + str(len(bulk_requests)) + " phenomena."
+
+        for item in bulk_requests:
+            json_query = json_query + item
+
+        bulk_requests = []
+
+        try:
+            es.bulk(index=INDEX, doc_type="phenomenon", body=json_query)
+            #print "Phenomenon saved in database."
+            time.sleep(1) # Make sure that thi sis submitted before we query again the database.
+        except Exception as ex:
+            print ex
+
+    return pid
+
+def index_file(fid, fjson):
+
+    """Indexes a file. """
+
+    es.index(index=INDEX, doc_type="file", id=fid, body=fjson)
+    time.sleep(0.01)
+
 def search_database(query):
 
     """
@@ -136,20 +183,6 @@ def search_database(query):
                    )
     time.sleep(0.1)
     return res
-
-def is_valid_result(result):
-
-    """
-    Validates the result of a DSL query by analizing the 
-    hits list. 
-    """
-
-    hits = result[u'hits'][u'hits']
-    if len(hits) > 0 :
-        phen_id =  hits[0][u"_source"][u"id"]
-        return phen_id
-    else:
-        return None
 
 def create_query(phenomenon):
 
@@ -225,52 +258,21 @@ def create_query(phenomenon):
 
     return es_query_template
 
-bulk_requests = []
-def index_phenomenon(phenomenon = None, threshold=0):
+#*******************************************************
+
+def is_valid_result(result):
 
     """
-    Indexes a phenomenon of a file.
-    Returns the id that the phenomenon will have in the database.
+    Validates the result of a DSL query by analizing the 
+    hits list. 
     """
 
-    pid = None
-    json_query = ""
-    global bulk_requests
-
-    if phenomenon is not None:
-        pid = abs(hash(str(phenomenon)))
-        phenomenon["id"] = pid
-        index  =  { "index": {"_id": "" }} 
-        index["index"]["_id"] = pid
-
-        json_query = json.dumps(index) + "\n"
-        json_query = json_query + json.dumps(phenomenon) + "\n"
-        bulk_requests.append(json_query)
-
-    if len(bulk_requests) > threshold:
-
-        print "indexing "  + str(len(bulk_requests)) + " phenomena."
-
-        for item in bulk_requests:
-            json_query = json_query + item
-
-        bulk_requests = []
-
-        try:
-            es.bulk(index=INDEX, doc_type="phenomenon", body=json_query)
-            #print "Phenomenon saved in database."
-            time.sleep(1) # Make sure that thi sis submitted before we query again the database.
-        except Exception as ex:
-            print ex
-
-    return pid
-
-def index_file(fid, fjson):
-
-    """Indexes a file. """
-
-    es.index(index=INDEX, doc_type="file", id=fid, body=fjson)
-    time.sleep(0.01)
+    hits = result[u'hits'][u'hits']
+    if len(hits) > 0 :
+        phen_id =  hits[0][u"_source"][u"id"]
+        return phen_id
+    else:
+        return None
 
 def netcdf_file_handler(index):
 
