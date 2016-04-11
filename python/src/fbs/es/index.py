@@ -79,7 +79,7 @@ def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
 
     if len(bulk_requests) > threshold:
 
-        print "indexing "  + str(len(bulk_requests)) + " phenomena."
+        #print "indexing "  + str(len(bulk_requests)) + " phenomena."
 
         for item in bulk_requests:
             json_query = json_query + item
@@ -88,10 +88,11 @@ def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
 
         try:
             es.bulk(index=index_l, doc_type=type_l, body=json_query)
+            #print json_query
             #print "Phenomenon saved in database."
             time.sleep(1) # Make sure that thi sis submitted before we query again the database.
         except Exception as ex:
-            print ex
+            print "Error ocured during indexing of phenomenon."
 
     return pid
 
