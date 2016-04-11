@@ -113,25 +113,12 @@ class   NetCdfFile(GenericFile):
             return True
         return False
 
-    # This is the structure of a phenomenon method. 
-    # 
-    #{
-    # "id" : "2017",
-    # "attribute_count" : "2",
-    # "attributes" : 
-    #[ 
-    # { "name" : "long_name", "value" : "rainfall" },
-    # { "name" : "units", "value" : "mm"} 
-    #]
-    #}
-    # 
-
     def phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
-        phens_list = []
+        phen_list = []
         phenomenon =\
         {
          "id" : "",
@@ -147,8 +134,8 @@ class   NetCdfFile(GenericFile):
             attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
                 phen_attr = {
-                              "name" : key.strip(),
-                              "value": unicode(value).strip()
+                              "name" : str(key.strip()),
+                              "value": str(unicode(value).strip())
                             }
                 if self.is_valid_parameter(phen_attr):
                     phen_attr_list.append(phen_attr.copy())
@@ -157,28 +144,20 @@ class   NetCdfFile(GenericFile):
 
             phen_attr = {
                           "name" : "var_id",
-                          "value" : v_name
+                          "value" : str(v_name)
                         }
-            #phen_attr_list.append(phen_attr.copy())
-            #attr_count = attr_count + 1
 
-            new_phenomenon = phenomenon.copy() 
-            new_phenomenon["attributes"] = phen_attr_list
-            new_phenomenon["attribute_count"] = attr_count
+            phen_attr_list.append(phen_attr.copy())
+            attr_count = attr_count + 1
 
-            phens_list.append(new_phenomenon)
+            if len(phen_attr_list) > 0:
+                new_phenomenon = phenomenon.copy() 
+                new_phenomenon["attributes"] = phen_attr_list
+                new_phenomenon["attribute_count"] = attr_count
 
-        return phens_list
+                phen_list.append(new_phenomenon)
 
-    def get_metadata_netcdf_file_level2(self, netcdf):
-        """
-        Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index level 2.
-        """
-
-        self.handler_id = "Netcdf handler level 2."
-        netcdf_phenomena = self.phenomena(netcdf)
-        return netcdf_phenomena
+        return phen_list
 
     def get_metadata_netcdf_level2(self):
 
