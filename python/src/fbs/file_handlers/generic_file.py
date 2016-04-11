@@ -66,12 +66,12 @@ class  GenericFile(object):
         if file_info is None:
             return None
 
-        return (file_info)
+        return (file_info, )
 
     def get_metadata_generic_level3(self):
         file_info = self.get_metadata_generic_level2()
         self.handler_id = "Generic level 3."
-        return file_info
+        return (file_info, )
 
     def get_metadata(self):
 
