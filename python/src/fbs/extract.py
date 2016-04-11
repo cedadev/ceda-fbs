@@ -151,9 +151,9 @@ class ExtractSeq(object):
 
             query = index.create_query(item)
             self.logger.debug("Query created: " + str(query))
-            print "Query created: " + str(query)
+            #print "Query created: " + str(query)
             res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
-            print "Query result: " + str(res)
+            #print "Query result: " + str(res)
             self.logger.debug("Query result: " + str(res))
 
             phen_id = self.is_valid_result(res)
