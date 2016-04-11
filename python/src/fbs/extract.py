@@ -48,8 +48,10 @@ class ExtractSeq(object):
         self.files_indexed = 0
         self.total_number_of_files = 0
         #Database connection information.
-        self.index_l = self.conf("es-configuration")["es-index"]
-        self.type_l = self.conf("es-configuration")["es-mapping"]
+        self.es_index = self.conf("es-configuration")["es-index"]
+        self.es_types = (self.conf("es-configuration")["es-mapping"]).split(",")
+        self.es_type_file = self.es_types[0]
+        self.es_type_phen = self.es_types[1]
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -79,7 +81,7 @@ class ExtractSeq(object):
         else:
             return None
 
-    def index_properties_seq(self, body, es_id):
+    def index_attributes_seq(self, body, es_id):
 
         """
         Indexes metadata in Elasticsearch.
@@ -100,7 +102,7 @@ class ExtractSeq(object):
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
-                handler_inst = handler(filename, level, es) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
@@ -125,7 +127,7 @@ class ExtractSeq(object):
         else:
             return None
 
-    def index_metadata(self, es, index_l, type_l, metadata):
+    def index_metadata(self, metadata, fid):
 
         """
         Implements the following scenario:
@@ -136,9 +138,9 @@ class ExtractSeq(object):
         5. This is done for all files in the list. Current size is 700.
         """
         fmeta = metadata[0]
-        fid = hashlib.sha1(fmeta["info"]["name"]).hexdigest()
+        #fid = hashlib.sha1(fmeta["info"]["name"]).hexdigest()
         if len(metadata) == 1:
-            index.index_file( es, index_l, type_l, fid, fmeta)
+            index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
             return
 
         phen_list = metadata[1]
@@ -148,30 +150,34 @@ class ExtractSeq(object):
         for item in phen_list:
 
             query = index.create_query(item)
+            self.logger.debug("Query created: " + str(query))
             print "Query created: " + str(query)
-            res = index.search_database(es, index_l, type_l, query)
+            res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
             print "Query result: " + str(res)
+            self.logger.debug("Query result: " + str(res))
 
             phen_id = self.is_valid_result(res)
             if phen_id is not None:
                 phen_ids.append(phen_id)
-                print "phenomenon found!"
+                #print "phenomenon found!"
+                self.logger.debug("phenomenon found!")
             else:
                 #print "phenomenon needs to be inserted in the database."
-                phen_id = index.index_phenomenon(es, index_l, "phenomenon", item, 800)
-                phen_ids.append(phen_id)
-                print "Phen created : " + str(phen_id)
+                phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
+                phen_ids.append(str(phen_id))
+                #print "Phen created : " + str(phen_id)
+                self.logger.debug("Phen created : " + str(phen_id))
 
-            index.index_phenomenon(es, index_l, "phenomenon")
+            index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
             #if wait_init:
             #    time.sleep(1)
             #    wait_init = False
 
         fmeta["info"]["phenomena"] = phen_ids
-        index.index_file( es, index_l, type_l, fid, fmeta)
+        index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
 
 
-    def scan_dataset(self):
+    def scan_files(self):
 
         """
          Extracts metadata information from files and posts them in elastic search.
@@ -217,8 +223,8 @@ class ExtractSeq(object):
                     self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
                     #this wher ethe new logic will be inserted.
                     try:
-                        #self.index_properties_seq(doc, es_id)
-                        self.index_metadata(self.es, self.index_l, self.type_l, doc)
+                        #self.index_attributes_seq(doc, es_id)
+                        self.index_metadata(doc, es_id)
                     except Exception as ex:
                         end = datetime.datetime.now()
                         self.logger.error(("Database error: %s" %ex))
@@ -427,7 +433,7 @@ class ExtractSeq(object):
             self.file_list.append(path.rstrip())
 
         #at the end extract metadata.
-        self.scan_dataset()
+        self.scan_files()
 
     #***Functionality for traversing dataset and then immediately extract metadata.***
     def prepare_logging_seq_rs(self):
@@ -508,4 +514,4 @@ class ExtractSeq(object):
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
         #at the end extract metadata.
-        self.scan_dataset()
+        self.scan_files()
