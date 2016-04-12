@@ -2,7 +2,6 @@ import logging
 import os
 import ntpath
 import json
-from es import ops
 
 class  GenericFile(object):
     """
