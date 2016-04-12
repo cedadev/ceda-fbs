@@ -4,7 +4,6 @@ import netCDF4
 from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
 import fbs_lib.geojson as geojson
-from es import ops
 
 class   NetCdfFile(GenericFile):
     """
