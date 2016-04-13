@@ -14,9 +14,6 @@ import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es.factory import ElasticsearchClientFactory
 from es import index
-from copy import deepcopy
-import json
-import time
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
