@@ -35,10 +35,18 @@ class NasaAmesFile(GenericFile):
         except Exception:
             return None
 
-    def get_properties_nanaames_level2(self):
+    def get_metadata_nanaames_level2(self):
 
         #Get basic file info.
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
+
+        phen_list = []
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
 
         if file_info is not None:
 
@@ -51,51 +59,46 @@ class NasaAmesFile(GenericFile):
                 return file_info
 
             #List of phenomena
-            phenomena_list = []
-            var_id_dict = {}
-            phenomenon_parameters_dict = {}
-
             for item in nasaames_phenomena:           #get all parameter objects.
 
+                phen_attr_list = []
                 name = item.get_name()                #get phenomena name.
+                phen_attr =\
+                {
+                  "name" : "var_id",
+                  "value": str(unicode(name).strip())
+                }
 
-                var_id_dict["name"] = "var_id"
-                var_id_dict["value"] = name
+                phen_attr_list = item.get()
+                phen_attr_list.append(phen_attr)
+                attr_count = len(phen_attr_list)
 
-                list_of_phenomenon_parameters = item.get()
-                list_of_phenomenon_parameters.append(var_id_dict.copy())
-                list_of_phenomenon_parameters = filter(util.check_attributes_length, list_of_phenomenon_parameters)
-                phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                new_phenomenon = phenomenon.copy()
+                new_phenomenon["attributes"] = phen_attr_list
+                new_phenomenon["attribute_count"] = attr_count
 
-                phenomena_list.append(phenomenon_parameters_dict.copy())
+                phen_list.append(new_phenomenon)
 
-                var_id_dict.clear()
-                phenomenon_parameters_dict.clear()
-
-
-            file_info["phenomena"] = phenomena_list
-
-
-            return file_info
+            return file_info +  (phen_list, )
 
         else:
             return None
 
-    def get_properties_nanaames_level3(self):
+    def get_metadata_nanaames_level3(self):
         res = self.get_properties_nanaames_level2()
         self.handler_id = "Nasaames handler level 3."
         return res
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_properties_generic_level1()
+            res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_properties_nanaames_level2()
+            res = self.get_metadata_nanaames_level2()
         elif self.level == "3":
-            res = self.get_properties_nanaames_level3()
+            res = self.get_metadata_nanaames_level3()
 
-        res["info"]["format"] = self.FILE_FORMAT
+        res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
 
