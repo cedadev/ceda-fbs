@@ -22,9 +22,14 @@ class GribFile(GenericFile):
         Construct list of Phenomena based on variables in Grib file.
         :returns : List of phenomena.
         """
-        phenomenon_attr = {}
-        phenomena_list = []
-        phenomenon_parameters_dict = {}
+
+        phen_list = []
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
 
         phen_keys = [
                       "paramId",
@@ -38,15 +43,12 @@ class GribFile(GenericFile):
         try:
             fd = open(self.file_path)
 
-            found = set()
-
             while 1:
                 gid = gapi.grib_new_from_file(fd)
                 if gid is None: break
 
-                list_of_phenomenon_parameters = []
-                list_of_phenomenon_parameters_t = []
-
+                phen_attr_list = []
+                attr_count = 0
                 for key in phen_keys:
 
                     if not gapi.grib_is_defined(gid, key):
@@ -56,53 +58,45 @@ class GribFile(GenericFile):
                     if len(key) < util.MAX_PAR_LENGTH \
                        and len(value) < util.MAX_PAR_LENGTH:
 
-                        phenomenon_attr["name"] = key
-                        phenomenon_attr["value"] = value
+                        phen_attr =\
+                        {
+                          "name" : str(key.strip()),
+                          "value": str(unicode(value).strip())
+                        }
 
-                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                        list_of_phenomenon_parameters_t.append((key, value))
+                        if phen_attr not in phen_attr_list:
+                            phen_attr_list.append(phen_attr.copy())
+                            attr_count = attr_count + 1
 
-                """
-                phenomenon_attr["name"] = "var_id"
-                phenomenon_attr["value"] = "None"
-                list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                phenomenon_attr.clear()
-                list_of_phenomenon_parameters_t.append(("name", "None"))
-                """
-                list_of_phenomenon_parameters_tt = tuple(list_of_phenomenon_parameters_t)
+                if len(phen_attr_list) > 0:
+                    new_phenomenon = phenomenon.copy() 
+                    new_phenomenon["attributes"] = phen_attr_list
+                    new_phenomenon["attribute_count"] = attr_count
 
-                if list_of_phenomenon_parameters_tt not in found:
-                    found.add(list_of_phenomenon_parameters_tt)
-                    #Dict of phenomenon attributes.
-                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                    phen_list.append(new_phenomenon)
 
-                    #list of phenomenon.
-                    phenomena_list.append(phenomenon_parameters_dict.copy())
-                    phenomenon_parameters_dict.clear()
-                else:
-                    phenomenon_parameters_dict.clear()
 
                 gapi.grib_release(gid)
 
             fd.close()
-            """
-            phenomena_list_unique = []
-            for item in phenomena_list:
-                if item not in phenomena_list_unique:
-                    phenomena_list_unique.append(item)
-            """
-            return phenomena_list
+
+            phen_list_unique = []
+            for item in phen_list:
+                if item not in phen_list_unique:
+                    phen_list_unique.append(item)
+
+            return phen_list_unique
 
         except Exception:
             return None
 
-    def get_properties_grib_level2(self):
+    def get_metadata_grib_level2(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
 
@@ -114,9 +108,7 @@ class GribFile(GenericFile):
             if grib_phenomena is None:
                 return file_info
 
-            file_info["phenomena"] = grib_phenomena
-
-            return file_info
+            return  file_info +  (grib_phenomena, )
 
         else:
             return None
@@ -269,7 +261,7 @@ class GribFile(GenericFile):
         except Exception:
             return None
 
-    def get_properties_grib_level3(self):
+    def get_metadata_grib_level3(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
@@ -299,17 +291,17 @@ class GribFile(GenericFile):
         else:
             return None
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_properties_generic_level1()
+            res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_properties_grib_level2()
+            res = self.get_metadata_grib_level2()
         elif self.level == "3":
-            res = self.get_properties_grib_level3()
+            res = self.get_metadata_grib_level3()
 
         #Sice file format is decided it can be added. 
-        res["info"]["format"] = self.FILE_FORMAT
+        res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
 
