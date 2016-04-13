@@ -71,46 +71,59 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
-    def get_properties_pp_level2(self):
+    def get_metadata_pp_level2(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
 
         #Get basic file info.
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
             try:
                 self.handler_id = "pp handler level 2."
-                phenomena_list = []
-                phenomenon_parameters_dict = {}
-                list_of_phenomenon_parameters = []
-                phenomenon_attr = {}
 
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
 
                 #Filter long values and overwrite duplicates.
+                phen_list = []
                 for var_id in var_ids:
                     metadata_dict = pp_file_content[var_id].attributes
-                    list_of_phenomenon_parameters = []
+                    phen_attr_list = []
+                    attr_count = 0
                     for key in metadata_dict.keys():
-                        value = str(metadata_dict[key])
 
+                        value = str(metadata_dict[key])
                         if     len(key) < util.MAX_PAR_LENGTH \
                            and len(value) < util.MAX_PAR_LENGTH:
-                            phenomenon_attr["name"] = key
-                            phenomenon_attr["value"] = value
-                            list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                            phen_attr =\
+                            {
+                              "name" : str(key.strip()),
+                              "value": str(unicode(value).strip())
+                            }
+
+                        phen_attr_list.append(phen_attr.copy())
+                        attr_count = attr_count + 1
 
                     #Dict of phenomenon attributes.
-                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-                    phenomena_list.append(phenomenon_parameters_dict.copy())
+                    if len(phen_attr_list) > 0:
+                        new_phenomenon = phenomenon.copy() 
+                        new_phenomenon["attributes"] = phen_attr_list
+                        new_phenomenon["attribute_count"] = attr_count
+
+                        phen_list.append(new_phenomenon)
 
                 pp_file_content.close()
-                file_info["phenomena"] = phenomena_list
-                return file_info
+
+                return file_info +  (phen_list, )
             except Exception as ex:
                 return file_info
         else:
@@ -121,14 +134,14 @@ class PpFile(GenericFile):
             coord = coord - 360
         return coord
 
-    def get_properties_pp_level3(self):
+    def get_metadata_pp_level3(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
         #Get basic file info.
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
             try:
@@ -197,16 +210,16 @@ class PpFile(GenericFile):
         else:
             return None
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_properties_generic_level1()
+            res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_properties_pp_level2()
+            res = self.get_metadata_pp_level2()
         elif self.level == "3":
-            res = self.get_properties_pp_level3()
+            res = self.get_metadata_pp_level3()
 
-        res["info"]["format"] = self.FILE_FORMAT
+        res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
 
