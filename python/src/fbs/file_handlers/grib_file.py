@@ -16,7 +16,7 @@ class GribFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def phenomena_level2(self):
+    def get_phenomena(self):
 
         """
         Construct list of Phenomena based on variables in Grib file.
@@ -40,6 +40,13 @@ class GribFile(GenericFile):
                       "nameECMF",
                       "name"
                     ]
+
+        phen_attr =\
+        {
+         "name" : "",
+         "value": ""
+        }
+
         try:
             fd = open(self.file_path)
 
@@ -58,11 +65,8 @@ class GribFile(GenericFile):
                     if len(key) < util.MAX_PAR_LENGTH \
                        and len(value) < util.MAX_PAR_LENGTH:
 
-                        phen_attr =\
-                        {
-                          "name" : str(key.strip()),
-                          "value": str(unicode(value).strip())
-                        }
+                        phen_attr["name"] = str(key.strip())
+                        phen_attr["value"] = str(unicode(value).strip())
 
                         if phen_attr not in phen_attr_list:
                             phen_attr_list.append(phen_attr.copy())
@@ -101,7 +105,7 @@ class GribFile(GenericFile):
         if file_info is not None:
 
             #level 2.
-            grib_phenomena = self.phenomena_level2()
+            grib_phenomena = self.get_phenomena()
 
             self.handler_id = "grib handler level 2."
 
