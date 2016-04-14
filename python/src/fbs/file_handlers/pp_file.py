@@ -71,7 +71,7 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
-    def get_metadata_pp_level2(self):
+    def get_phenomena(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
@@ -83,49 +83,58 @@ class PpFile(GenericFile):
          "attributes" :[]
         }
 
-        #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        phen_attr =\
+        {
+          "name" : "",
+          "value": ""
+        }
 
-        if file_info is not None:
-            try:
-                self.handler_id = "pp handler level 2."
+        try:
+            self.handler_id = "pp handler level 2."
 
-                pp_file_content=cdms.open(self.file_path)
-                var_ids = pp_file_content.listvariables()
+            pp_file_content=cdms.open(self.file_path)
+            var_ids = pp_file_content.listvariables()
 
-                #Filter long values and overwrite duplicates.
-                phen_list = []
-                for var_id in var_ids:
-                    metadata_dict = pp_file_content[var_id].attributes
-                    phen_attr_list = []
-                    attr_count = 0
-                    for key in metadata_dict.keys():
+            #Filter long values and overwrite duplicates.
+            phen_list = []
+            for var_id in var_ids:
+                metadata_dict = pp_file_content[var_id].attributes
+                phen_attr_list = []
+                attr_count = 0
+                for key in metadata_dict.keys():
 
-                        value = str(metadata_dict[key])
-                        if     len(key) < util.MAX_PAR_LENGTH \
-                           and len(value) < util.MAX_PAR_LENGTH:
-                            phen_attr =\
-                            {
-                              "name" : str(key.strip()),
-                              "value": str(unicode(value).strip())
-                            }
+                    value = str(metadata_dict[key])
+
+                    if     len(key) < util.MAX_PAR_LENGTH \
+                        and len(value) < util.MAX_PAR_LENGTH:
+                        phen_attr["name"] = str(key.strip())
+                        phen_attr["value"] = str(unicode(value).strip())
 
                         phen_attr_list.append(phen_attr.copy())
                         attr_count = attr_count + 1
 
-                    #Dict of phenomenon attributes.
-                    if len(phen_attr_list) > 0:
-                        new_phenomenon = phenomenon.copy() 
-                        new_phenomenon["attributes"] = phen_attr_list
-                        new_phenomenon["attribute_count"] = attr_count
+                #Dict of phenomenon attributes.
+                if len(phen_attr_list) > 0:
+                    new_phenomenon = phenomenon.copy() 
+                    new_phenomenon["attributes"] = phen_attr_list
+                    new_phenomenon["attribute_count"] = attr_count
 
-                        phen_list.append(new_phenomenon)
+                    phen_list.append(new_phenomenon)
 
-                pp_file_content.close()
+            pp_file_content.close()
 
-                return file_info +  (phen_list, )
-            except Exception as ex:
-                return file_info
+            return (phen_list, )
+        except Exception as ex:
+            return None
+
+    def get_metadata_pp_level2(self):
+
+        #Get basic file info.
+        file_info = self.get_metadata_generic_level1()
+
+        if file_info is not None:
+            phen_list = self.get_phenomena()
+            return file_info +  phen_list
         else:
             return None
 
