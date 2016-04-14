@@ -35,10 +35,7 @@ class NasaAmesFile(GenericFile):
         except Exception:
             return None
 
-    def get_metadata_nanaames_level2(self):
-
-        #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+    def get_phenomena(self):
 
         phen_list = []
         phenomenon =\
@@ -48,44 +45,55 @@ class NasaAmesFile(GenericFile):
          "attributes" :[]
         }
 
+        phen_attr =\
+        {
+         "name" : "",
+         "value": ""
+        }
+
+        nasaames_phenomena = self.phenomena()
+
+        if nasaames_phenomena is None:
+            return None
+
+        #List of phenomena
+        for item in nasaames_phenomena:           #get all parameter objects.
+
+            phen_attr_list = []
+            name = item.get_name()                #get phenomena name.
+            phen_attr["name"] = "var_id"
+            phen_attr["value"] = str(unicode(name).strip())
+
+            phen_attr_list = item.get()
+            phen_attr_list.append(phen_attr)
+            attr_count = len(phen_attr_list)
+
+            new_phenomenon = phenomenon.copy()
+            new_phenomenon["attributes"] = phen_attr_list
+            new_phenomenon["attribute_count"] = attr_count
+
+            phen_list.append(new_phenomenon)
+
+        return (phen_list, )
+
+
+    def get_metadata_nanaames_level2(self):
+
+        #Get basic file info.
+        file_info = self.get_metadata_generic_level1()
+
         if file_info is not None:
 
             self.handler_id = "Nasaames handler level 2."
 
-            #level 2
-            nasaames_phenomena = self.phenomena()
-
-            if nasaames_phenomena is None:
-                return file_info
-
-            #List of phenomena
-            for item in nasaames_phenomena:           #get all parameter objects.
-
-                phen_attr_list = []
-                name = item.get_name()                #get phenomena name.
-                phen_attr =\
-                {
-                  "name" : "var_id",
-                  "value": str(unicode(name).strip())
-                }
-
-                phen_attr_list = item.get()
-                phen_attr_list.append(phen_attr)
-                attr_count = len(phen_attr_list)
-
-                new_phenomenon = phenomenon.copy()
-                new_phenomenon["attributes"] = phen_attr_list
-                new_phenomenon["attribute_count"] = attr_count
-
-                phen_list.append(new_phenomenon)
-
-            return file_info +  (phen_list, )
+            phen_list = self.get_phenomena()
+            return file_info +  phen_list
 
         else:
             return None
 
     def get_metadata_nanaames_level3(self):
-        res = self.get_properties_nanaames_level2()
+        res = self.get_metadata_nanaames_level2()
         self.handler_id = "Nasaames handler level 3."
         return res
 
