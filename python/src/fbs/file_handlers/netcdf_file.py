@@ -112,7 +112,7 @@ class   NetCdfFile(GenericFile):
             return True
         return False
 
-    def phenomena(self, netcdf):
+    def get_phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
@@ -125,6 +125,12 @@ class   NetCdfFile(GenericFile):
          "attributes" :[]
         }
 
+        phen_attr =\
+        {
+          "name" : "",
+          "value": ""
+        }
+
         #for all phenomena list.
         for v_name, v_data in netcdf.variables.iteritems():
             phen_attr_list = []
@@ -132,19 +138,17 @@ class   NetCdfFile(GenericFile):
             #for all attributtes in phenomenon.
             attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
-                phen_attr = {
-                              "name" : str(key.strip()),
-                              "value": str(unicode(value).strip())
-                            }
+
+                phen_attr["name"] = str(key.strip())
+                phen_attr["value"] = str(unicode(value).strip())
+
                 if self.is_valid_parameter(phen_attr):
                     phen_attr_list.append(phen_attr.copy())
                     attr_count = attr_count + 1
 
 
-            phen_attr = {
-                          "name" : "var_id",
-                          "value" : str(v_name)
-                        }
+            phen_attr["name"] = "var_id"
+            phen_attr["value"] = str(v_name)
 
             phen_attr_list.append(phen_attr.copy())
             attr_count = attr_count + 1
@@ -165,7 +169,7 @@ class   NetCdfFile(GenericFile):
         if file_info is not None:
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
-                    netcdf_phenomena = self.phenomena(netcdf_object)
+                    netcdf_phenomena = self.get_phenomena(netcdf_object)
                 return file_info +  (netcdf_phenomena, )
             except Exception:
                 return (file_info, None)
