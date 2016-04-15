@@ -89,7 +89,7 @@ def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
         es.bulk(index=index_l, doc_type=type_l, body=json_query)
         #print json_query
         #print "Phenomenon saved in database."
-        time.sleep(1) # Make sure that thi sis submitted before we query again the database.
+        time.sleep(0.2) # Make sure that thi sis submitted before we query again the database.
 
     return pid
 
