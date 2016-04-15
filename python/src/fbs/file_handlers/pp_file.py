@@ -105,8 +105,8 @@ class PpFile(GenericFile):
 
                     value = str(metadata_dict[key])
 
-                    if     len(key) < util.MAX_PAR_LENGTH \
-                        and len(value) < util.MAX_PAR_LENGTH:
+                    if     len(key) < util.MAX_ATTR_LENGTH \
+                        and len(value) < util.MAX_ATTR_LENGTH:
                         phen_attr["name"] = str(key.strip())
                         phen_attr["value"] = str(unicode(value).strip())
 
@@ -176,8 +176,8 @@ class PpFile(GenericFile):
                     for key in metadata_dict.keys():
                         value = str(metadata_dict[key])
 
-                        if     len(key) < util.MAX_PAR_LENGTH \
-                           and len(value) < util.MAX_PAR_LENGTH:
+                        if     len(key) < util.MAX_ATTR_LENGTH \
+                           and len(value) < util.MAX_ATTR_LENGTH:
                             phenomenon_attr["name"] = key
                             phenomenon_attr["value"] = value
                             list_of_phenomenon_parameters.append(phenomenon_attr.copy())
