@@ -92,7 +92,7 @@ class  HandlerPicker(object):
                     handler = grib_file.GribFile
                 else:
                     handler = generic_file.GenericFile
-        except: #catch everything... we do not want ifthere is an error just return the generic handler.
+        except: #catch everything... if there is an error just return the generic handler.
             handler = generic_file.GenericFile
 
 
