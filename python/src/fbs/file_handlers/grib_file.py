@@ -62,8 +62,8 @@ class GribFile(GenericFile):
                         break
 
                     value = str(gapi.grib_get(gid, key))
-                    if len(key) < util.MAX_PAR_LENGTH \
-                       and len(value) < util.MAX_PAR_LENGTH:
+                    if len(key) < util.MAX_ATTR_LENGTH \
+                       and len(value) < util.MAX_ATTR_LENGTH:
 
                         phen_attr["name"] = str(key.strip())
                         phen_attr["value"] = str(unicode(value).strip())
@@ -77,19 +77,15 @@ class GribFile(GenericFile):
                     new_phenomenon["attributes"] = phen_attr_list
                     new_phenomenon["attribute_count"] = attr_count
 
-                    phen_list.append(new_phenomenon)
+                    if new_phenomenon not in phen_list:
+                        phen_list.append(new_phenomenon)
 
 
                 gapi.grib_release(gid)
 
             fd.close()
 
-            phen_list_unique = []
-            for item in phen_list:
-                if item not in phen_list_unique:
-                    phen_list_unique.append(item)
-
-            return phen_list_unique
+            return phen_list
 
         except Exception:
             return None
@@ -195,8 +191,8 @@ class GribFile(GenericFile):
                     elif key == "dataTime" and date_t is None:
                         date_t = value
                     else:
-                        if len(key) < util.MAX_PAR_LENGTH \
-                           and len(value) < util.MAX_PAR_LENGTH:
+                        if len(key) < util.MAX_ATTR_LENGTH \
+                           and len(value) < util.MAX_ATTR_LENGTH:
 
                             phenomenon_attr["name"] = key
                             phenomenon_attr["value"] = value
