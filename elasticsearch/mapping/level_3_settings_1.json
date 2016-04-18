@@ -1,66 +1,87 @@
 {
-  "mappings" : {
- "phenomenon" :
+ "mappings" : 
  {
- "properties" :
- {
-  "id" :
+  "phenomenon" :
   {
-    "type" : "string"
-  },
-  "parameters" :
-  {
-   "type" : "nested",
-   "properties":
+   "properties" :
    {
-    "name" : {"type": "string" },
-    "value" : {"type": "string" }
+    "id" :
+    {
+     "type" : "string"
+    },
+    "attribute_count": 
+    {
+     "type" : "short"
+    },
+    "attributes" :
+    {
+     "type" : "nested",
+     "properties":
+     {
+      "name" : {"type": "string" },
+      "value" : {"type": "string" }
+     }
+    }
+   }
+  },
+  "file" : 
+  {
+   "properties" : 
+   {
+    "info" : 
+    {
+     "properties" : 
+     {
+      "directory" : 
+      {
+       "type" : "string", "index" : "not_analyzed" 
+      },
+      "format" : 
+      {
+       "type" : "string"
+      },
+      "md5" : 
+      {
+       "type" : "string"
+      },
+      "name" : 
+      {
+       "type" : "string", "index" : "not_analyzed" 
+      },
+      "name_auto" : 
+      { 
+       "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
+      },
+      "phenomena" : 
+      {
+       "type" : "string"
+      },
+      "size" : 
+      {
+       "type" : "long"
+      },
+      "type" : 
+      {
+       "type" : "string"
+      },
+      "spatial" : 
+      {
+       "properties" : 
+       {
+        "coordinates" : { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
+       }
+      },
+      "temporal" : 
+      {
+        "properties" : 
+        {
+         "end_time"  : { "type": "date", "format": "dateOptionalTime" },
+         "start_time": { "type": "date", "format": "dateOptionalTime" }
+        }
+      }
+     }
+    }
    }
   }
  }
-},
-      "file" : {
-        "properties" : {
-          "info" : {
-            "properties" : {
-              "directory" : {
-               "type" : "string", "index" : "not_analyzed" 
-              },
-              "format" : {
-                "type" : "string"
-              },
-              "md5" : {
-                "type" : "string"
-              },
-              "name" : {
-                "type" : "string", "index" : "not_analyzed" 
-              },
-              "name_auto" : { 
-                "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
-              },
-              "phenomena" : {
-                "type" : "string"
-              },
-              "size" : {
-                "type" : "long"
-              },
-              "type" : {
-                "type" : "string"
-              }
-            }
-          },
-          "spatial" : {
-            "properties" : {
-               "coordinates": { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
-              }
-          },
-          "temporal" : {
-            "properties" : {
-              "end_time"  : { "type": "date", "format": "dateOptionalTime" },
-              "start_time": { "type": "date", "format": "dateOptionalTime" }
-            }
-          }
-        }
-      }
-    }
-   }
+}
