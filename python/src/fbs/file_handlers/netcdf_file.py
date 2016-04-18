@@ -183,7 +183,7 @@ class   NetCdfFile(GenericFile):
         :returns:  A dict containing information compatible with current es index level 2.
         """
         #level 1
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
 
@@ -191,7 +191,7 @@ class   NetCdfFile(GenericFile):
                 with netCDF4.Dataset(self.file_path) as netcdf:
 
                     #level 2
-                    level2_meta = self.get_properties_netcdf_file_level2(netcdf, file_info)
+                    netcdf_phenomena = self.get_phenomena(netcdf)
 
                     self.handler_id = "Netcdf handler level 3."
 
@@ -205,20 +205,19 @@ class   NetCdfFile(GenericFile):
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
-                        level2_meta["spatial"] = loc_dict
+                        file_info[0]["spatial"] = loc_dict
                     except AttributeError:
                         pass
 
                     try:
                         temp_info = self.get_temporal(netcdf)
-                        level2_meta["temporal"] = temp_info
+                        file_info[0]["temporal"] = temp_info
                     except AttributeError:
                         pass
 
-                    return level2_meta
+                    return file_info  + (netcdf_phenomena, )
             except Exception as ex:
-                print ex
-                return file_info
+                return file_info + (netcdf_phenomena, )
         else:
             return None
 
