@@ -72,10 +72,6 @@ class PpFile(GenericFile):
         return (start_time, end_time, time_units)
 
     def get_phenomena(self):
-        """
-        Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index level 2.
-        """
         phenomenon =\
         {
          "id" : "",
@@ -144,21 +140,26 @@ class PpFile(GenericFile):
         return coord
 
     def get_metadata_pp_level3(self):
-        """
-        Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index level 2.
-        """
+
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
+
+        phen_attr =\
+        {
+          "name" : "",
+          "value": ""
+        }
 
         #Get basic file info.
         file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
             try:
-                self.handler_id = "pp handler level 2."
-                phenomena_list = []
-                phenomenon_parameters_dict = {}
-                list_of_phenomenon_parameters = []
-                phenomenon_attr = {}
+                self.handler_id = "pp handler level 3."
                 lat_l = []
                 lat_u = []
                 lon_l = []
@@ -169,22 +170,32 @@ class PpFile(GenericFile):
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
 
-                #Filter long values and overwrite duplicates.
+                phen_list = []
                 for var_id in var_ids:
                     metadata_dict = pp_file_content[var_id].attributes
-                    list_of_phenomenon_parameters = []
+                    phen_attr_list = []
+
+                    attr_count = 0
                     for key in metadata_dict.keys():
+
                         value = str(metadata_dict[key])
 
-                        if     len(key) < util.MAX_ATTR_LENGTH \
-                           and len(value) < util.MAX_ATTR_LENGTH:
-                            phenomenon_attr["name"] = key
-                            phenomenon_attr["value"] = value
-                            list_of_phenomenon_parameters.append(phenomenon_attr.copy())
+                        if      len(key) < util.MAX_ATTR_LENGTH \
+                            and len(value) < util.MAX_ATTR_LENGTH:
+
+                            phen_attr["name"] = str(key.strip())
+                            phen_attr["value"] = str(unicode(value).strip())
+
+                            phen_attr_list.append(phen_attr.copy())
+                            attr_count = attr_count + 1
 
                     #Dict of phenomenon attributes.
-                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-                    phenomena_list.append(phenomenon_parameters_dict.copy())
+                    if len(phen_attr_list) > 0:
+                        new_phenomenon = phenomenon.copy() 
+                        new_phenomenon["attributes"] = phen_attr_list
+                        new_phenomenon["attribute_count"] = attr_count
+                        phen_list.append(new_phenomenon)
+
                     try :
                         spatial  = self.getBoundingBox(var_id, pp_file_content)
                         temporal = self.getTemporalDomain(var_id, pp_file_content)
@@ -208,12 +219,12 @@ class PpFile(GenericFile):
                 max_lat_u = self.normalize_coord(max(lon_u))
 
 
-                file_info["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
-                file_info["temporal"] = {'start_time': min(start_time), 'end_time': max(end_time) }
+                file_info[0]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
+                file_info[0]["temporal"] = {'start_time': min(start_time), 'end_time': max(end_time) }
 
                 pp_file_content.close()
-                file_info["phenomena"] = phenomena_list
-                return file_info
+
+                return file_info + (phen_list, )
             except Exception as ex:
                 return file_info
         else:
