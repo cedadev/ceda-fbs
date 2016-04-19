@@ -205,13 +205,13 @@ class   NetCdfFile(GenericFile):
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
-                        file_info[0]["spatial"] = loc_dict
+                        file_info[0]["info"]["spatial"] = loc_dict
                     except AttributeError:
                         pass
 
                     try:
                         temp_info = self.get_temporal(netcdf)
-                        file_info[0]["temporal"] = temp_info
+                        file_info[0]["info"]["temporal"] = temp_info
                     except AttributeError:
                         pass
 
