@@ -120,12 +120,12 @@ class GribFile(GenericFile):
          "value": ""
         }
 
-        lat_f = None
-        lon_f = None
-        lat_l = None
-        lon_l = None
-        date_d = None
-        date_t = None
+        lat_f_l = []
+        lon_f_l = []
+        lat_l_l = []
+        lon_l_l = []
+        date_d_l = []
+        date_t_l = []
 
         phen_keys = [
                       "paramId",
@@ -156,13 +156,7 @@ class GribFile(GenericFile):
                 for key in phen_keys:
 
                     if not gapi.grib_is_defined(gid, key):
-                        lat_f = None
-                        lon_f = None
-                        lat_l = None
-                        lon_l = None
-                        date_d = None
-                        date_t = None
-                        break
+                        continue
 
                     value = str(gapi.grib_get(gid, key))
 
@@ -171,18 +165,18 @@ class GribFile(GenericFile):
                     #will be stored i.e the one that contain the full list of parameter
                     #and are unique. If evety record has got different spatial and temporal
                     #then th eindex must change because currently there is only on geo_shape_field.
-                    if key == "latitudeOfFirstGridPointInDegrees" and lat_f is None:
-                        lat_f = value
-                    elif key == "longitudeOfFirstGridPointInDegrees" and lon_f is None:
-                        lon_f = value
-                    elif key == "latitudeOfLastGridPointInDegrees" and lat_l is None:
-                        lat_l = value
-                    elif key =="longitudeOfLastGridPointInDegrees" and lon_l is None:
-                        lon_l = value
-                    elif key == "dataDate" and date_d is None:
-                        date_d = value
-                    elif key == "dataTime" and date_t is None:
-                        date_t = value
+                    if key == "latitudeOfFirstGridPointInDegrees":
+                        lat_f_l.append(value)
+                    elif key == "longitudeOfFirstGridPointInDegrees":
+                        lon_f_l.append(value)
+                    elif key == "latitudeOfLastGridPointInDegrees":
+                        lat_l_l.append(value)
+                    elif key =="longitudeOfLastGridPointInDegrees":
+                        lon_l_l.append(value)
+                    elif key == "dataDate":
+                        date_d_l.append(value)
+                    elif key == "dataTime":
+                        date_t_l.append(value)
                     else:
                         if    len(key) < util.MAX_ATTR_LENGTH \
                           and len(value) < util.MAX_ATTR_LENGTH:
@@ -206,18 +200,28 @@ class GribFile(GenericFile):
 
             fd.close()
 
-            geospatial_dict = {}
-            temporal_dict = {}
-            if lat_f is not None      \
-               and lon_f is not None  \
-               and lat_l is not None  \
-               and lon_l is not None  \
-               and date_d is not None \
-               and date_t is not None:
+            if len(lat_f_l) > 0 \
+               and len(lon_f_l) > 0  \
+               and len(lat_l_l) > 0  \
+               and len(lon_l_l) > 0  \
+               and len(date_d_l) > 0 \
+               and len(date_t_l):
 
+                geospatial_dict = {}
                 geospatial_dict["type"] = "envelope"
+
+                temporal_dict = {} 
+                lat_f = min(lat_f_l)
+                lon_f = min(lon_f_l)
+                lat_l = max(lat_l_l)
+                lon_l = max(lon_l_l)
+
+                date_d = min(date_d_l)
+                date_t = min(date_t_l)
+
                 if float(lon_l) > 180:
                     lon_l = (float(lon_l) -180) - 180
+
                 geospatial_dict["coordinates"] = [[lat_f, lon_f], [lat_l, lon_l]]
 
                 temporal_dict["start_time"] = date_d
@@ -251,8 +255,8 @@ class GribFile(GenericFile):
             if len(metadata) == 3:
                 loc_dict = {}
                 loc_dict["coordinates"] = metadata[1]
-                file_info[0]["spatial"] = loc_dict
-                file_info[0]["temporal"] = metadata[2]
+                file_info[0]["info"]["spatial"] = loc_dict
+                file_info[0]["info"]["temporal"] = metadata[2]
 
             return file_info + (metadata[0], ) 
 
