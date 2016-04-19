@@ -219,8 +219,8 @@ class PpFile(GenericFile):
                 max_lat_u = self.normalize_coord(max(lon_u))
 
 
-                file_info[0]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
-                file_info[0]["temporal"] = {'start_time': min(start_time), 'end_time': max(end_time) }
+                file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
+                file_info[0]["info"]["temporal"] = {'start_time': min(start_time), 'end_time': max(end_time) }
 
                 pp_file_content.close()
 
