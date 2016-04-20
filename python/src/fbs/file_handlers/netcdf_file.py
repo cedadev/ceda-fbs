@@ -99,16 +99,16 @@ class   NetCdfFile(GenericFile):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
         return self.temporal(ncdf, time_name) 
 
-    def is_valid_parameter(self, item):
+    def is_valid_parameter(self, name, value):
         valid_parameters = [ "standard_name",
                              "long_name",
                              "title",
                              "name",
                              "units"
                            ]
-        if item["name"] in valid_parameters \
-           and len(item["value"]) < util.MAX_ATTR_LENGTH\
-           and len(item["name"]) < util.MAX_ATTR_LENGTH:
+        if name in valid_parameters \
+           and len(value) < util.MAX_ATTR_LENGTH\
+           and len(name) < util.MAX_ATTR_LENGTH:
             return True
         return False
 
@@ -139,12 +139,15 @@ class   NetCdfFile(GenericFile):
             attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
 
+                if not   self.is_valid_parameter(key, value) \
+                   or  not util.is_valid_phen_attr(value):
+                    continue
+
                 phen_attr["name"] = str(key.strip())
                 phen_attr["value"] = str(unicode(value).strip())
 
-                if self.is_valid_parameter(phen_attr):
-                    phen_attr_list.append(phen_attr.copy())
-                    attr_count = attr_count + 1
+                phen_attr_list.append(phen_attr.copy())
+                attr_count = attr_count + 1
 
 
             phen_attr["name"] = "var_id"
