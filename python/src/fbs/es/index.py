@@ -56,40 +56,48 @@ def index_file(es, index_l, type_l, fid, fjson):
     time.sleep(0.01)
 
 bulk_requests = []
+bulk = False
 def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
 
     """
     Indexes a phenomenon of a file.
     Returns the id that the phenomenon will have in the database.
     """
+    if phenomenon is None:
+        return
 
     pid = None
-    json_query = ""
-    global bulk_requests
+    pid = abs(hash(str(phenomenon)))
+    phenomenon["id"] = pid
 
-    if phenomenon is not None:
-        pid = abs(hash(str(phenomenon)))
-        phenomenon["id"] = pid
-        index  =  { "index": {"_id": "" }} 
-        index["index"]["_id"] = pid
+    if bulk:
+        pjson = ""
+        global bulk_requests
 
-        json_query = json.dumps(index) + "\n"
-        json_query = json_query + json.dumps(phenomenon) + "\n"
-        bulk_requests.append(json_query)
+        if phenomenon is not None:
+            phenomenon["id"] = pid
+            index  =  { "index": {"_id": "" }} 
+            index["index"]["_id"] = pid
 
-    if len(bulk_requests) > threshold:
+            pjson = json.dumps(index) + "\n"
+            pjson = pjson + json.dumps(phenomenon) + "\n"
+            bulk_requests.append(pjson)
 
-        #print "indexing "  + str(len(bulk_requests)) + " phenomena."
+        if len(bulk_requests) > threshold:
 
-        for item in bulk_requests:
-            json_query = json_query + item
+            #print "indexing "  + str(len(bulk_requests)) + " phenomena."
 
-        bulk_requests = []
+            for item in bulk_requests:
+                pjson = pjson + item
 
-        es.bulk(index=index_l, doc_type=type_l, body=json_query)
-        #print json_query
-        #print "Phenomenon saved in database."
-        time.sleep(0.2) # Make sure that thi sis submitted before we query again the database.
+            bulk_requests = []
+
+            es.bulk(index=index_l, doc_type=type_l, body=pjson)
+    else:
+        pjson = json.dumps(phenomenon)
+        es.index(index=index_l, doc_type=type_l, id=pid, body=pjson, request_timeout=60)
+
+        time.sleep(0.2)
 
     return pid
 
