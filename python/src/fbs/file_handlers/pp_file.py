@@ -102,7 +102,8 @@ class PpFile(GenericFile):
                     value = str(metadata_dict[key])
 
                     if     len(key) < util.MAX_ATTR_LENGTH \
-                        and len(value) < util.MAX_ATTR_LENGTH:
+                        and len(value) < util.MAX_ATTR_LENGTH \
+                        and util.is_valid_phen_attr(value):
                         phen_attr["name"] = str(key.strip())
                         phen_attr["value"] = str(unicode(value).strip())
 
@@ -181,7 +182,8 @@ class PpFile(GenericFile):
                         value = str(metadata_dict[key])
 
                         if      len(key) < util.MAX_ATTR_LENGTH \
-                            and len(value) < util.MAX_ATTR_LENGTH:
+                            and len(value) < util.MAX_ATTR_LENGTH \
+                            and util.is_valid_phen_attr(value):
 
                             phen_attr["name"] = str(key.strip())
                             phen_attr["value"] = str(unicode(value).strip())
