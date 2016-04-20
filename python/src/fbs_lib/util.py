@@ -12,6 +12,7 @@ import time
 from enum import Enum
 import ConfigParser
 import logging
+import re
 
 
 log_levels = {"debug"   : logging.DEBUG,
@@ -295,6 +296,14 @@ def check_attributes_length(item):
         and len(item["name"]) < MAX_ATTR_LENGTH:
         return True
     return False
+
+def is_valid_phen_attr(attribute):
+    if attribute is None:
+        return True
+    elif  re.search(r"\d+-\d+-\d+.*", attribute) is not None:
+        return False
+    else:
+        return True
 
 def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
 
