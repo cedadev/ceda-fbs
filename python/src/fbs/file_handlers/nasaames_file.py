@@ -23,12 +23,13 @@ class NasaAmesFile(GenericFile):
 
             variables = {}
             for var in na_fhandle.getVariables():
-                variables.update({
-                    var[0]: {
-                        "name": var[0],
-                        "units": var[1]
-                    }
-                })
+                if util.is_valid_phen_attr(var[1]):
+                    variables.update({
+                        var[0]: {
+                            "name": var[0],
+                            "units": var[1]
+                        }
+                    })
 
             variables = [util.Parameter(k, other_params=var) for (k, var) in variables.iteritems()]
             return variables
