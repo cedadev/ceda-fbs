@@ -131,7 +131,10 @@ class PpFile(GenericFile):
 
         if file_info is not None:
             phen_list = self.get_phenomena()
-            return file_info +  phen_list
+            if phen_list is not None:
+                return file_info +  phen_list
+            else:
+                return file_info
         else:
             return None
 
@@ -165,8 +168,8 @@ class PpFile(GenericFile):
                 lat_u = []
                 lon_l = []
                 lon_u = []
-                start_time = []
-                end_time = []
+                start_time_l = []
+                end_time_l = []
 
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
@@ -209,20 +212,29 @@ class PpFile(GenericFile):
                         lon_u.append(spatial[3])
 
                         #temporal
-                        start_time.append(temporal[0])
-                        end_time.append(temporal[1])
+                        start_time_l.append(temporal[0])
+                        end_time_l.append(temporal[1])
 
                     except Exception as ex:
                         continue
 
-                min_lon_l = self.normalize_coord(min(lat_l))
-                min_lat_l = self.normalize_coord(min(lon_l))
-                max_lon_u = self.normalize_coord(max(lat_u))
-                max_lat_u = self.normalize_coord(max(lon_u))
 
+                if     len(lat_l) > 0  \
+                   and len(lon_l) > 0  \
+                   and len(lon_l) > 0  \
+                   and len(lat_u) > 0  \
+                   and len(lon_u) > 0:
 
-                file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
-                file_info[0]["info"]["temporal"] = {'start_time': min(start_time), 'end_time': max(end_time) }
+                    min_lon_l = self.normalize_coord(min(lat_l))
+                    min_lat_l = self.normalize_coord(min(lon_l))
+                    max_lon_u = self.normalize_coord(max(lat_u))
+                    max_lat_u = self.normalize_coord(max(lon_u))
+
+                    file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
+
+                if     len(start_time_l) > 0 \
+                   and len(end_time_l) > 0:
+                    file_info[0]["info"]["temporal"] = {'start_time': min(start_time_l), 'end_time': max(end_time_l) }
 
                 pp_file_content.close()
 
