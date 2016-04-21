@@ -220,7 +220,7 @@ class   NetCdfFile(GenericFile):
 
                     return file_info  + (netcdf_phenomena, )
             except Exception as ex:
-                return file_info + (netcdf_phenomena, )
+                return file_info
         else:
             return None
 
