@@ -68,7 +68,7 @@
       {
        "properties" : 
        {
-        "coordinates" : { "type": "geo_shape", "tree": "quadtree", "precision": "2km" }
+        "coordinates" : { "type": "geo_shape", "tree": "quadtree", "precision": "5km" }
        }
       },
       "temporal" : 
