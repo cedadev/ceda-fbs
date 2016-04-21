@@ -54,7 +54,7 @@ class GribFile(GenericFile):
                 for key in phen_keys:
 
                     if not gapi.grib_is_defined(gid, key):
-                        break
+                        continue
 
                     value = str(gapi.grib_get(gid, key))
                     if len(key) < util.MAX_ATTR_LENGTH \
