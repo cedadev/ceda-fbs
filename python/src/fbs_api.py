@@ -64,7 +64,7 @@ def search_database_phenomena(cfg, directory):
                           body=query,
                           request_timeout=60,
                           size = 10000,
-                          scroll = '30m',
+                          scroll = '5m',
                           search_type = 'scan',
                         )
 
@@ -79,7 +79,7 @@ def search_database_phenomena(cfg, directory):
     # Start scrolling
     while (scroll_size > 0):
         #print "Scrolling..."
-        page = es_conn.scroll(scroll_id = sid, scroll = '30m')
+        page = es_conn.scroll(scroll_id = sid, scroll = '5m')
         # Update the scroll ID
         sid = page['_scroll_id']
 
