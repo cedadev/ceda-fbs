@@ -96,7 +96,7 @@ class ManifestFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def open_file(self):
+    def _open_file(self):
         self.root = ET.parse(self.file_path).getroot()
         self._parse_content()
         return self
@@ -162,26 +162,22 @@ class ManifestFile(GenericFile):
 
         res = self.get_metadata_generic_level1()
 
-        self.open_file()
+        self._open_file()
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
-
-        #print geospatial
-        #print temporal
 
         #{'lat': [-56.301735, -54.830536, -58.449139, -60.058411], 'type': 'swath', 'lon': [-37.49408, -31.223965, -28.045124, -34.86174]}
         #{'start_time': '2015-07-04T21:33:30.724498', 'end_time': '2015-07-04T21:34:36.080966'}
 
+        l1  =  max(geospatial["lat"])
+        l2  =  min(geospatial["lat"])
 
-        l1  =  geospatial["lat"][0]
-        l2 =  geospatial["lat"][1]
-
-        lo1  = geospatial["lon"][0]
-        lo2 = geospatial["lon"][1]
+        lo1  = max(geospatial["lon"])
+        lo2 =  min(geospatial["lon"])
 
 
-        res[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[l1, lo1], [l2, lo2]] } }
-        res[0]["info"]["temporal"] = {'start_time': temporal["start_time"], 'end_time': temporal["end_time"] }
+        res[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
+        res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
         return res
 
