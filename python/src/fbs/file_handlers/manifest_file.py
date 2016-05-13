@@ -6,8 +6,6 @@ Created on 12 May 2016
 
 from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
-
-import datetime, os
 import xml.etree.cElementTree as ET
 
 # Set up name spaces for use in XML paths
