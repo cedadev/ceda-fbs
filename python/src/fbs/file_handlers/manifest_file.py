@@ -8,30 +8,37 @@ from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
 import xml.etree.cElementTree as ET
 
-# Set up name spaces for use in XML paths
-ns = {
-    "gml": "http://www.opengis.net/gml",
-    "gx": "http://www.google.com/kml/ext/2.2",
-    "s1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1",    
-    "s1sar": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar",
-    "s1sarl1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1",
-    "s1sarl2": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-2",
-    "safe": "http://www.esa.int/safe/sentinel-1.0",    
-    "version": "esa/safe/sentinel-1.0/sentinel-1/sar/level-1/slc/standard/iwsp",
-    "xfdu": "urn:ccsds:schema:xfdu:1",
-}
+class ManifestFile(GenericFile):
 
-# Define mappings dictionary of XML paths to sections we are capturing
-mappings = {
-    "platform": {
-       "common_prefix": 
-         "./metadataSection/metadataObject[@ID='platform']/metadataWrap/xmlData/",
-       "properties": {
+    """
+    Class for returning basic information about the content
+    of an manifest file.
+    """
+
+    # Set up name spaces for use in XML paths 
+    ns = {
+        "gml": "http://www.opengis.net/gml",
+        "gx": "http://www.google.com/kml/ext/2.2",
+        "s1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1",    
+        "s1sar": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar",
+        "s1sarl1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1",
+        "s1sarl2": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-2",
+        "safe": "http://www.esa.int/safe/sentinel-1.0",    
+        "version": "esa/safe/sentinel-1.0/sentinel-1/sar/level-1/slc/standard/iwsp",
+        "xfdu": "urn:ccsds:schema:xfdu:1",
+    }
+
+    # Define mappings dictionary of XML paths to sections we are capturing
+    mappings = {
+        "platform": {
+           "common_prefix": 
+           "./metadataSection/metadataObject[@ID='platform']/metadataWrap/xmlData/",
+        "properties": {
          "Platform Family Name": "{%(safe)s}platform/{%(safe)s}familyName" % ns, 
          "NSSDC Identifier": "{%(safe)s}platform/{%(safe)s}nssdcIdentifier" % ns,
          "Instrument Family Name": "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}familyName" % ns,
          "Mode": "{%(safe)s}platform/{%(safe)s}instrument/{%(safe)s}extension/{%(s1sarl1)s}instrumentMode/{%(s1sarl1)s}mode" % ns,
-       },
+        },
     },
     "spatial": {
        "common_prefix":
@@ -76,15 +83,8 @@ mappings = {
          "Stop Time": "{%(safe)s}acquisitionPeriod/{%(safe)s}stopTime" % ns,
        }
     }
-}
+    }
 
-
-class ManifestFile(GenericFile):
-
-    """
-    Class for returning basic information about the content
-    of an manifest file.
-    """
 
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
