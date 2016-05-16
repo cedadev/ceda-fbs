@@ -8,15 +8,8 @@ from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
 import xml.etree.cElementTree as ET
 
-class ManifestFile(GenericFile):
-
-    """
-    Class for returning basic information about the content
-    of an manifest file.
-    """
-
-    # Set up name spaces for use in XML paths 
-    ns = {
+# Set up name spaces for use in XML paths 
+ns = {
         "gml": "http://www.opengis.net/gml",
         "gx": "http://www.google.com/kml/ext/2.2",
         "s1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1",    
@@ -29,7 +22,7 @@ class ManifestFile(GenericFile):
     }
 
     # Define mappings dictionary of XML paths to sections we are capturing
-    mappings = {
+mappings = {
         "platform": {
            "common_prefix": 
            "./metadataSection/metadataObject[@ID='platform']/metadataWrap/xmlData/",
@@ -83,8 +76,15 @@ class ManifestFile(GenericFile):
          "Stop Time": "{%(safe)s}acquisitionPeriod/{%(safe)s}stopTime" % ns,
        }
     }
-    }
+}
 
+class ManifestFile(GenericFile):
+
+
+    """
+    Class for returning basic information about the content
+    of an manifest file.
+    """
 
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
@@ -97,7 +97,7 @@ class ManifestFile(GenericFile):
     def _open_file(self):
         self.root = ET.parse(self.file_path).getroot()
         self._parse_content()
-        return self
+
 
     def _parse_content(self):
         self.sections = {}
