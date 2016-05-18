@@ -38,17 +38,21 @@ class MetadataTagsJsonFile(GenericFile):
          "value": ""
         }
 
-        attr_count = 0
+        phenomena_list = []
         for item in phenomena:
             phen_attr["name"]  = "var_id"
             phen_attr["value"] = item["var_id"]
 
-            phenomenon["attributes"].append(phen_attr.copy())
-            attr_count = attr_count + 1
+            attr_list = []
+            attr_list.append(phen_attr.copy())
 
-        phenomenon["attribute_count"] = attr_count
+            new_phenomenon = phenomenon.copy()
+            new_phenomenon["attributes"] = attr_list
+            new_phenomenon["attribute_count"] = 1
 
-        return [phenomenon]
+            phenomena_list.append(new_phenomenon)
+
+        return phenomena_list
 
 
     def get_metadata_tags_json_level2(self):
