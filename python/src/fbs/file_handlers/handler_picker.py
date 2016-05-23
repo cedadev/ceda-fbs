@@ -9,7 +9,7 @@ import netcdf_file as netcdf_file
 import nasaames_file as nasaames_file
 import pp_file as pp_file
 import grib_file as grib_file
-import manifest_file as manifest_file
+import esasafe_file as esasafe_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util
@@ -66,7 +66,7 @@ class  HandlerPicker(object):
         elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
             handler = grib_file.GribFile
         elif extension is ".manifest":
-            handler = manifest_file.ManifestFile
+            handler = esasafe_file.EsaSafeFile
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
