@@ -224,7 +224,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
     #util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
     #                        user_wait_time=30)
     #ok, we are going to create a file with the commands instead. 
-    util.write_list_to_file(commands, "lotus_commands.txt")
+    util.write_list_to_file_nl(commands, "lotus_commands.txt")
 
 def scan_datasets_in_lotus(config, scan_status):
 
