@@ -122,12 +122,14 @@ def search_database_phenomena(cfg, directory):
 
         #get all phenomen with ids found in the first query.
         res = es_conn.mget(body=mget_query, index=es_index, doc_type=es_type)
+    else:
+        res = {'docs': []}
 
     summary_info = {}
     summary_info["number_of_files"] = number_of_files
     summary_info["total_size"] = total_size
     summary_info["formats"] = formats
-    summary_info[" phenomena"] = res[u'docs']
+    summary_info["phenomena"] = res[u'docs']
 
     return summary_info
 
