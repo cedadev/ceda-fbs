@@ -323,7 +323,7 @@ class ExtractSeq(object):
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
             try :
-                files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
+                files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:
                 self.logger.error("Could not save the python list of files to file...{}".format(ex))
             else:
