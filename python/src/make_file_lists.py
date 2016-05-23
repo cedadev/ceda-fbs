@@ -28,7 +28,6 @@ from docopt import docopt
 import fbs_lib.util as util
 from fbs import __version__  # Grab version from package __init__.py
 import datetime
-from enum import Enum
 import subprocess
 import fbs_lib.util as util
 import fbs.constants.constants as constants
