@@ -13,6 +13,7 @@ from enum import Enum
 import ConfigParser
 import logging
 import re
+import io
 
 
 log_levels = {"debug"   : logging.DEBUG,
@@ -235,6 +236,10 @@ def read_file_into_list(filename):
         for line in fd:
             content.append(line)
     return content
+
+def save_to_file(filename, data):
+    with io.FileIO(filename, "a") as fp:
+        fp.write(data)
 
 def find_in_list(list_str, str_item):
 
