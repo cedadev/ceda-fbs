@@ -61,12 +61,12 @@ class NasaAmesFile(GenericFile):
         for item in nasaames_phenomena:           #get all parameter objects.
 
             phen_attr_list = []
-            name = item.get_name()                #get phenomena name.
-            phen_attr["name"] = "var_id"
-            phen_attr["value"] = str(unicode(name).strip())
+            #name = item.get_name()                #get phenomena name.
+            #phen_attr["name"] = "var_id"
+            #phen_attr["value"] = str(unicode(name).strip())
 
             phen_attr_list = item.get()
-            phen_attr_list.append(phen_attr)
+            #phen_attr_list.append(phen_attr)
             attr_count = len(phen_attr_list)
 
             new_phenomenon = phenomenon.copy()
