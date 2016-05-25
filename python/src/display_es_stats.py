@@ -28,8 +28,6 @@ def plot(x, y):
     x_axis = np.arange(len(x))
     y_range = 250*(10**6)
 
-    print y_range
-
     plt.bar(x_axis, y)
 
     plt.xticks(x_axis + 0.5, x, rotation=25, fontsize=8)
