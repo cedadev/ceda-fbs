@@ -26,10 +26,20 @@ def plot(x, y):
 
     # The X axis can just be numbered 0,1,2,3...
     x_axis = np.arange(len(x))
+    y_range = 250*(10**6)
+
+    print y_range
 
     plt.bar(x_axis, y)
 
-    plt.xticks(x_axis + 0.5, x, rotation=25)
+    plt.xticks(x_axis + 0.5, x, rotation=25, fontsize=8)
+    plt.ylim([0, y_range])
+
+
+
+    plt.title('File scanning.', fontsize=20)
+    plt.ylabel('Files.', fontsize=18)
+    plt.xlabel('Time.', fontsize=18)
     plt.show()
 
 
