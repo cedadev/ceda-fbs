@@ -37,7 +37,7 @@ def plot(x, y):
     fig = plt.gcf()
     fig.canvas.set_window_title("Results.")
 
-    plt.title("File scanning.", fontsize=20)
+    plt.title("File scanning.", fontsize=18)
     plt.ylabel("Files.", fontsize=18)
     plt.xlabel("Time.", fontsize=18)
     plt.show()
