@@ -312,7 +312,6 @@ def find_num_lines_in_file(filename):
             num_lines += 1
     return num_lines
 
-
 def check_attributes_length(item):
     if len(item["value"]) < MAX_ATTR_LENGTH\
         and len(item["name"]) < MAX_ATTR_LENGTH:
