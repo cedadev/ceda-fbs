@@ -96,10 +96,7 @@ def create_query(filename):
     {
      "query":
      {
-      "bool" :
-      { 
-       "must" : { "matchPhrase" : { "file.path" : filename} }
-      }
+      "matchPhrase" : { "file.path" : filename}
      }
     }
 
