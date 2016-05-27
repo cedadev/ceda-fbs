@@ -1,9 +1,9 @@
 """
 Usage:
-  scan_archive.py --help
-  scan_archive.py --version
-  scan_archive.py (-f <filename> | --filename <filename>)
-                  [-p <number_of_processes> | --num-processes <number_of_processes>]
+  run_commands_in_lotus.py --help
+  run_commands_in_lotus.py --version
+  run_commands_in_lotus.py (-f <filename> | --filename <filename>)
+                           [-p <number_of_processes> | --num-processes <number_of_processes>]
 
 Options:
   --help                                     Show this screen.
@@ -21,7 +21,6 @@ Created on 23 May 2016
 """
 
 import os
-
 from docopt import docopt
 import fbs_lib.util as util
 from fbs import __version__  # Grab version from package __init__.py
