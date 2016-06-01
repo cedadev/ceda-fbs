@@ -4,12 +4,13 @@ import json
 import re
 
 from fbs_lib.util import FileFormatError
-import generic_file as generic_file
-import netcdf_file as netcdf_file
-import nasaames_file as nasaames_file
-import pp_file as pp_file
-import grib_file as grib_file
-import esasafe_file as esasafe_file
+import generic_file
+import netcdf_file
+import nasaames_file
+import pp_file
+import grib_file 
+import esasafe_file 
+from file_handlers import kmz_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util
@@ -65,8 +66,10 @@ class  HandlerPicker(object):
             handler = pp_file.PpFile
         elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
             handler = grib_file.GribFile
-        elif extension is ".manifest":
+        elif extension == ".manifest":
             handler = esasafe_file.EsaSafeFile
+        elif extension == ".kmz" or extension == ".kml":
+            handler = kmz_file.KmzFile
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
