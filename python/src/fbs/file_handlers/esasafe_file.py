@@ -167,14 +167,14 @@ class EsaSafeFile(GenericFile):
         #{'lat': [-56.301735, -54.830536, -58.449139, -60.058411], 'type': 'swath', 'lon': [-37.49408, -31.223965, -28.045124, -34.86174]}
         #{'start_time': '2015-07-04T21:33:30.724498', 'end_time': '2015-07-04T21:34:36.080966'}
 
-        l1  =  max(geospatial["lat"])
-        l2  =  min(geospatial["lat"])
+        lat_u  =  max(geospatial["lat"])
+        lat_l =  min(geospatial["lat"])
 
-        lo1  = max(geospatial["lon"])
-        lo2 =  min(geospatial["lon"])
+        lon_u  = max(geospatial["lon"])
+        lon_l=  min(geospatial["lon"])
 
 
-        res[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
+        res[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
         res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
         return res

@@ -206,10 +206,10 @@ class PpFile(GenericFile):
                         temporal = self.getTemporalDomain(var_id, pp_file_content)
 
                         #geospatial data.
-                        lat_l.append(spatial[0])
-                        lon_l.append(spatial[1])
-                        lat_u.append(spatial[2])
-                        lon_u.append(spatial[3])
+                        lon_l.append(spatial[0])
+                        lat_l.append(spatial[1])
+                        lon_u.append(spatial[2])
+                        lat_u.append(spatial[3])
 
                         #temporal
                         start_time_l.append(temporal[0])
@@ -221,16 +221,15 @@ class PpFile(GenericFile):
 
                 if     len(lat_l) > 0  \
                    and len(lon_l) > 0  \
-                   and len(lon_l) > 0  \
                    and len(lat_u) > 0  \
                    and len(lon_u) > 0:
 
-                    min_lon_l = self.normalize_coord(min(lat_l))
-                    min_lat_l = self.normalize_coord(min(lon_l))
-                    max_lon_u = self.normalize_coord(max(lat_u))
-                    max_lat_u = self.normalize_coord(max(lon_u))
+                    min_lon_l = self.normalize_coord(min(lon_l))
+                    min_lat_l = self.normalize_coord(min(lat_l))
+                    max_lon_u = self.normalize_coord(max(lon_u))
+                    max_lat_u = self.normalize_coord(max(lat_u))
 
-                    file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lat_l, min_lon_l], [max_lat_u, max_lon_u]]}}
+                    file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lon_l, min_lat_l], [max_lon_u, max_lat_u]]}}
 
                 if     len(start_time_l) > 0 \
                    and len(end_time_l) > 0:

@@ -78,10 +78,10 @@ class KmzFile(GenericFile):
             coordinates = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["LineString"]["coordinates"]
             date = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][1]["td"][1]
             time = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][2]["td"][1]
-            lat_l.append(coordinates.split(" ")[0].split(",")[0])
-            lon_l.append(coordinates.split(" ")[0].split(",")[1])
-            lat_a.append(coordinates.split(" ")[1].split(",")[0])
-            lon_a.append(coordinates.split(" ")[1].split(",")[1])
+            lon_l.append(coordinates.split(" ")[0].split(",")[0])
+            lat_l.append(coordinates.split(" ")[0].split(",")[1])
+            lon_a.append(coordinates.split(" ")[1].split(",")[0])
+            lat_a.append(coordinates.split(" ")[1].split(",")[1])
             dates.append(date) 
             times.append(time)
 
@@ -95,7 +95,7 @@ class KmzFile(GenericFile):
         dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
         end_date   = "{}-{}-{}".format(dt.year, dt.month, dt.day)
 
-        res[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[c1, c2], [c3, c4]] } }
+        res[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[c2, c1 ], [c4, c3]] } }
         res[0]["info"]["temporal"] = {'start_time': start_date , 'end_time': end_date }#"1975-01-01"
 
         return res

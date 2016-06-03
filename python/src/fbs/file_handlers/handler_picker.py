@@ -8,9 +8,10 @@ import generic_file
 import netcdf_file
 import nasaames_file
 import pp_file
-import grib_file 
-import esasafe_file 
-from file_handlers import kmz_file
+import grib_file
+import esasafe_file
+import kmz_file
+import hdf_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util
@@ -70,6 +71,8 @@ class  HandlerPicker(object):
             handler = esasafe_file.EsaSafeFile
         elif extension == ".kmz" or extension == ".kml":
             handler = kmz_file.KmzFile
+        elif extension == ".hdf":
+            handler = hdf_file.HdfFile
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler

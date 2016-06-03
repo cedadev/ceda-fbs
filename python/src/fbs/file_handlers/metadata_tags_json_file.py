@@ -88,12 +88,12 @@ class MetadataTagsJsonFile(GenericFile):
             return None
 
         #"geospatial": [-180.0, 90, 180, -90],
-        l1  = metadata["geospatial"][0]
-        lo1 = metadata["geospatial"][1]
-        l2  = metadata["geospatial"][2]
-        lo2 = metadata["geospatial"][3]
+        lon_l  = metadata["geospatial"][0]
+        lat_l = metadata["geospatial"][1]
+        lon_u  = metadata["geospatial"][2]
+        lat_u = metadata["geospatial"][3]
 
-        file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[l1, lo1], [l2, lo2]]}}
+        file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[lon_l, lat_l], [lon_u, lat_u]]}}
 
         # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
         start_time = metadata["time"][0]
