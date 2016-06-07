@@ -69,8 +69,8 @@ class KmzFile(GenericFile):
 
         lat_l = []
         lon_l = []
-        lat_a = []
-        lon_a = []
+        lat_u = []
+        lon_u = []
 
         dates = [] 
         times = []
@@ -80,16 +80,16 @@ class KmzFile(GenericFile):
             time = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][2]["td"][1]
             lon_l.append(coordinates.split(" ")[0].split(",")[0])
             lat_l.append(coordinates.split(" ")[0].split(",")[1])
-            lon_a.append(coordinates.split(" ")[1].split(",")[0])
-            lat_a.append(coordinates.split(" ")[1].split(",")[1])
+            lon_u.append(coordinates.split(" ")[1].split(",")[0])
+            lat_u.append(coordinates.split(" ")[1].split(",")[1])
             dates.append(date) 
             times.append(time)
 
 
         c1 = min(lat_l)
         c2 = min(lon_l)
-        c3 = max(lat_a)
-        c4 = max(lon_l)
+        c3 = max(lat_u)
+        c4 = max(lon_u)
         dt = datetime.datetime.strptime(min(dates), '%d-%m-%Y')
         start_date = "{}-{}-{}".format(dt.year, dt.month, dt.day)
         dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
