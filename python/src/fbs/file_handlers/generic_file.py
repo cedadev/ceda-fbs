@@ -44,7 +44,11 @@ class  GenericFile(object):
 
         info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
 
-        info["type"] = "file"
+        file_type = os.path.splitext(info["name"])[1]
+        if len(file_type) == 0:
+            file_type = "File without extension."
+
+        info["type"] = file_type
 
         info["md5"] = ""
 
