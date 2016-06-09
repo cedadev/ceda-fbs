@@ -36,7 +36,7 @@ import fbs.constants.constants as constants
 def get_stat_and_defs(com_args):
 
     """
-    Set global variables that determine the operations to be performed.
+    Sets variables that determine the operations to be performed.
     """
 
     status_and_defaults = []
