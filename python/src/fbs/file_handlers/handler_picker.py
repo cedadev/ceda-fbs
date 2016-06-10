@@ -51,7 +51,7 @@ class  HandlerPicker(object):
         file_dir = os.path.dirname(filename)
 
         #Try configured handler.
-        handler = self.get_configured_handler_class(filename)
+        #handler = self.get_configured_handler_class(filename)
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
@@ -75,7 +75,17 @@ class  HandlerPicker(object):
         elif extension == ".hdf":
             handler = hdf_file.HdfFile
         elif extension == ".csv":
-            handler = badc_csv_file.BadcCsvFile
+            try:
+                header = util.get_bytes_from_file(filename, 500)
+                pattern_to_search = "Conventions,G,BADC-CSV"
+                res = header.find(pattern_to_search)
+                if res != -1:
+                    handler = badc_csv_file.BadcCsvFile
+                else:
+                    handler = generic_file.GenericFile
+            except Exception: #catch everything... if there is an error just return the generic handler.
+                handler = generic_file.GenericFile
+
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
@@ -104,19 +114,7 @@ class  HandlerPicker(object):
                     handler = grib_file.GribFile
                 else:
                     handler = generic_file.GenericFile
-        except: #catch everything... if there is an error just return the generic handler.
-            handler = generic_file.GenericFile
-
-        #check wether the file is a csv file.
-        try:
-            header = util.get_bytes_from_file(filename, 500)
-            pattern_to_search = "Conventions,G,BADC-CSV"
-            res = header.find(pattern_to_search)
-            if res != -1:
-                handler = badc_csv_file.BadcCsvFile
-            else:
-                handler = generic_file.GenericFile
-        except: #catch everything... if there is an error just return the generic handler.
+        except Exception : #catch everything... if there is an error just return the generic handler.
             handler = generic_file.GenericFile
 
 
