@@ -22,8 +22,8 @@ class KmzFile(GenericFile):
 
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
-        self.handler_id = "MAnifest handler level 3."
-        self.FILE_FORMAT = "NASA Ames"
+        self.handler_id = "kmz file handler."
+        self.FILE_FORMAT = "KMZ"
 
     def get_handler_id(self):
         return self.handler_id
