@@ -96,18 +96,14 @@ class ExtractSeq(object):
         """
         Returns metadata from the given file.
         """
-        try:
-            handler = self.handler_factory_inst.pick_best_handler(filename)
-            if handler is not None:
-                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
-                metadata = handler_inst.get_metadata()
-                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
-                return metadata
-            else:
-                self.logger.error("{} could not be read by any handler.".format(filename))
-                return None
-        except Exception as ex:
-            self.logger.error("Could not process file: {}".format(ex))
+        handler = self.handler_factory_inst.pick_best_handler(filename)
+        if handler is not None:
+            handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+            metadata = handler_inst.get_metadata()
+            self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
+            return metadata
+        else:
+            self.logger.error("{} could not be read by any handler.".format(filename))
             return None
 
     def is_valid_result(self, result):
