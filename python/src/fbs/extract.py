@@ -391,7 +391,7 @@ class ExtractSeq(object):
         #Set up logger and handler class.
         self.prepare_logging_rdf()
         self.logger.debug("***Scanning started.***")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
         self.handler_factory_inst.get_configured_handlers()
 
 
@@ -504,7 +504,7 @@ class ExtractSeq(object):
 
         self.prepare_logging_seq_rs()
         self.logger.debug("***Scanning started.***.")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
         self.handler_factory_inst.get_configured_handlers()
 
         self.file_list = self.read_dataset()

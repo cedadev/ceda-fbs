@@ -23,14 +23,17 @@ class  HandlerPicker(object):
     Returns a file handler for the supplied file.
     """
 
-    def __init__(self, handler_map):
-        self.handler_map = handler_map
+    def __init__(self, conf):
+        self.conf = conf
+        self.handler_map = conf["handlers"]
         self.handlers = {}
         self.handlers_and_dirs = {}
         self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
         self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
         self.DATA_PYTHON_MAGIC_NUM_RES = "data"
-
+        self.dirs_to_hadlers = []
+        for key in conf["dir_conf_handlers"] :
+            self.handlers_and_dirs[key] = conf["dir_conf_handlers"][key]
 
     def pick_best_handler(self, filename):
         """
