@@ -127,7 +127,7 @@ class HdfFile(GenericFile):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Navigation":
-                    geospatial = self._get_coords(self.vs, self.fname)
+                    geospatial = self._get_coords(self.vs, self.file_path)
                     geospatial["type"] = "track"  # Type annotation
                     vg.detach()
                     return geospatial
@@ -153,7 +153,7 @@ class HdfFile(GenericFile):
                 vg = self.v.attach(ref)
 
                 if vg._name == "Mission":
-                    temporal = self._get_temporal(self.vs, self.fname)
+                    temporal = self._get_temporal(self.vs, self.file_path)
                     vg.detach()
                     return temporal
 
@@ -213,7 +213,7 @@ class HdfFile(GenericFile):
 
         #geospatial = self.get_geospatial()
         #temporal = self.get_temporal()
-
+        #geospatial = None
 
         geospatial = self.get_geolocation()
 
