@@ -6,7 +6,6 @@ Created on 2 Jun 2016
 from fbs.file_handlers.generic_file import GenericFile
 import fbs_lib.util as util
 import csv
-import string
 import re
 
 class BadcCsvFile(GenericFile):
