@@ -51,7 +51,7 @@ class  HandlerPicker(object):
         file_dir = os.path.dirname(filename)
 
         #Try configured handler.
-        #handler = self.get_configured_handler_class(filename)
+        handler = self.get_configured_handler_class(filename)
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
@@ -123,7 +123,8 @@ class  HandlerPicker(object):
             return handler
 
         #Try to return last handler used in this directory.
-        handler = self.handlers_and_dirs[file_dir] = handler
+        if file_dir in self.handlers_and_dirs.keys():
+            handler = self.handlers_and_dirs[file_dir]
 
         if handler is not None:
             return handler
