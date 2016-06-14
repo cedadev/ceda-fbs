@@ -32,11 +32,6 @@ class  HandlerPicker(object):
         self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
         self.DATA_PYTHON_MAGIC_NUM_RES = "data"
         self.dirs_to_hadlers = []
-        for key in conf["dir_conf_handlers"] :
-            handler_class = conf["dir_conf_handlers"][key]
-            (module, _class) = handler_class.rsplit(".", 1)
-            mod = __import__(module, fromlist=[_class])
-            self.handlers_and_dirs[key] = getattr(mod, _class)
 
     def pick_best_handler(self, filename):
         """
@@ -146,6 +141,13 @@ class  HandlerPicker(object):
 
         return handler
 
+    def get_configured_dir_handlers(self):
+        for key in self.conf["dir_conf_handlers"] :
+            handler_class = self.conf["dir_conf_handlers"][key]
+            (module, _class) = handler_class.rsplit(".", 1)
+            mod = __import__(module, fromlist=[_class])
+            self.handlers_and_dirs[key] = getattr(mod, _class)
+
     def get_configured_handlers(self):
 
         for pattern, handler in self.handler_map.iteritems():
@@ -160,6 +162,9 @@ class  HandlerPicker(object):
              "class": getattr(mod, _class),
              "priority": priority
             }
+
+        #Also load the handlers that cirrespond to directories.
+        self.get_configured_dir_handlers()
 
     def get_configured_handler_class(self, filename):
         """
