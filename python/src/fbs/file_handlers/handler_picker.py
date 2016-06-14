@@ -33,7 +33,10 @@ class  HandlerPicker(object):
         self.DATA_PYTHON_MAGIC_NUM_RES = "data"
         self.dirs_to_hadlers = []
         for key in conf["dir_conf_handlers"] :
-            self.handlers_and_dirs[key] = conf["dir_conf_handlers"][key]
+            handler_class = conf["dir_conf_handlers"][key]
+            (module, _class) = handler_class.rsplit(".", 1)
+            mod = __import__(module, fromlist=[_class])
+            self.handlers_and_dirs[key] = getattr(mod, _class)
 
     def pick_best_handler(self, filename):
         """
@@ -55,6 +58,11 @@ class  HandlerPicker(object):
 
         #Try configured handler.
         handler = self.get_configured_handler_class(filename)
+
+        #This is test code.
+        #if file_dir in self.handlers_and_dirs.keys():
+        #    handler = self.handlers_and_dirs[file_dir]
+
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
