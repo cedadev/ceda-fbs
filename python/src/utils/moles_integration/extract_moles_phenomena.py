@@ -8,7 +8,7 @@ extract_moles_phenomena.py
 
 import urllib, re, os, sys
 sys.path.append(".")
-import fbs_api
+import src.fbs_api as fbs_api
 
 
 TIME_UNIT_REGEX = re.compile("^(years|months|weeks|days|hours|minutes|seconds)\s+since\s+\d+")
@@ -62,7 +62,7 @@ def create_phens_list(phens):
     for phen in phens:
         atts = phen["_source"]["attributes"]
         d = {}
-    
+
         for att in atts:
             key = att["name"]
             value = att["value"]
