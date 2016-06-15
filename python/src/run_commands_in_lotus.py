@@ -29,10 +29,6 @@ import datetime
 
 def main():
 
-    """
-    Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23204
-    """
-
     start = datetime.datetime.now()
     print "==============================="
     print "Script started at: %s." %(str(start))
