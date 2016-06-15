@@ -52,6 +52,9 @@ def search_database_phenomena(cfg, directory):
      }
     }
 
+    name_sample = 0
+    name_sample_list = []
+
     #open connection.
     es_conn = open_connection(cfg)
 
@@ -104,6 +107,10 @@ def search_database_phenomena(cfg, directory):
                 if info_dict[u'format'] not in formats:
                     formats.append(info_dict[u'format'])
 
+            if u"name" in info_dict:
+                if name_sample < 5:
+                    name_sample_list.append(info_dict[u"name"])
+                    name_sample = name_sample + 1
 
     es_type = cfg["es-mapping"].split(",")[1]
 
@@ -130,6 +137,7 @@ def search_database_phenomena(cfg, directory):
     summary_info["total_size"] = total_size
     summary_info["formats"] = formats
     summary_info["phenomena"] = res[u'docs']
+    summary_info["sample_names"] = name_sample_list
 
     return summary_info
 
