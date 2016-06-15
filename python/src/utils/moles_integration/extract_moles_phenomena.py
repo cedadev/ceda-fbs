@@ -168,6 +168,8 @@ def process_obs_to_html(paths_page="http://catalogue.ceda.ac.uk/export/paths/"):
 
             try:
                 results = fbs_api.get_dir_info(data_path)
+                if len(results["formats"]) > 0:
+                    print results["formats"]
             except:
                 continue
 
