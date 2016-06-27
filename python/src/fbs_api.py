@@ -79,6 +79,7 @@ def search_database_phenomena(cfg, directory):
     formats = []
     total_size = 0
     number_of_files = 0
+    valid_formats = [".nc",".na",".pp",".grb",".grib",".GRB",".GRIB",".manifest",".json",".kmz",".kml",".csv",".hdf"]
 
     # Start scrolling
     while (scroll_size > 0):
@@ -112,10 +113,12 @@ def search_database_phenomena(cfg, directory):
                 if fname_sample < 2:
                     file_name = info_dict[u"name"]
                     current_file_type = os.path.splitext(file_name)[1]
-                    if last_file_type != current_file_type:
-                        fname_sample_list.append(info_dict[u"name"])
-                        fname_sample += 1
-                        last_file_type = current_file_type
+                    if current_file_type is not None:
+                        if current_file_type in valid_formats:
+                            if last_file_type != current_file_type:
+                                fname_sample_list.append(info_dict[u"name"])
+                                fname_sample += 1
+                                last_file_type = current_file_type
 
     es_type = cfg["es-mapping"].split(",")[1]
 
