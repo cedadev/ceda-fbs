@@ -1,14 +1,21 @@
 #!/usr/bin/env python
+"""
+Usage:
+  extract_dataset_format.py -h | --help
+  extract_dataset_format.py --version
+  extract_dataset_format.py [-f <filename> | --filename <filename>]
 
-"""
-extract_dataset_format.py
-==========================
-"""
+Options:
+  -h --help                                  Show this screen.
+  --version                                  Show version.
+  -f --filename=<filename>                   File from where the dataset [default: datasets.ini].
+ """
 
 import urllib, sys
 sys.path.append(".")
 import src.fbs_api as fbs_api
 import src.fbs_lib.util as util
+from docopt import docopt
 
 def create_html_table(data):
 
@@ -39,48 +46,32 @@ def create_html_table(data):
     util.save_to_file("html_file.htm", html_page)
     return table
 
-def process_obs_to_html(paths_page="http://catalogue.ceda.ac.uk/export/paths/"):
+def process_obs_to_html(dataset_file):
     """
     Looks up each Observation in the MOLES catalogue, matches phenomena to it 
     from ES and then writes HTML pages listing them. 
     """
-    lines = urllib.urlopen(paths_page).readlines()
-    lines.sort()
-    n = len(lines)
+    lines = util.read_file_into_list(dataset_file)
     summary_info = []
-    test_counter = 0
+    counter = 0
+    for line in lines:
+        path = line.split("=")[1].rstrip()
+        try:
+            print "searching path {}".format(path)
+            results = fbs_api.get_dir_info(path)
+        except:
+            continue
 
-    SPLIT = 100
-
-    while lines:
-        lines_to_process = lines[:SPLIT]
-        lines = lines[SPLIT:]
-
-        test_counter = test_counter +1
-        if test_counter > 4:
-            break
-
-        for i, line in enumerate(lines_to_process):
-            if i > 50000000: 
-                lines = []
-                break
-
-            data_path, ob_url = line.strip().split()
-
-
-            try:
-                results = fbs_api.get_dir_info(data_path)
-            except:
-                continue
-
-            if len(results["formats"]) > 0:
-                #print "Formats in directory {} are {} and some files {}".format(data_path, results["formats"], results["sample_names"])
-                record = (data_path, results["formats"], results["sample_names"])
-                summary_info.append(record)
-
+        if len(results["formats"]) > 0:
+            #print "Formats in directory {} are {} and some files {}".format(data_path, results["formats"], results["sample_names"])
+            record = (line, results["formats"], results["sample_names"])
+            summary_info.append(record)
+            #counter += 1
+            #if counter >10:
+            #    break
 
     print create_html_table(summary_info)
 
 if __name__ == "__main__":
-
-    process_obs_to_html() 
+    com_args = util.sanitise_args(docopt(__doc__))
+    process_obs_to_html(com_args["filename"])
