@@ -11,7 +11,6 @@ Options:
   -f --filename=<filename>                   File from where the dataset [default: datasets.ini].
  """
 
-sys.path.append(".")
 import src.fbs_api as fbs_api
 import src.fbs_lib.util as util
 from docopt import docopt
