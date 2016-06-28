@@ -206,29 +206,39 @@ class HdfFile(GenericFile):
 
         file_info = self.get_metadata_generic_level1()
 
-        #OLD method for extracting spatial and temporal infomration.
-        #self.hdf = HDF(self.file_path)
-        #self.vs = self.hdf.vstart()
-        #self.v = self.hdf.vgstart()
+        #First method for extracting information.
+        self.hdf = HDF(self.file_path)
+        self.vs = self.hdf.vstart()
+        self.v = self.hdf.vgstart()
 
-        #geospatial = self.get_geospatial()
-        #temporal = self.get_temporal()
-        #geospatial = None
-
-        geospatial = self.get_geolocation()
+        geospatial = self.get_geospatial()
+        temporal = self.get_temporal()
 
 
         if geospatial is not None:
-            lat_u = self.normalize_coord(float(max(geospatial[0])))
-            lat_l = self.normalize_coord(float(min(geospatial[0])))
+            lat_u = self.normalize_coord(float(max(geospatial["Latitude"])))
+            lat_l = self.normalize_coord(float(min(geospatial["Latitude"])))
 
-            lon_u = self.normalize_coord(float(max(geospatial[1])))
-            lon_l = self.normalize_coord(float(min(geospatial[1])))
-
+            lon_u = self.normalize_coord(float(max(geospatial["Longitude"])))
+            lon_l = self.normalize_coord(float(min(geospatial["Longitude"])))
 
             file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
-            #if  phen[2] is not None:
-            #    file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
+        else:
+            #Second method.
+            geospatial = self.get_geolocation()
+
+            if geospatial is not None:
+                lat_u = self.normalize_coord(float(max(geospatial[0])))
+                lat_l = self.normalize_coord(float(min(geospatial[0])))
+
+                lon_u = self.normalize_coord(float(max(geospatial[1])))
+                lon_l = self.normalize_coord(float(min(geospatial[1])))
+
+                file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
+
+
+        if temporal is not None:
+            file_info[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
 
         return file_info
