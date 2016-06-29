@@ -54,8 +54,11 @@ def search_database_phenomena(cfg, directory):
     }
 
     fname_sample = 0
+    non_valid_files = 0
+    non_valid_files_list = []
     fname_sample_list = []
     last_file_type = ""
+    non_valid_files_type = ""
 
     #open connection.
     es_conn = open_connection(cfg)
@@ -81,6 +84,7 @@ def search_database_phenomena(cfg, directory):
     total_size = 0
     number_of_files = 0
     valid_formats = [".nc",".na",".pp",".grb",".grib",".GRB",".GRIB",".manifest",".json",".kmz",".kml",".csv",".hdf"]
+
 
     # Start scrolling
     while (scroll_size > 0):
@@ -120,6 +124,18 @@ def search_database_phenomena(cfg, directory):
                                 fname_sample_list.append(info_dict[u"name"])
                                 fname_sample += 1
                                 last_file_type = current_file_type
+                        else :
+                            if non_valid_files < 2 :
+                                if non_valid_files_type != file_name :
+                                    non_valid_files_list.append(file_name)
+                                    non_valid_files += 1
+                                    non_valid_files_type = file_name
+                    else:
+                        if non_valid_files < 2 :
+                            if non_valid_files_type != file_name :
+                                non_valid_files_list.append(file_name)
+                                non_valid_files += 1
+                                non_valid_files_type = file_name
 
     es_type = cfg["es-mapping"].split(",")[1]
 
@@ -146,6 +162,12 @@ def search_database_phenomena(cfg, directory):
     summary_info["total_size"] = total_size
     summary_info["formats"] = formats
     summary_info["phenomena"] = res[u'docs']
+
+    if len(fname_sample_list) < 2 :
+        items_to_copy = 2 - len(fname_sample_list)
+        for x in range(0, items_to_copy):
+            fname_sample_list.append(non_valid_files_list[x])
+
     summary_info["sample_names"] = fname_sample_list
 
     return summary_info
