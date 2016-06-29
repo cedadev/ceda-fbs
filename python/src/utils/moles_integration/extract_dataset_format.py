@@ -64,9 +64,9 @@ def process_obs_to_html(dataset_file):
             #print "Formats in directory {} are {} and some files {}".format(data_path, results["formats"], results["sample_names"])
         record = (line, results["formats"], results["sample_names"])
         summary_info.append(record)
-        counter += 1
-        if counter >10:
-            break
+        #counter += 1
+        #if counter >10:
+        #    break
 
     print create_html_table(summary_info)
 
