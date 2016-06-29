@@ -21,6 +21,7 @@ OUTPUTS:
     "size": the overall size (in bytes) of the directory calculated as the sum of all file sizes under that directory tree
     "number_of_files": the total number of files under that directory tree
     "file_format": a unique list of all file formats found under that directory tree.
+    "sample_names" sample filenames found in directory. 
 """
 
 def read_cfg():
