@@ -157,6 +157,7 @@ def search_database_for_files(cfg):
 
     print "Number of files indexed: {}".format(files_indexed)
     print "Number of files not indexed: {}".format(files_not_indexed)
+    print "File \"files_not_found.txt\" created and contains the files not found in the index."
     write_list_to_file(file_not_found_list, "files_not_found.txt")
 
 def main(directory=None):
