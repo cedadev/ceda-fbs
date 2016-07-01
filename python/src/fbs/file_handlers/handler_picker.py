@@ -142,11 +142,12 @@ class  HandlerPicker(object):
         return handler
 
     def get_configured_dir_handlers(self):
-        for key in self.conf["dir_conf_handlers"] :
-            handler_class = self.conf["dir_conf_handlers"][key]
-            (module, _class) = handler_class.rsplit(".", 1)
-            mod = __import__(module, fromlist=[_class])
-            self.handlers_and_dirs[key] = getattr(mod, _class)
+        if "dir_conf_handlers" in self.conf:
+            for key in self.conf["dir_conf_handlers"] :
+                handler_class = self.conf["dir_conf_handlers"][key]
+                (module, _class) = handler_class.rsplit(".", 1)
+                mod = __import__(module, fromlist=[_class])
+                self.handlers_and_dirs[key] = getattr(mod, _class)
 
     def get_configured_handlers(self):
 
