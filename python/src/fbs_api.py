@@ -126,16 +126,18 @@ def search_database_phenomena(cfg, directory):
                                 last_file_type = current_file_type
                         else :
                             if non_valid_files < 2 :
+                                if not file_name.startswith("."):
+                                    if non_valid_files_type != file_name :
+                                        non_valid_files_list.append(file_name)
+                                        non_valid_files += 1
+                                        non_valid_files_type = file_name
+                    else:
+                        if non_valid_files < 2 :
+                            if not file_name.startswith("."):
                                 if non_valid_files_type != file_name :
                                     non_valid_files_list.append(file_name)
                                     non_valid_files += 1
                                     non_valid_files_type = file_name
-                    else:
-                        if non_valid_files < 2 :
-                            if non_valid_files_type != file_name :
-                                non_valid_files_list.append(file_name)
-                                non_valid_files += 1
-                                non_valid_files_type = file_name
 
     es_type = cfg["es-mapping"].split(",")[1]
 
