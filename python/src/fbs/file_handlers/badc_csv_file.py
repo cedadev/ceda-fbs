@@ -63,32 +63,38 @@ class BadcCsvFile(GenericFile):
 
         file_info = self.get_metadata_generic_level1()
 
-        fp = open(self.file_path)
-        phen = self.get_phenomena(fp)
+        if file_info is not None:
+            fp = open(self.file_path)
+            phen = self.get_phenomena(fp)
 
-        return  file_info +  (phen[0],)
+            return  file_info +  (phen[0],)
+        else:
+            return None
 
     def get_metadata_badccsv_level3(self):
         self.handler_id = "Csv handler level 3."
 
         file_info = self.get_metadata_generic_level1()
 
-        fp = open(self.file_path)
-        phen = self.get_phenomena(fp)
+        if file_info is not None:
+            fp = open(self.file_path)
+            phen = self.get_phenomena(fp)
 
 
-        #l1  =  max(geospatial["lat"])
-        #l2  =  min(geospatial["lat"])
+            #l1  =  max(geospatial["lat"])
+            #l2  =  min(geospatial["lat"])
 
-        #lo1  = max(geospatial["lon"])
-        #lo2 =  min(geospatial["lon"])
+            #lo1  = max(geospatial["lon"])
+            #lo2 =  min(geospatial["lon"])
 
 
-        #file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
-        if  phen[2] is not None:
-            file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
+            #file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
+            if  phen[2] is not None:
+                file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
 
-        return file_info +  (phen[0],)
+            return file_info +  (phen[0],)
+        else:
+            return None
 
     def get_metadata(self):
 
