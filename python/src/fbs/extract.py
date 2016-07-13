@@ -198,7 +198,6 @@ class ExtractSeq(object):
 
             fmeta["info"]["phenomena"] = phen_ids
 
-        print metadata
         if len(metadata) == 3:
             if metadata[2] != None:
                 lid = self.index_location(metadata[2])
