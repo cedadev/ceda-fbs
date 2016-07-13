@@ -158,6 +158,7 @@ class PpFile(GenericFile):
           "value": ""
         }
 
+        spatial = None
         #Get basic file info.
         file_info = self.get_metadata_generic_level1()
 
@@ -229,7 +230,7 @@ class PpFile(GenericFile):
                     max_lon_u = self.normalize_coord(max(lon_u))
                     max_lat_u = self.normalize_coord(max(lat_u))
 
-                    file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lon_l, min_lat_l], [max_lon_u, max_lat_u]]}}
+                    spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lon_l, min_lat_l], [max_lon_u, max_lat_u]]}}
 
                 if     len(start_time_l) > 0 \
                    and len(end_time_l) > 0:
@@ -237,7 +238,7 @@ class PpFile(GenericFile):
 
                 pp_file_content.close()
 
-                return file_info + (phen_list, )
+                return file_info + (phen_list, spatial, )
             except Exception as ex:
                 return file_info
         else:

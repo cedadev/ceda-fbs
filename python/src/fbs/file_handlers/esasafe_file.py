@@ -157,6 +157,7 @@ class EsaSafeFile(GenericFile):
 
     def get_metadata_esasafe_level3(self):
         self.handler_id = "MAnifest handler level 3."
+        spatial = None
 
         res = self.get_metadata_generic_level1()
 
@@ -167,17 +168,19 @@ class EsaSafeFile(GenericFile):
         #{'lat': [-56.301735, -54.830536, -58.449139, -60.058411], 'type': 'swath', 'lon': [-37.49408, -31.223965, -28.045124, -34.86174]}
         #{'start_time': '2015-07-04T21:33:30.724498', 'end_time': '2015-07-04T21:34:36.080966'}
 
-        lat_u  =  max(geospatial["lat"])
+        lat_u =  max(geospatial["lat"])
         lat_l =  min(geospatial["lat"])
 
-        lon_u  = max(geospatial["lon"])
-        lon_l=  min(geospatial["lon"])
+        lon_u = max(geospatial["lon"])
+        lon_l =  min(geospatial["lon"])
 
 
-        res[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
+        spatial  =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
         res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
-        return res
+        phenomena = None
+
+        return res + (phenomena, spatial,)
 
     def get_metadata(self):
 

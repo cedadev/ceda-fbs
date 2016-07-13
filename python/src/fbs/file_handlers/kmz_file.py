@@ -49,6 +49,7 @@ class KmzFile(GenericFile):
 
     def get_metadata_kmz_level3(self):
         self.handler_id = "MAnifest handler level 3."
+        spatial = None
 
         res = self.get_metadata_generic_level1()
         # this is what i need to find.
@@ -95,10 +96,10 @@ class KmzFile(GenericFile):
         dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
         end_date   = "{}-{}-{}".format(dt.year, dt.month, dt.day)
 
-        res[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[c2, c1 ], [c4, c3]] } }
+        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[c2, c1 ], [c4, c3]] } }
         res[0]["info"]["temporal"] = {'start_time': start_date , 'end_time': end_date }#"1975-01-01"
 
-        return res
+        return res + (None, spatial, )
 
     def get_metadata(self):
 

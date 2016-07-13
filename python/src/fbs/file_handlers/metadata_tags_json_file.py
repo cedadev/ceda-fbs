@@ -76,6 +76,7 @@ class MetadataTagsJsonFile(GenericFile):
     def get_metadata_tags_json_level3(self):
         #Get basic file info.
         file_info = self.get_metadata_generic_level1()
+        spatial = None
 
         if file_info is not None:
 
@@ -93,14 +94,14 @@ class MetadataTagsJsonFile(GenericFile):
         lon_u  = metadata["geospatial"][2]
         lat_u = metadata["geospatial"][3]
 
-        file_info[0]["info"]["spatial"] =  {'coordinates': {'type': 'envelope', 'coordinates': [[lon_l, lat_l], [lon_u, lat_u]]}}
+        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[lon_l, lat_l], [lon_u, lat_u]]}}
 
         # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
         start_time = metadata["time"][0]
         end_time   = metadata["time"][1]
         file_info[0]["info"]["temporal"] = {'start_time': start_time, 'end_time': end_time }
 
-        return file_info + (phen_list, )
+        return file_info + (phen_list, spatial, )
 
     def get_metadata(self):
 

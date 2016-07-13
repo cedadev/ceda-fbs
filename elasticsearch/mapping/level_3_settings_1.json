@@ -24,6 +24,22 @@
     }
    }
   },
+  "locations" :
+  {
+   "properties" :
+   {
+    "id" :
+    {
+     "type" : "string"
+    },
+    "coordinates" : 
+    { 
+      "type": "geo_shape", 
+      "tree": "quadtree", 
+      "precision": "5km" 
+    }
+   }
+  },
   "file" : 
   {
    "properties" : 
@@ -56,6 +72,10 @@
       {
        "type" : "string"
       },
+      "location" : 
+      {
+       "type" : "string"
+      },
       "size" : 
       {
        "type" : "long"
@@ -63,13 +83,6 @@
       "type" : 
       {
        "type" : "string"
-      },
-      "spatial" : 
-      {
-       "properties" : 
-       {
-        "coordinates" : { "type": "geo_shape", "tree": "quadtree", "precision": "5km" }
-       }
       },
       "temporal" : 
       {

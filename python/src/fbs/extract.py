@@ -49,6 +49,7 @@ class ExtractSeq(object):
         self.es_types = (self.conf("es-configuration")["es-mapping"]).split(",")
         self.es_type_file = self.es_types[0]
         self.es_type_phen = self.es_types[1]
+        self.es_type_loc  = self.es_types[2]
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -123,6 +124,30 @@ class ExtractSeq(object):
         else:
             return None
 
+    def create_location_json(self, lid, coordinates):
+        record = {\
+                   "coordinates": coordinates["coordinates"],
+                   "id" : lid
+                 }
+        return record
+
+    def index_location(self, coordinates):
+
+        """
+        Index location only if does not exists.
+        """
+
+        lid = hashlib.sha1(str(coordinates)).hexdigest()
+        query = index.create_sp_query(lid)
+        res = index.search_database(self.es, self.es_index, self.es_type_loc, query)
+        lid_found = self.is_valid_result(res)
+        if lid_found is None:
+            lmeta = self.create_location_json(lid, coordinates)
+            index.index_file(self.es, self.es_index, self.es_type_loc, lid, lmeta)
+
+        return lid
+
+
     def index_metadata(self, metadata, fid):
 
         """
@@ -140,36 +165,45 @@ class ExtractSeq(object):
             return
 
         phen_list = metadata[1]
-        phen_ids = []
-        #Test if phenomenon exist in database.
-        #if not create it.
-        for item in phen_list:
+        if phen_list != None :
 
-            query = index.create_query(item)
-            self.logger.debug("Query created: " + str(query))
-            #print "Query created: " + str(query)
-            res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
-            #print "Query result: " + str(res)
-            self.logger.debug("Query result: " + str(res))
+            phen_ids = []
+            #Test if phenomenon exist in database.
+            #if not create it.
+            for item in phen_list:
 
-            phen_id = self.is_valid_result(res)
-            if phen_id is not None:
-                phen_ids.append(phen_id)
-                #print "phenomenon found!"
-                self.logger.debug("phenomenon found!")
-            else:
-                #print "phenomenon needs to be inserted in the database."
-                phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
-                phen_ids.append(str(phen_id))
-                #print "Phen created : " + str(phen_id)
-                self.logger.debug("Phen created : " + str(phen_id))
+                query = index.create_query(item)
+                self.logger.debug("Query created: " + str(query))
+                #print "Query created: " + str(query)
+                res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
+                #print "Query result: " + str(res)
+                self.logger.debug("Query result: " + str(res))
 
-            index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
-            #if wait_init:
-            #    time.sleep(1)
-            #    wait_init = False
+                phen_id = self.is_valid_result(res)
+                if phen_id is not None:
+                    phen_ids.append(phen_id)
+                    #print "phenomenon found!"
+                    self.logger.debug("phenomenon found!")
+                else:
+                    #print "phenomenon needs to be inserted in the database."
+                    phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
+                    phen_ids.append(str(phen_id))
+                    #print "Phen created : " + str(phen_id)
+                    self.logger.debug("Phen created : " + str(phen_id))
 
-        fmeta["info"]["phenomena"] = phen_ids
+                index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
+                #if wait_init:
+                #    time.sleep(1)
+                #    wait_init = False
+
+            fmeta["info"]["phenomena"] = phen_ids
+
+        print metadata
+        if len(metadata) == 3:
+            if metadata[2] != None:
+                lid = self.index_location(metadata[2])
+                fmeta["info"]["location"] = lid
+
         index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
 
 

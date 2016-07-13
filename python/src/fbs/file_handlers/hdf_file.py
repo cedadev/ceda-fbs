@@ -203,6 +203,7 @@ class HdfFile(GenericFile):
 
     def get_metadata_badccsv_level3(self):
         self.handler_id = "Hdf handler level 3."
+        spatial = None
 
         file_info = self.get_metadata_generic_level1()
 
@@ -222,7 +223,7 @@ class HdfFile(GenericFile):
             lon_u = self.normalize_coord(float(max(geospatial["Longitude"])))
             lon_l = self.normalize_coord(float(min(geospatial["Longitude"])))
 
-            file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
+            spatial =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
         else:
             #Second method.
             geospatial = self.get_geolocation()
@@ -234,14 +235,14 @@ class HdfFile(GenericFile):
                 lon_u = self.normalize_coord(float(max(geospatial[1])))
                 lon_l = self.normalize_coord(float(min(geospatial[1])))
 
-                file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
+                spatial =  {"coordinates": {"type": "envelope", "coordinates": [[lon_l, lat_l], [lon_u, lat_u]] } }
 
 
         if temporal is not None:
             file_info[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
 
-        return file_info
+        return file_info + (None, spatial, )
 
     def get_metadata(self):
 

@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import TransportError
 from copy import deepcopy
+import hashlib
 
 
 def _get_host_string(config):
@@ -174,4 +175,20 @@ def create_query(phenomenon):
     es_query_template["query"]["bool"]["must"].append(es_subquery_count)
 
     return es_query_template
+
+def create_sp_query(lid):
+
+    query_template = {\
+     "query":
+     {
+       "match":
+       {
+         "id" : lid
+       }
+     }
+    }
+    return query_template
+
+
+
 

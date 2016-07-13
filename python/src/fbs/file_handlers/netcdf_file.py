@@ -187,6 +187,7 @@ class   NetCdfFile(GenericFile):
         """
         #level 1
         file_info = self.get_metadata_generic_level1()
+        spatial = None
 
         if file_info is not None:
 
@@ -208,7 +209,7 @@ class   NetCdfFile(GenericFile):
                         spatial = gj.get_elasticsearch_geojson()
 
                         loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
-                        file_info[0]["info"]["spatial"] = loc_dict
+                        spatial = loc_dict
                     except AttributeError:
                         pass
 
@@ -218,7 +219,7 @@ class   NetCdfFile(GenericFile):
                     except AttributeError:
                         pass
 
-                    return file_info  + (netcdf_phenomena, )
+                    return file_info  + (netcdf_phenomena, spatial, )
             except Exception as ex:
                 return file_info
         else:

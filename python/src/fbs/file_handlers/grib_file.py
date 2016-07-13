@@ -257,10 +257,10 @@ class GribFile(GenericFile):
             if len(metadata) == 3:
                 loc_dict = {}
                 loc_dict["coordinates"] = metadata[1]
-                file_info[0]["info"]["spatial"] = loc_dict
+                #file_info[0]["info"]["spatial"] = loc_dict
                 file_info[0]["info"]["temporal"] = metadata[2]
 
-            return file_info + (metadata[0], ) 
+            return file_info + (metadata[0], loc_dict, )
 
         else:
             return None
