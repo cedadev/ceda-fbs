@@ -164,44 +164,48 @@ class ExtractSeq(object):
             index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
             return
 
-        phen_list = metadata[1]
-        if phen_list != None :
+        try :
+            phen_list = metadata[1]
+            if phen_list != None :
 
-            phen_ids = []
-            #Test if phenomenon exist in database.
-            #if not create it.
-            for item in phen_list:
+                phen_ids = []
+                #Test if phenomenon exist in database.
+                #if not create it.
+                for item in phen_list:
 
-                query = index.create_query(item)
-                self.logger.debug("Query created: " + str(query))
-                #print "Query created: " + str(query)
-                res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
-                #print "Query result: " + str(res)
-                self.logger.debug("Query result: " + str(res))
+                    query = index.create_query(item)
+                    self.logger.debug("Query created: " + str(query))
+                    #print "Query created: " + str(query)
+                    res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
+                    #print "Query result: " + str(res)
+                    self.logger.debug("Query result: " + str(res))
 
-                phen_id = self.is_valid_result(res)
-                if phen_id is not None:
-                    phen_ids.append(phen_id)
-                    #print "phenomenon found!"
-                    self.logger.debug("phenomenon found!")
-                else:
-                    #print "phenomenon needs to be inserted in the database."
-                    phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
-                    phen_ids.append(str(phen_id))
-                    #print "Phen created : " + str(phen_id)
-                    self.logger.debug("Phen created : " + str(phen_id))
+                    phen_id = self.is_valid_result(res)
+                    if phen_id is not None:
+                        phen_ids.append(phen_id)
+                        #print "phenomenon found!"
+                        self.logger.debug("phenomenon found!")
+                    else:
+                        #print "phenomenon needs to be inserted in the database."
+                        phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
+                        phen_ids.append(str(phen_id))
+                        #print "Phen created : " + str(phen_id)
+                        self.logger.debug("Phen created : " + str(phen_id))
 
-                index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
-                #if wait_init:
-                #    time.sleep(1)
-                #    wait_init = False
+                    index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
+                    #if wait_init:
+                    #    time.sleep(1)
+                    #    wait_init = False
 
-            fmeta["info"]["phenomena"] = phen_ids
+                fmeta["info"]["phenomena"] = phen_ids
 
-        if len(metadata) == 3:
-            if metadata[2] != None:
-                lid = self.index_location(metadata[2])
-                fmeta["info"]["location"] = lid
+            if len(metadata) == 3:
+                if metadata[2] != None:
+                    lid = self.index_location(metadata[2])
+                    fmeta["info"]["location"] = lid
+        #if something fails at least index the basic information.
+        except Exception as ex:
+            pass
 
         index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
 

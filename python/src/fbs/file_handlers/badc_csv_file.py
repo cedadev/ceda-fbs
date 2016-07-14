@@ -89,7 +89,7 @@ class BadcCsvFile(GenericFile):
 
 
             #file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
-            if  phen[2] is not None:
+            if phen[2] is not None:
                 file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
 
             return file_info +  (phen[0],)
