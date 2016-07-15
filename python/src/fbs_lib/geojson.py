@@ -53,11 +53,17 @@ class GeoJSONGenerator(object):
                        "display": self._gen_track()
                     }
                 }
-            elif self.shape_type == "track" or self.shape_type is None:
+            elif self.shape_type == "track":
                 geojson = {
                     "geometries": {
                         "search": self._gen_envelope(),
                         "display": self._gen_track()
+                    }
+                }
+            elif self.shape_type is None:
+                geojson = {
+                    "geometries": {
+                        "search": self._gen_envelope()
                     }
                 }
 
@@ -192,6 +198,7 @@ class GeoJSONGenerator(object):
         """
         lon_left, lon_right = self._get_bounds(self.longitudes,
                                                wrapped_coords=True)
+
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
         if (lon_left is None or lon_right is None or
