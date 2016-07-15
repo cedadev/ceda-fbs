@@ -188,6 +188,7 @@ class   NetCdfFile(GenericFile):
         #level 1
         file_info = self.get_metadata_generic_level1()
         spatial = None
+        netcdf_phenomena = None
 
         if file_info is not None:
 
@@ -221,6 +222,10 @@ class   NetCdfFile(GenericFile):
 
                     return file_info  + (netcdf_phenomena, spatial, )
             except Exception as ex:
+                if netcdf_phenomena is not None:
+                    return file_info + (netcdf_phenomena, )
+                else:
+                    return file_info
                 return file_info
         else:
             return None
