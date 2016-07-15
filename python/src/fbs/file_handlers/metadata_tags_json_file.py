@@ -77,6 +77,7 @@ class MetadataTagsJsonFile(GenericFile):
         #Get basic file info.
         file_info = self.get_metadata_generic_level1()
         spatial = None
+        phen_list = None
 
         if file_info is not None:
 
