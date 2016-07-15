@@ -224,7 +224,8 @@ class GribFile(GenericFile):
                 if float(lon_l) > 180:
                     lon_l = (float(lon_l) -180) - 180
 
-                geospatial_dict["coordinates"] = [[lon_f, lat_f ], [lon_l, lat_l]]
+
+                geospatial_dict["coordinates"] = [[round(float(lon_f)), round(float(lat_f))], [round(float(lon_l)), round(float(lat_l)) ]]
 
                 temporal_dict["start_time"] = date_d
                 temporal_dict["end_time"] = date_t
@@ -233,7 +234,7 @@ class GribFile(GenericFile):
             else:
                 return (phen_list,)
 
-        except Exception:
+        except Exception as ex:
             return None
 
     def get_metadata_grib_level3(self):
