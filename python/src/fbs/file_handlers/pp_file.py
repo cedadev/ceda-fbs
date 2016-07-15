@@ -138,9 +138,17 @@ class PpFile(GenericFile):
         else:
             return None
 
-    def normalize_coord(self, coord):
+    def normalize_lon(self, coord):
         if coord > 180:
             coord = coord - 360
+        return coord
+
+    def normalize_lat(self, coord):
+        if coord > 90:
+            coord = 90
+        if coord < -90:
+            coord = 90
+
         return coord
 
     def get_metadata_pp_level3(self):
@@ -225,10 +233,10 @@ class PpFile(GenericFile):
                    and len(lat_u) > 0  \
                    and len(lon_u) > 0:
 
-                    min_lon_l = self.normalize_coord(min(lon_l))
-                    min_lat_l = self.normalize_coord(min(lat_l))
-                    max_lon_u = self.normalize_coord(max(lon_u))
-                    max_lat_u = self.normalize_coord(max(lat_u))
+                    min_lon_l = self.normalize_lon(min(lon_l))
+                    min_lat_l = self.normalize_lat(min(lat_l))
+                    max_lon_u = self.normalize_lon(max(lon_u))
+                    max_lat_u = self.normalize_lat(max(lat_u))
 
                     spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[min_lon_l, min_lat_l], [max_lon_u, max_lat_u]]}}
 
