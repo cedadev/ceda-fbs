@@ -96,7 +96,7 @@ class KmzFile(GenericFile):
         dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
         end_date   = "{}-{}-{}".format(dt.year, dt.month, dt.day)
 
-        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(float(c2)), round(float(c1)) ], [round(float(c4)), round(float(c3))]] } }
+        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(float(c2), 3), round(float(c1), 3) ], [round(float(c4), 3), round(float(c3), 3)]] } }
         res[0]["info"]["temporal"] = {'start_time': start_date , 'end_time': end_date }#"1975-01-01"
 
         return res + (None, spatial, )
