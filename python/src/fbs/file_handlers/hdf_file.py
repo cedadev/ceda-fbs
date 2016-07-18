@@ -223,7 +223,7 @@ class HdfFile(GenericFile):
             lon_u = self.normalize_coord(float(max(geospatial["Longitude"])))
             lon_l = self.normalize_coord(float(min(geospatial["Longitude"])))
 
-            spatial =  {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l), round(lat_l)], [round(lon_u), round(lat_u)]] } }
+            spatial =  {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]] } }
         else:
             #Second method.
             geospatial = self.get_geolocation()
@@ -235,7 +235,7 @@ class HdfFile(GenericFile):
                 lon_u = self.normalize_coord(float(max(geospatial[1])))
                 lon_l = self.normalize_coord(float(min(geospatial[1])))
 
-                spatial =  {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l), round(lat_l)], [round(lon_u), round(lat_u)]] } }
+                spatial =  {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]] } }
 
 
         if temporal is not None:
