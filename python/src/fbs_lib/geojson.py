@@ -208,8 +208,8 @@ class GeoJSONGenerator(object):
         envelope = {
             "type": "envelope",
             "coordinates": [
-                [round(lon_left), round(lat_top)],
-                [round(lon_right), round(lat_bottom)]
+                [round(lon_left, 3), round(lat_top, 3)],
+                [round(lon_right, 3), round(lat_bottom, 3)]
             ]
         }
 
