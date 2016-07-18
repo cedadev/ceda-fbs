@@ -95,7 +95,7 @@ class MetadataTagsJsonFile(GenericFile):
         lon_u  = metadata["geospatial"][2]
         lat_u = metadata["geospatial"][3]
 
-        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l), round(lat_l)], [round(lon_u), round(lat_u)]]}}
+        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]]}}
 
         # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
         start_time = metadata["time"][0]
