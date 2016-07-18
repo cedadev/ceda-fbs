@@ -238,7 +238,7 @@ class PpFile(GenericFile):
                     max_lon_u = self.normalize_lon(max(lon_u))
                     max_lat_u = self.normalize_lat(max(lat_u))
 
-                    spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l), round(min_lat_l)], [round(max_lon_u), round(max_lat_u)]]}}
+                    spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
 
                 if     len(start_time_l) > 0 \
                    and len(end_time_l) > 0:
