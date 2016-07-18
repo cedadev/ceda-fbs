@@ -225,7 +225,7 @@ class GribFile(GenericFile):
                     lon_l = (float(lon_l) -180) - 180
 
 
-                geospatial_dict["coordinates"] = [[round(float(lon_f)), round(float(lat_f))], [round(float(lon_l)), round(float(lat_l)) ]]
+                geospatial_dict["coordinates"] = [[round(float(lon_f), 3), round(float(lat_f), 3)], [round(float(lon_l), 3), round(float(lat_l), 3) ]]
 
                 temporal_dict["start_time"] = date_d
                 temporal_dict["end_time"] = date_t
