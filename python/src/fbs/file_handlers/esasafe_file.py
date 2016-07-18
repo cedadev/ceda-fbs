@@ -175,7 +175,7 @@ class EsaSafeFile(GenericFile):
         lon_l =  min(geospatial["lon"])
 
 
-        spatial = {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l), round(lat_l)], [round(lon_u), round(lat_u)]] } }
+        spatial = {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]] } }
         res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
 
         phenomena = None
