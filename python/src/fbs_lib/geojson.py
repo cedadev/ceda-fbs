@@ -114,23 +114,27 @@ class GeoJSONGenerator(object):
         lat_mask = ma.getmaskarray(lats)
 
         # Filter the arrays
+        # kltsa 19/07/2016 Change for issue 23330: Some filters 
+        #                  were excluded in order to allow values 
+        #                  up to 90 to be included.
         self.longitudes = lons[
             (lons >= -180) &
             (lons <= 180) &
-            (lats >= -90) &
-            (lats <= 90) &
-            (lon_mask == False) &
-            (lat_mask == False)
+            #(lats >= 90) &
+            #(lats <= 90) &
+            (lon_mask == False)# &
+            #(lat_mask == False)
         ]
 
         self.latitudes = lats[
-            (lons >= -180) &
-            (lons <= 180) &
+            #(lons >= -180) &
+            #(lons <= 180) &
             (lats >= -90) &
             (lats <= 90) &
-            (lon_mask == False) &
+            #(lon_mask == False) &
             (lat_mask == False)
         ]
+
 
     def _gen_point(self):
         """
