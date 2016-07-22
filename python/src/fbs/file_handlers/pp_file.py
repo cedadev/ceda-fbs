@@ -1,6 +1,7 @@
 import cdms2 as cdms
 import os
 import fbs_lib.util as util
+import datetime
 
 
 from fbs.file_handlers.generic_file import GenericFile
@@ -240,9 +241,14 @@ class PpFile(GenericFile):
 
                     spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
 
+                #kltsa 22/07/2016 change for issue 23341: validation of dates added.
                 if     len(start_time_l) > 0 \
                    and len(end_time_l) > 0:
-                    file_info[0]["info"]["temporal"] = {'start_time': min(start_time_l), 'end_time': max(end_time_l) }
+                    min_time = min(start_time_l)
+                    max_time = max(end_time_l)
+                    if util.is_date_valid(min_time.split("T")[0])\
+                       and util.is_date_valid(max_time.split("T")[0]):
+                        file_info[0]["info"]["temporal"] = {'start_time': min_time, 'end_time': max_time }
 
                 pp_file_content.close()
 
