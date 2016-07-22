@@ -14,6 +14,7 @@ import ConfigParser
 import logging
 import re
 import io
+import datetime
 
 
 log_levels = {"debug"   : logging.DEBUG,
@@ -345,6 +346,13 @@ def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
         num_of_running_tasks = max_number_of_tasks_to_submit
 
     return num_of_running_tasks
+
+def is_date_valid(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
 
