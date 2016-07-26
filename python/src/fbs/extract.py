@@ -134,7 +134,7 @@ class ExtractSeq(object):
     def index_location(self, coordinates):
 
         """
-        Index location only if does not exists.
+        Indexes location only if does not exists.
         """
 
         lid = hashlib.sha1(str(coordinates)).hexdigest()
