@@ -13,6 +13,7 @@ import esasafe_file
 import kmz_file
 import hdf_file
 import badc_csv_file
+import metadata_tags_json_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util
@@ -50,47 +51,52 @@ class  HandlerPicker(object):
             return None
 
         file_dir = os.path.dirname(filename)
-
+        file_basename = os.path.basename(filename)
         #Try configured handler.
-        handler = self.get_configured_handler_class(filename)
+        #kltsa 26/07/2015 : All logic now will be implemented in code.
+        #handler = self.get_configured_handler_class(filename)
 
         #This is test code.
         #if file_dir in self.handlers_and_dirs.keys():
         #    handler = self.handlers_and_dirs[file_dir]
 
 
-        if handler is not None:
-            self.handlers_and_dirs[file_dir] = handler
-            return handler
+        #if handler is not None:
+        #    self.handlers_and_dirs[file_dir] = handler
+        #    return handler
 
-        #Try returning a handler based on file extension.
-        extension = os.path.splitext(filename)[1]
 
-        if extension == ".nc":
-            handler = netcdf_file.NetCdfFile
-        elif extension == ".na":
-            handler = nasaames_file.NasaAmesFile
-        elif extension == ".pp":
-            handler = pp_file.PpFile
-        elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
-            handler = grib_file.GribFile
-        elif extension == ".manifest":
-            handler = esasafe_file.EsaSafeFile
-        elif extension == ".kmz" or extension == ".kml":
-            handler = kmz_file.KmzFile
-        elif extension == ".hdf":
-            handler = hdf_file.HdfFile
-        elif extension == ".csv":
-            try:
-                header = util.get_bytes_from_file(filename, 500)
-                pattern_to_search = "Conventions,G,BADC-CSV"
-                res = header.find(pattern_to_search)
-                if res != -1:
-                    handler = badc_csv_file.BadcCsvFile
-                else:
+        if file_basename == "metadata_tags.json" :
+            handler = metadata_tags_json_file.MetadataTagsJsonFile
+        else :
+            #Try returning a handler based on file extension.
+            extension = os.path.splitext(filename)[1]
+
+            if extension == ".nc":
+                handler = netcdf_file.NetCdfFile
+            elif extension == ".na":
+                handler = nasaames_file.NasaAmesFile
+            elif extension == ".pp":
+                handler = pp_file.PpFile
+            elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
+                handler = grib_file.GribFile
+            elif extension == ".manifest":
+                handler = esasafe_file.EsaSafeFile
+            elif extension == ".kmz" or extension == ".kml":
+                handler = kmz_file.KmzFile
+            elif extension == ".hdf":
+                handler = hdf_file.HdfFile
+            elif extension == ".csv":
+                try:
+                    header = util.get_bytes_from_file(filename, 500)
+                    pattern_to_search = "Conventions,G,BADC-CSV"
+                    res = header.find(pattern_to_search)
+                    if res != -1:
+                        handler = badc_csv_file.BadcCsvFile
+                    else:
+                        handler = generic_file.GenericFile
+                except Exception as ex: #catch everything... if there is an error just return the generic handler.
                     handler = generic_file.GenericFile
-            except Exception: #catch everything... if there is an error just return the generic handler.
-                handler = generic_file.GenericFile
 
 
         if handler is not None:
