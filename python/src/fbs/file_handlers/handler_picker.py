@@ -4,11 +4,16 @@ import json
 import re
 
 from fbs_lib.util import FileFormatError
-import generic_file as generic_file
-import netcdf_file as netcdf_file
-import nasaames_file as nasaames_file
-import pp_file as pp_file
-import grib_file as grib_file
+import generic_file
+import netcdf_file
+import nasaames_file
+import pp_file
+import grib_file
+import esasafe_file
+import kmz_file
+import hdf_file
+import badc_csv_file
+import metadata_tags_json_file
 
 import magic as magic_number_reader
 import fbs_lib.util as util
@@ -19,14 +24,15 @@ class  HandlerPicker(object):
     Returns a file handler for the supplied file.
     """
 
-    def __init__(self, handler_map):
-        self.handler_map = handler_map
+    def __init__(self, conf):
+        self.conf = conf
+        self.handler_map = conf["handlers"]
         self.handlers = {}
         self.handlers_and_dirs = {}
         self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
         self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
         self.DATA_PYTHON_MAGIC_NUM_RES = "data"
-
+        self.dirs_to_hadlers = []
 
     def pick_best_handler(self, filename):
         """
@@ -45,25 +51,55 @@ class  HandlerPicker(object):
             return None
 
         file_dir = os.path.dirname(filename)
+        file_basename = os.path.basename(filename)
 
+
+        #kltsa 26/07/2015 : All handler logic will now be implemented in code.
         #Try configured handler.
-        handler = self.get_configured_handler_class(filename)
+        #handler = self.get_configured_handler_class(filename)
 
-        if handler is not None:
-            self.handlers_and_dirs[file_dir] = handler
-            return handler
+        #This is test code.
+        #if file_dir in self.handlers_and_dirs.keys():
+        #    handler = self.handlers_and_dirs[file_dir]
 
-        #Try returning a handler based on file extension.
-        extension = os.path.splitext(filename)[1]
 
-        if extension == ".nc":
-            handler = netcdf_file.NetCdfFile
-        elif extension == ".na":
-            handler = nasaames_file.NasaAmesFile
-        elif extension == ".pp":
-            handler = pp_file.PpFile
-        elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
-            handler = grib_file.GribFile
+        #if handler is not None:
+        #    self.handlers_and_dirs[file_dir] = handler
+        #    return handler
+
+
+        if file_basename == "metadata_tags.json" :
+            handler = metadata_tags_json_file.MetadataTagsJsonFile
+        else :
+            #Try returning a handler based on file extension.
+            extension = os.path.splitext(filename)[1]
+
+            if extension == ".nc":
+                handler = netcdf_file.NetCdfFile
+            elif extension == ".na":
+                handler = nasaames_file.NasaAmesFile
+            elif extension == ".pp":
+                handler = pp_file.PpFile
+            elif extension in (".grb", ".grib", ".GRB", ".GRIB"):
+                handler = grib_file.GribFile
+            elif extension == ".manifest":
+                handler = esasafe_file.EsaSafeFile
+            elif extension == ".kmz" or extension == ".kml":
+                handler = kmz_file.KmzFile
+            elif extension == ".hdf":
+                handler = hdf_file.HdfFile
+            elif extension == ".csv":
+                try:
+                    header = util.get_bytes_from_file(filename, 500)
+                    pattern_to_search = "Conventions,G,BADC-CSV"
+                    res = header.find(pattern_to_search)
+                    if res != -1:
+                        handler = badc_csv_file.BadcCsvFile
+                    else:
+                        handler = generic_file.GenericFile
+                except Exception as ex: #catch everything... if there is an error just return the generic handler.
+                    handler = generic_file.GenericFile
+
 
         if handler is not None:
             self.handlers_and_dirs[file_dir] = handler
@@ -92,7 +128,7 @@ class  HandlerPicker(object):
                     handler = grib_file.GribFile
                 else:
                     handler = generic_file.GenericFile
-        except: #catch everything... we do not want ifthere is an error just return the generic handler.
+        except Exception : #catch everything... if there is an error just return the generic handler.
             handler = generic_file.GenericFile
 
 
@@ -101,7 +137,8 @@ class  HandlerPicker(object):
             return handler
 
         #Try to return last handler used in this directory.
-        handler = self.handlers_and_dirs[file_dir] = handler
+        if file_dir in self.handlers_and_dirs.keys():
+            handler = self.handlers_and_dirs[file_dir]
 
         if handler is not None:
             return handler
@@ -111,6 +148,14 @@ class  HandlerPicker(object):
 
 
         return handler
+
+    def get_configured_dir_handlers(self):
+        if "dir_conf_handlers" in self.conf:
+            for key in self.conf["dir_conf_handlers"] :
+                handler_class = self.conf["dir_conf_handlers"][key]
+                (module, _class) = handler_class.rsplit(".", 1)
+                mod = __import__(module, fromlist=[_class])
+                self.handlers_and_dirs[key] = getattr(mod, _class)
 
     def get_configured_handlers(self):
 
@@ -126,6 +171,9 @@ class  HandlerPicker(object):
              "class": getattr(mod, _class),
              "priority": priority
             }
+
+        #Also load the handlers that cirrespond to directories.
+        self.get_configured_dir_handlers()
 
     def get_configured_handler_class(self, filename):
         """

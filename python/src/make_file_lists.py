@@ -28,7 +28,6 @@ from docopt import docopt
 import fbs_lib.util as util
 from fbs import __version__  # Grab version from package __init__.py
 import datetime
-from enum import Enum
 import subprocess
 import fbs_lib.util as util
 import fbs.constants.constants as constants
@@ -37,7 +36,7 @@ import fbs.constants.constants as constants
 def get_stat_and_defs(com_args):
 
     """
-    Set global variables that determine the operations to be performed.
+    Sets variables that determine the operations to be performed.
     """
 
     status_and_defaults = []

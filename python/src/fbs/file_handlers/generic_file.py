@@ -17,7 +17,7 @@ class  GenericFile(object):
     def get_handler_id(self):
         return self.handler_id
 
-    def get_properties_generic_level1(self):
+    def get_metadata_generic_level1(self):
         """
         Scans the given file and returns information about 
         the file not the content.
@@ -44,60 +44,46 @@ class  GenericFile(object):
 
         info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
 
-        info["type"] = "file"
+        file_type = os.path.splitext(info["name"])[1]
+        if len(file_type) == 0:
+            file_type = "File without extension."
+
+        info["type"] = file_type
 
         info["md5"] = ""
 
         file_info["info"] = info
+        return (file_info, )
 
-        return file_info
-
-    def get_properties_generic_level2(self):
+    def get_metadata_generic_level2(self):
 
         """
          Wrapper for method get_properties_generic_level1().
-        :returns: A dict containing information compatible with current es index.
+        :returns: A dict containing information compatible with current es ops.
         """
 
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         self.handler_id = "Generic level 2."
 
         if file_info is None:
             return None
 
-        """
-        #creates the nested json structure.
-        phenomenon_parameters_dict = {}
-        var_id_dict = {}
-        var_id_dict["name"] = "var_id"
-        var_id_dict["value"] = "None"
-
-        list_of_phenomenon_parameters = []
-        list_of_phenomenon_parameters.append(var_id_dict.copy())
-
-        phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-        phenomena_list = []
-        phenomena_list.append(phenomenon_parameters_dict.copy())
-
-        file_info["phenomena"] = phenomena_list
-        """
-
         return file_info
 
-    def get_properties_generic_level3(self):
-        res = self.get_properties_generic_level2()
+    def get_metadata_generic_level3(self):
+        file_info = self.get_metadata_generic_level2()
         self.handler_id = "Generic level 3."
-        return res
+        return file_info
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            return self.get_properties_generic_level1()
+            return self.get_metadata_generic_level1()
         elif self.level == "2":
-            return self.get_properties_generic_level2()
+            return self.get_metadata_generic_level2()
         elif self.level == "3":
-            return self.get_properties_generic_level3()
+            return self.get_metadata_generic_level3()
 
     def __enter__(self):
         return self

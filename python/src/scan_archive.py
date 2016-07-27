@@ -199,10 +199,9 @@ def read_datasets_from_files_and_scan_in_lotus(config):
         start = 0
         for i in range(0, number_of_jobs):
 
-            command = (" python %s/scan_dataset.py -f %s --num-files %s"
-                        " --start %d  -l %s"
+            command = " python %s/scan_dataset.py -f %s --num-files %s --start %d  -l %s"\
                         %(current_dir, filename, num_files, start, level)
-                      )
+
 
             start += step
 
@@ -213,8 +212,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
         #include remaning files
         if remainder > 0:
 
-            command = " python %s/scan_dataset.py -f %s  \
-                        --num-files %d --start %d -l %s" \
+            command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
                       %(current_dir, filename, remainder, start, level)
 
             print "created command : %s" %(command)
@@ -222,9 +220,11 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
 
     #Run each command in lotus.
-    lotus_max_processes = config["num-processes"]
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
-                            user_wait_time=30)
+    #lotus_max_processes = config["num-processes"]
+    #util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
+    #                        user_wait_time=30)
+    #ok, we are going to create a file with the commands instead. 
+    util.write_list_to_file_nl(commands, "lotus_commands.txt")
 
 def scan_datasets_in_lotus(config, scan_status):
 

@@ -53,11 +53,17 @@ class GeoJSONGenerator(object):
                        "display": self._gen_track()
                     }
                 }
-            elif self.shape_type == "track" or self.shape_type is None:
+            elif self.shape_type == "track":
                 geojson = {
                     "geometries": {
                         "search": self._gen_envelope(),
                         "display": self._gen_track()
+                    }
+                }
+            elif self.shape_type is None:
+                geojson = {
+                    "geometries": {
+                        "search": self._gen_envelope()
                     }
                 }
 
@@ -108,23 +114,27 @@ class GeoJSONGenerator(object):
         lat_mask = ma.getmaskarray(lats)
 
         # Filter the arrays
+        # kltsa 19/07/2016 Change for issue 23330: Some filters 
+        #                  were excluded in order to allow values 
+        #                  up to 90 to be included.
         self.longitudes = lons[
             (lons >= -180) &
             (lons <= 180) &
-            (lats >= -90) &
-            (lats <= 90) &
-            (lon_mask == False) &
-            (lat_mask == False)
+            #(lats >= 90) &
+            #(lats <= 90) &
+            (lon_mask == False)# &
+            #(lat_mask == False)
         ]
 
         self.latitudes = lats[
-            (lons >= -180) &
-            (lons <= 180) &
+            #(lons >= -180) &
+            #(lons <= 180) &
             (lats >= -90) &
             (lats <= 90) &
-            (lon_mask == False) &
+            #(lon_mask == False) &
             (lat_mask == False)
         ]
+
 
     def _gen_point(self):
         """
@@ -192,6 +202,7 @@ class GeoJSONGenerator(object):
         """
         lon_left, lon_right = self._get_bounds(self.longitudes,
                                                wrapped_coords=True)
+
         lat_bottom, lat_top = self._get_bounds(self.latitudes)
 
         if (lon_left is None or lon_right is None or
@@ -201,8 +212,8 @@ class GeoJSONGenerator(object):
         envelope = {
             "type": "envelope",
             "coordinates": [
-                [lon_left, lat_top],
-                [lon_right, lat_bottom]
+                [round(lon_left, 3), round(lat_top, 3)],
+                [round(lon_right, 3), round(lat_bottom, 3)]
             ]
         }
 

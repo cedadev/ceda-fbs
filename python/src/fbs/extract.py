@@ -12,7 +12,7 @@ import socket
 import fbs_lib.util as util
 import file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from es.search import ElasticsearchClientFactory
+from es.factory import ElasticsearchClientFactory
 from es import index
 
 #kltsa 14/08/2015 issue #23203.
@@ -44,7 +44,12 @@ class ExtractSeq(object):
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
-        self.cf_tempdir = None
+        #Database connection information.
+        self.es_index = self.conf("es-configuration")["es-index"]
+        self.es_types = (self.conf("es-configuration")["es-mapping"]).split(",")
+        self.es_type_file = self.es_types[0]
+        self.es_type_phen = self.es_types[1]
+        self.es_type_loc  = self.es_types[2]
 
     #***General purpose methods.***
     def conf(self, conf_opt):
@@ -74,18 +79,20 @@ class ExtractSeq(object):
         else:
             return None
 
-    def index_properties_seq(self, body, es_id):
+    def index_attributes_seq(self, body, es_id):
 
         """
         Indexes metadata in Elasticsearch.
         """
+
         self.es.index(index=self.conf("es-configuration")["es-index"],\
                       doc_type=self.conf("es-configuration")["es-mapping"],\
                       body=body,\
                       id=es_id,\
-                      timeout=30)
+                      request_timeout=60\
+                     )
 
-    def process_file_seq(self, filename, level):
+    def process_file_seq(self, filename, level, es):
 
         """
         Returns metadata from the given file.
@@ -93,8 +100,8 @@ class ExtractSeq(object):
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
             if handler is not None:
-                handler_inst = handler(filename, level, self.cf_tempdir) #Can this done within the HandlerPicker class.
-                metadata = handler_inst.get_properties()
+                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
             else:
@@ -102,9 +109,108 @@ class ExtractSeq(object):
                 return None
         except Exception as ex:
             self.logger.error("Could not process file: {}".format(ex))
+
+    def is_valid_result(self, result):
+
+        """
+        Validates the result of a DSL query by analizing the 
+        hits list. 
+        """
+
+        hits = result[u'hits'][u'hits']
+        if len(hits) > 0 :
+            phen_id =  hits[0][u"_source"][u"id"]
+            return phen_id
+        else:
             return None
 
-    def scan_dataset(self):
+    def create_location_json(self, lid, coordinates):
+        record = {\
+                   "coordinates": coordinates["coordinates"],
+                   "id" : lid
+                 }
+        return record
+
+    def index_location(self, coordinates):
+
+        """
+        Indexes location only if does not exists.
+        """
+
+        lid = hashlib.sha1(str(coordinates)).hexdigest()
+        query = index.create_sp_query(lid)
+        res = index.search_database(self.es, self.es_index, self.es_type_loc, query)
+        lid_found = self.is_valid_result(res)
+        if lid_found is None:
+            lmeta = self.create_location_json(lid, coordinates)
+            index.index_file(self.es, self.es_index, self.es_type_loc, lid, lmeta)
+
+        return lid
+
+
+    def index_metadata(self, metadata, fid):
+
+        """
+        Implements the following scenario:
+        1. Metadata are extracted for a file (file info and phenomena).
+        2. If phenomena do not exist in database then they are created.
+        3. Phenomena ids are stored in the json representing file info.
+        4. File info is stored in database.
+        5. This is done for all files in the list. Current size is 700.
+        """
+        fmeta = metadata[0]
+        #fid = hashlib.sha1(fmeta["info"]["name"]).hexdigest()
+        if len(metadata) == 1:
+            index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
+            return
+
+        try :
+            phen_list = metadata[1]
+            if phen_list != None :
+
+                phen_ids = []
+                #Test if phenomenon exist in database.
+                #if not create it.
+                for item in phen_list:
+
+                    query = index.create_query(item)
+                    self.logger.debug("Query created: " + str(query))
+                    #print "Query created: " + str(query)
+                    res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
+                    #print "Query result: " + str(res)
+                    self.logger.debug("Query result: " + str(res))
+
+                    phen_id = self.is_valid_result(res)
+                    if phen_id is not None:
+                        phen_ids.append(phen_id)
+                        #print "phenomenon found!"
+                        self.logger.debug("phenomenon found!")
+                    else:
+                        #print "phenomenon needs to be inserted in the database."
+                        phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
+                        phen_ids.append(str(phen_id))
+                        #print "Phen created : " + str(phen_id)
+                        self.logger.debug("Phen created : " + str(phen_id))
+
+                    index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
+                    #if wait_init:
+                    #    time.sleep(1)
+                    #    wait_init = False
+
+                fmeta["info"]["phenomena"] = phen_ids
+
+            if len(metadata) == 3:
+                if metadata[2] != None:
+                    lid = self.index_location(metadata[2])
+                    fmeta["info"]["location"] = lid
+        #if something fails at least index the basic information.
+        except Exception as ex:
+            pass
+
+        index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
+
+
+    def scan_files(self):
 
         """
          Extracts metadata information from files and posts them in elastic search.
@@ -140,17 +246,18 @@ class ExtractSeq(object):
                 start = datetime.datetime.now()
 
                 self.logger.debug("Scanning file {} at level {}.".format(filename, level))
-                doc = self.process_file_seq(filename, level)
+                doc = self.process_file_seq(filename, level, self.es)
 
 
                 if doc is not None:
 
                     #es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
-                    self.logger.debug("Json for file {}: {} has is .".format(filename, doc, es_id))
-
+                    self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
+                    #this wher ethe new logic will be inserted.
                     try:
-                        self.index_properties_seq(doc, es_id)
+                        #self.index_attributes_seq(doc, es_id)
+                        self.index_metadata(doc, es_id)
                     except Exception as ex:
                         end = datetime.datetime.now()
                         self.logger.error(("Database error: %s" %ex))
@@ -195,7 +302,7 @@ class ExtractSeq(object):
         #kltsa 15/09/2015 changes for issue :23221.
         #if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
-        #                %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
+        #                %(self.conf("es-configuration")["es-ops"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())
         #else:
         log_fname = "%s_%s_%s.log" \
@@ -252,7 +359,7 @@ class ExtractSeq(object):
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
             try :
-                files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
+                files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:
                 self.logger.error("Could not save the python list of files to file...{}".format(ex))
             else:
@@ -321,9 +428,8 @@ class ExtractSeq(object):
         #Set up logger and handler class.
         self.prepare_logging_rdf()
         self.logger.debug("***Scanning started.***")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
         self.handler_factory_inst.get_configured_handlers()
-        self.cf_tempdir = self.conf("cf_tempdir")
 
 
         file_containing_paths = self.conf("filename")
@@ -352,6 +458,7 @@ class ExtractSeq(object):
             return
 
         file_list = content[int(start_file):end_file]
+        content = None
 
         self.logger.debug("{} files copied in local file list.".format(len(file_list)))
 
@@ -359,7 +466,7 @@ class ExtractSeq(object):
             self.file_list.append(path.rstrip())
 
         #at the end extract metadata.
-        self.scan_dataset()
+        self.scan_files()
 
     #***Functionality for traversing dataset and then immediately extract metadata.***
     def prepare_logging_seq_rs(self):
@@ -434,11 +541,10 @@ class ExtractSeq(object):
 
         self.prepare_logging_seq_rs()
         self.logger.debug("***Scanning started.***.")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.conf("handlers"))
+        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
         self.handler_factory_inst.get_configured_handlers()
-        self.cf_tempdir = self.conf("cf_tempdir")
 
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
         #at the end extract metadata.
-        self.scan_dataset()
+        self.scan_files()

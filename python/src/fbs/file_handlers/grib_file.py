@@ -16,15 +16,15 @@ class GribFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def phenomena_level2(self):
+    def get_phenomena(self):
 
-        """
-        Construct list of Phenomena based on variables in Grib file.
-        :returns : List of phenomena.
-        """
-        phenomenon_attr = {}
-        phenomena_list = []
-        phenomenon_parameters_dict = {}
+        phen_list = []
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
 
         phen_keys = [
                       "paramId",
@@ -35,109 +35,98 @@ class GribFile(GenericFile):
                       "nameECMF",
                       "name"
                     ]
+
+        phen_attr =\
+        {
+         "name" : "",
+         "value": ""
+        }
+
         try:
             fd = open(self.file_path)
-
-            found = set()
 
             while 1:
                 gid = gapi.grib_new_from_file(fd)
                 if gid is None: break
 
-                list_of_phenomenon_parameters = []
-                list_of_phenomenon_parameters_t = []
-
+                phen_attr_list = []
+                attr_count = 0
                 for key in phen_keys:
 
                     if not gapi.grib_is_defined(gid, key):
-                        break
+                        continue
 
                     value = str(gapi.grib_get(gid, key))
-                    if len(key) < util.NETCDF_MAX_PAR_LENGTH \
-                       and len(value) < util.NETCDF_MAX_PAR_LENGTH:
+                    if len(key) < util.MAX_ATTR_LENGTH \
+                       and len(value) < util.MAX_ATTR_LENGTH \
+                       and util.is_valid_phen_attr(value):
 
-                        phenomenon_attr["name"] = key
-                        phenomenon_attr["value"] = value
+                        phen_attr["name"] = str(key.strip())
+                        phen_attr["value"] = str(unicode(value).strip())
 
-                        list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                        list_of_phenomenon_parameters_t.append((key, value))
+                        if phen_attr not in phen_attr_list:
+                            phen_attr_list.append(phen_attr.copy())
+                            attr_count = attr_count + 1
 
-                """
-                phenomenon_attr["name"] = "var_id"
-                phenomenon_attr["value"] = "None"
-                list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                phenomenon_attr.clear()
-                list_of_phenomenon_parameters_t.append(("name", "None"))
-                """
-                list_of_phenomenon_parameters_tt = tuple(list_of_phenomenon_parameters_t)
+                if len(phen_attr_list) > 0:
+                    new_phenomenon = phenomenon.copy() 
+                    new_phenomenon["attributes"] = phen_attr_list
+                    new_phenomenon["attribute_count"] = attr_count
 
-                if list_of_phenomenon_parameters_tt not in found:
-                    found.add(list_of_phenomenon_parameters_tt)
-                    #Dict of phenomenon attributes.
-                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
+                    if new_phenomenon not in phen_list:
+                        phen_list.append(new_phenomenon)
 
-                    #list of phenomenon.
-                    phenomena_list.append(phenomenon_parameters_dict.copy())
-                    phenomenon_parameters_dict.clear()
-                else:
-                    phenomenon_parameters_dict.clear()
 
                 gapi.grib_release(gid)
 
             fd.close()
-            """
-            phenomena_list_unique = []
-            for item in phenomena_list:
-                if item not in phenomena_list_unique:
-                    phenomena_list_unique.append(item)
-            """
-            return phenomena_list
+
+            return phen_list
 
         except Exception:
             return None
 
-    def get_properties_grib_level2(self):
-        """
-        Wrapper for method phenomena().
-        :returns:  A dict containing information compatible with current es index level 2.
-        """
+    def get_metadata_grib_level2(self):
 
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
 
             #level 2.
-            grib_phenomena = self.phenomena_level2()
+            grib_phenomena = self.get_phenomena()
 
             self.handler_id = "grib handler level 2."
 
             if grib_phenomena is None:
                 return file_info
 
-            file_info["phenomena"] = grib_phenomena
-
-            return file_info
+            return  file_info +  (grib_phenomena, )
 
         else:
             return None
 
+    def get_metadata_level3(self):
 
+        phen_list = []
+        phenomenon =\
+        {
+         "id" : "",
+         "attribute_count" : "",
+         "attributes" :[]
+        }
 
-    def phenomena_level3(self):
+        phen_attr =\
+        {
+         "name" : "",
+         "value": ""
+        }
 
-        """
-        Construct list of Phenomena based on variables in Grib file.
-        :returns : List of phenomena.
-        """
-        phenomenon_attr = {}
-        phenomena_list = []
-        phenomenon_parameters_dict = {}
-        lat_f = None
-        lon_f = None
-        lat_l = None
-        lon_l = None
-        date_d = None
-        date_t = None
+        lat_f_l = []
+        lon_f_l = []
+        lat_l_l = []
+        lon_l_l = []
+        date_d_l = []
+        date_t_l = []
 
         phen_keys = [
                       "paramId",
@@ -159,25 +148,16 @@ class GribFile(GenericFile):
         try:
             fd = open(self.file_path)
 
-            found = set()
-
             while 1:
                 gid = gapi.grib_new_from_file(fd)
                 if gid is None: break
 
-                list_of_phenomenon_parameters = []
-                list_of_phenomenon_parameters_t = []
-
+                phen_attr_list = []
+                attr_count = 0
                 for key in phen_keys:
 
                     if not gapi.grib_is_defined(gid, key):
-                        lat_f = None
-                        lon_f = None
-                        lat_l = None
-                        lon_l = None
-                        date_d = None
-                        date_t = None
-                        break
+                        continue
 
                     value = str(gapi.grib_get(gid, key))
 
@@ -186,130 +166,117 @@ class GribFile(GenericFile):
                     #will be stored i.e the one that contain the full list of parameter
                     #and are unique. If evety record has got different spatial and temporal
                     #then th eindex must change because currently there is only on geo_shape_field.
-                    if key == "latitudeOfFirstGridPointInDegrees" and lat_f is None:
-                        lat_f = value
-                    elif key == "longitudeOfFirstGridPointInDegrees" and lon_f is None:
-                        lon_f = value
-                    elif key == "latitudeOfLastGridPointInDegrees" and lat_l is None:
-                        lat_l = value
-                    elif key =="longitudeOfLastGridPointInDegrees" and lon_l is None:
-                        lon_l = value
-                    elif key == "dataDate" and date_d is None:
-                        date_d = value
-                    elif key == "dataTime" and date_t is None:
-                        date_t = value
+                    if key == "latitudeOfFirstGridPointInDegrees":
+                        lat_f_l.append(value)
+                    elif key == "longitudeOfFirstGridPointInDegrees":
+                        lon_f_l.append(value)
+                    elif key == "latitudeOfLastGridPointInDegrees":
+                        lat_l_l.append(value)
+                    elif key =="longitudeOfLastGridPointInDegrees":
+                        lon_l_l.append(value)
+                    elif key == "dataDate":
+                        date_d_l.append(value)
+                    elif key == "dataTime":
+                        date_t_l.append(value)
                     else:
-                        if len(key) < util.NETCDF_MAX_PAR_LENGTH \
-                           and len(value) < util.NETCDF_MAX_PAR_LENGTH:
+                        if    len(key) < util.MAX_ATTR_LENGTH \
+                          and len(value) < util.MAX_ATTR_LENGTH \
+                          and util.is_valid_phen_attr(value):
 
-                            phenomenon_attr["name"] = key
-                            phenomenon_attr["value"] = value
+                            phen_attr["name"] = str(key.strip())
+                            phen_attr["value"] = str(unicode(value).strip())
 
-                            list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                            list_of_phenomenon_parameters_t.append((key, value))
+                            if phen_attr not in phen_attr_list:
+                                phen_attr_list.append(phen_attr.copy())
+                                attr_count = attr_count + 1
 
-                """
-                phenomenon_attr["name"] = "var_id"
-                phenomenon_attr["value"] = "None"
-                list_of_phenomenon_parameters.append(phenomenon_attr.copy())
-                phenomenon_attr.clear()
-                list_of_phenomenon_parameters_t.append(("name", "None"))
-                """
-                list_of_phenomenon_parameters_tt = tuple(list_of_phenomenon_parameters_t)
+                if len(phen_attr_list) > 0:
+                    new_phenomenon = phenomenon.copy() 
+                    new_phenomenon["attributes"] = phen_attr_list
+                    new_phenomenon["attribute_count"] = attr_count
 
-                if list_of_phenomenon_parameters_tt not in found:
-                    found.add(list_of_phenomenon_parameters_tt)
-                    #Dict of phenomenon attributes.
-                    phenomenon_parameters_dict["phenomenon_parameters"] = list_of_phenomenon_parameters
-
-                    #list of phenomenon.
-                    phenomena_list.append(phenomenon_parameters_dict.copy())
-
-                    phenomenon_parameters_dict.clear()
-                else:
-                    phenomenon_parameters_dict.clear()
+                    if new_phenomenon not in phen_list:
+                        phen_list.append(new_phenomenon)
 
                 gapi.grib_release(gid)
 
             fd.close()
-            """
-            phenomena_list_unique = []
-            for item in phenomena_list:
-                if item not in phenomena_list_unique:
-                    phenomena_list_unique.append(item)
-            """
-            #ok, if there are temporal and geospatial data these can be added.
-            #based on the assaumption that there is onl;y one record of this 
-            #in the whole file. 
-            phen_geo_tem_data = {}
-            geospatial_dict = {}
-            temporal_dict = {}
-            if lat_f is not None      \
-               and lon_f is not None  \
-               and lat_l is not None  \
-               and lon_l is not None  \
-               and date_d is not None \
-               and date_t is not None:
 
+            if len(lat_f_l) > 0 \
+               and len(lon_f_l) > 0  \
+               and len(lat_l_l) > 0  \
+               and len(lon_l_l) > 0  \
+               and len(date_d_l) > 0 \
+               and len(date_t_l):
+
+                geospatial_dict = {}
                 geospatial_dict["type"] = "envelope"
+
+                temporal_dict = {} 
+                lat_f = min(lat_f_l)
+                lon_f = min(lon_f_l)
+                lat_l = max(lat_l_l)
+                lon_l = max(lon_l_l)
+
+                date_d = min(date_d_l)
+                date_t = min(date_t_l)
+
                 if float(lon_l) > 180:
                     lon_l = (float(lon_l) -180) - 180
-                geospatial_dict["coordinates"] = [[lat_f, lon_f], [lat_l, lon_l]]
+
+
+                geospatial_dict["coordinates"] = [[round(float(lon_f), 3), round(float(lat_f), 3)], [round(float(lon_l), 3), round(float(lat_l), 3) ]]
 
                 temporal_dict["start_time"] = date_d
                 temporal_dict["end_time"] = date_t
 
+                return (phen_list, geospatial_dict, temporal_dict)
+            else:
+                return (phen_list,)
 
-            phen_geo_tem_data["phen_data"] = phenomena_list
-            phen_geo_tem_data["geo_data"] = geospatial_dict
-            phen_geo_tem_data["tmp_data"] = temporal_dict
-
-            return phen_geo_tem_data
-
-        except Exception:
+        except Exception as ex:
             return None
 
-    def get_properties_grib_level3(self):
+    def get_metadata_grib_level3(self):
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
 
-        file_info = self.get_properties_generic_level1()
+        file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
 
             #level 2.
-            grib_phenomena = self.phenomena_level3()
+            metadata = self.get_metadata_level3()
 
             self.handler_id = "grib handler level 3."
 
-            if grib_phenomena is None:
+            if metadata is None:
                 return file_info
 
-            file_info["phenomena"] = grib_phenomena["phen_data"]
-            loc_dict = {}
-            loc_dict["coordinates"] = grib_phenomena["geo_data"]
-            file_info["spatial"] = loc_dict
+            if len(metadata) == 3:
+                loc_dict = {}
+                loc_dict["coordinates"] = metadata[1]
+                #file_info[0]["info"]["spatial"] = loc_dict
+                file_info[0]["info"]["temporal"] = metadata[2]
 
-            file_info["temporal"] = grib_phenomena["tmp_data"]
-
-            return file_info
+            return file_info + (metadata[0], loc_dict, )
 
         else:
             return None
 
-    def get_properties(self):
+    def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_properties_generic_level1()
+            res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_properties_grib_level2()
+            res = self.get_metadata_grib_level2()
         elif self.level == "3":
-            res = self.get_properties_grib_level3()
+            res = self.get_metadata_grib_level3()
 
         #Sice file format is decided it can be added. 
-        res["info"]["format"] = self.FILE_FORMAT
+        res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
 
