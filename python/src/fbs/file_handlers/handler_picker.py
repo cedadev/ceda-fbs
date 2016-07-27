@@ -52,8 +52,10 @@ class  HandlerPicker(object):
 
         file_dir = os.path.dirname(filename)
         file_basename = os.path.basename(filename)
+
+
+        #kltsa 26/07/2015 : All handler logic will now be implemented in code.
         #Try configured handler.
-        #kltsa 26/07/2015 : All logic now will be implemented in code.
         #handler = self.get_configured_handler_class(filename)
 
         #This is test code.
