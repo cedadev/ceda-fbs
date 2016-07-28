@@ -11,8 +11,9 @@ Options:
   -f --filename=<filename>                   File from where the dataset [default: datasets.ini].
  """
 
-import src.fbs_api as fbs_api
-import src.fbs_lib.util as util
+import  src.fbs.gui.fbs_api as fbs_api
+
+import src.fbs.processing.common_util.util as util
 from docopt import docopt
 
 def create_html_table(data):

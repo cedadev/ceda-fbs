@@ -8,7 +8,7 @@ Created on 11 Feb 2016
 
 #29/09/2015 Test code delete after done.       
 import os
-import fbs_lib.util as util
+import src.fbs.processing.common_util.util as util
 import sys
  
 def sample_files(in_path, out_path):

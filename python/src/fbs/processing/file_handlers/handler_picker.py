@@ -3,7 +3,7 @@ import ntpath
 import json
 import re
 
-from fbs_lib.util import FileFormatError
+from processing.common_util.util import FileFormatError
 import generic_file
 import netcdf_file
 import nasaames_file
@@ -16,7 +16,7 @@ import badc_csv_file
 import metadata_tags_json_file
 
 import magic as magic_number_reader
-import fbs_lib.util as util
+import processing.common_util.util as util
 
 
 class  HandlerPicker(object):

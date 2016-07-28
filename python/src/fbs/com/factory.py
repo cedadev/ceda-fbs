@@ -5,7 +5,6 @@ import simplejson as json
 from random import randint
 
 from elasticsearch import Elasticsearch, ConnectionError
-from fbs_lib.geojson import GeoJSONGenerator
 
 class ElasticsearchClientFactory(object):
 

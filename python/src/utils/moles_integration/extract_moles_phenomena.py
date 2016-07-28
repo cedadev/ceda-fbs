@@ -8,7 +8,7 @@ extract_moles_phenomena.py
 
 import urllib, re, os, sys
 sys.path.append(".")
-import src.fbs_api as fbs_api
+import src.fbs.gui.fbs_api as fbs_api
 
 
 TIME_UNIT_REGEX = re.compile("^(years|months|weeks|days|hours|minutes|seconds)\s+since\s+\d+")

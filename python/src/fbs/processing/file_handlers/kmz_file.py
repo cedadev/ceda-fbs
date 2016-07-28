@@ -3,8 +3,8 @@ Created on 31 May 2016
 
 @author: kleanthis
 '''
-from fbs.file_handlers.generic_file import GenericFile
-import fbs_lib.util as util
+from processing.file_handlers.generic_file import GenericFile
+import processing.common_util.util as util
 import zipfile
 import xmltodict
 import os

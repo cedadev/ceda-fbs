@@ -1,7 +1,7 @@
 import gribapi as gapi
-import fbs_lib.util as util
+import processing.common_util.util as util
 
-from fbs.file_handlers.generic_file import GenericFile
+from processing.file_handlers.generic_file import GenericFile
 
 class GribFile(GenericFile):
     """

@@ -9,11 +9,11 @@ import sys
 import re
 import hashlib
 import socket
-import fbs_lib.util as util
-import file_handlers.handler_picker as handler_picker
+import processing.common_util.util as util
+import processing.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from es.factory import ElasticsearchClientFactory
-from es import index
+from com.factory import ElasticsearchClientFactory
+from com import index
 
 #kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):

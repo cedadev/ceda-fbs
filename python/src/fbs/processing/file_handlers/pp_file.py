@@ -1,10 +1,10 @@
 import cdms2 as cdms
 import os
-import fbs_lib.util as util
+import processing.common_util.util as util
 import datetime
 
 
-from fbs.file_handlers.generic_file import GenericFile
+from processing.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """
