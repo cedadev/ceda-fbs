@@ -42,12 +42,12 @@ import os
 
 from docopt import docopt
 
-import fbs_lib.util as util
+import processing.common_util.util as util
 from fbs import __version__  # Grab version from package __init__.py
 
 import datetime
 import subprocess
-import fbs.constants.constants as constants
+import processing.constants.constants as constants
 
 
 
@@ -62,7 +62,7 @@ def get_stat_and_defs(com_args):
     # Searches for the configuration file.
     if "config" not in com_args or not com_args["config"]:
         direc = os.path.dirname(__file__)
-        conf_path = os.path.join(direc, "../config/ceda_fbs.ini")
+        conf_path = os.path.join(direc, "../../../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
 

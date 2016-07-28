@@ -13,13 +13,15 @@ import sys
 import time
 from elasticsearch import Elasticsearch
 import datetime
-import fbs_lib.util as util
+import src.fbs.processing.common_util.util as util
 import os
+sys.path.append("../../" + sys.path[0])
+
 
 def read_cfg():
 
     c_dir     = os.path.dirname(__file__)
-    conf_path = os.path.join(c_dir, "../config/ceda_fbs.ini")
+    conf_path = os.path.join(c_dir, "../../../config/ceda_fbs.ini")
     config    = util.cfg_read(conf_path)
 
     return config

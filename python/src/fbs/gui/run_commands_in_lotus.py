@@ -22,7 +22,7 @@ Created on 23 May 2016
 
 import os
 from docopt import docopt
-import fbs_lib.util as util
+import processing.common_util.util as util
 from fbs import __version__  # Grab version from package __init__.py
 import datetime
 
