@@ -15,7 +15,6 @@ from elasticsearch import Elasticsearch
 import datetime
 import src.fbs.processing.common_util.util as util
 import os
-sys.path.append("../../" + sys.path[0])
 
 
 def read_cfg():

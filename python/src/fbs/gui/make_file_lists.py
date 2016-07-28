@@ -25,7 +25,7 @@ Options:
 import os
 
 from docopt import docopt
-import processing.common_util.util as util
+import src.fbs.processing.common_util.util as util
 from fbs import __version__  # Grab version from package __init__.py
 import datetime
 import subprocess

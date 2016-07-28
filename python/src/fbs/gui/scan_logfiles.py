@@ -16,7 +16,7 @@ Options:
 import os
 
 from docopt import docopt
-import processing.common_util.util as util
+import src.fbs.processing.common_util.util as util
 from fbs import __version__
 
 import datetime

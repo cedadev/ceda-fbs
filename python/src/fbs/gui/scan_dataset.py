@@ -41,11 +41,11 @@ import os
 
 from docopt import docopt
 
-import processing.common_util.util as util
+import src.fbs.processing.common_util.util as util
 from gui import __version__  # Grab version from package __init__.py
 from processing.extract import ExtractSeq
 import datetime
-import processing.constants.constants as constants
+import src.fbs.processing.constants.constants as constants
 import signal, getpass, pwd
 
 
