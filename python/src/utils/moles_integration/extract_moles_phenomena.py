@@ -8,7 +8,7 @@ extract_moles_phenomena.py
 
 import urllib, re, os, sys
 sys.path.append(".")
-import src.fbs_api as fbs_api
+import src.fbs.gui.fbs_api as fbs_api
 
 
 TIME_UNIT_REGEX = re.compile("^(years|months|weeks|days|hours|minutes|seconds)\s+since\s+\d+")
@@ -92,7 +92,7 @@ def render_results(ob_url, data_path, results, count, total):
     if VERBOSE: print "Phenomena: (%d)" % len(results["phenomena"])
     formats = ", ".join(results["formats"])
     generic_html += "<td>%s</td>" % formats
-
+     
     try:
       phens = create_phens_list(results["phenomena"])
     except Exception, err:
@@ -168,6 +168,8 @@ def process_obs_to_html(paths_page="http://catalogue.ceda.ac.uk/export/paths/"):
 
             try:
                 results = fbs_api.get_dir_info(data_path)
+                if len(results["formats"]) > 0:
+                    print results["formats"]
             except:
                 continue
 
@@ -187,5 +189,5 @@ def process_obs_to_html(paths_page="http://catalogue.ceda.ac.uk/export/paths/"):
         page_number += 1
 
 if __name__ == "__main__":
-    com_args = util.sanitise_args(docopt(__doc__))
+
     process_obs_to_html() 

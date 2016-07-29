@@ -1,9 +1,0 @@
-warning: Currently logging to gdbtrace.log.  Turn the logging off and on to make the new setting effective.
-[Thread debugging using libthread_db enabled]
-Using host libthread_db library "/lib64/libthread_db.so.1".
-[New Thread 0x7fffe8867700 (LWP 9005)]
-[Thread 0x7fffe8867700 (LWP 9005) exited]
-[Inferior 1 (process 9001) exited with code 01]
-/usr/lib64/libreoffice/program/gdbtrace:9: Error in sourced command file:
-No stack.
-Missing separate debuginfos, use: debuginfo-install libreoffice-core-4.3.7.2-5.el7_2.1.x86_64
