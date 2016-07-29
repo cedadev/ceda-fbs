@@ -26,7 +26,7 @@ import os
 
 from docopt import docopt
 import src.fbs.processing.common_util.util as util
-from fbs import __version__  # Grab version from package __init__.py
+from gui import __version__   # Grab version from package __init__.py
 import datetime
 import subprocess
 import processing.constants.constants as constants

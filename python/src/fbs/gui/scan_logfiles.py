@@ -17,7 +17,7 @@ import os
 
 from docopt import docopt
 import src.fbs.processing.common_util.util as util
-from fbs import __version__
+from gui import __version__ 
 
 import datetime
 
