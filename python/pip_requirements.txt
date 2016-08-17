@@ -17,6 +17,7 @@ docutils==0.12
 git+https://github.com/SciTools/iris.git#egg=Iris
 svn+http://proj.badc.rl.ac.uk/svn/cows/cows_support/nappy/trunk/#egg=nappy
 elasticsearch
+filemagic
 flake8==2.3.0
 h5py==2.3.1
 jasmin-cis==0.7.3
