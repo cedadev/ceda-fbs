@@ -94,7 +94,6 @@ class PpFile(GenericFile):
             # Filter long values and overwrite duplicates.
             phen_list = []
             for var_id in var_ids:
-                # len(var_ids = 177) ==> there are 177 var_id
                 metadata_dict = pp_file_content[var_id].attributes
                 phen_attr_list = []
                 attr_count = 0
