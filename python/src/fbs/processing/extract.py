@@ -9,6 +9,7 @@ import sys
 import re
 import hashlib
 import socket
+import pdb
 import processing.common_util.util as util
 import processing.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
@@ -231,6 +232,7 @@ class ExtractSeq(object):
             if te[0] == 400:
                 pass
             else:
+            	#pdb.set_trace()
                 raise TransportError(te)
 
         doc = {}
