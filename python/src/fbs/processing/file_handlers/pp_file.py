@@ -88,13 +88,13 @@ class PpFile(GenericFile):
 
         try:
             self.handler_id = "pp handler level 2."
-
             pp_file_content=cdms.open(self.file_path)
             var_ids = pp_file_content.listvariables()
 
-            #Filter long values and overwrite duplicates.
+            # Filter long values and overwrite duplicates.
             phen_list = []
             for var_id in var_ids:
+                # len(var_ids = 177) ==> there are 177 var_id
                 metadata_dict = pp_file_content[var_id].attributes
                 phen_attr_list = []
                 attr_count = 0
@@ -102,7 +102,7 @@ class PpFile(GenericFile):
 
                     value = str(metadata_dict[key])
 
-                    if     len(key) < util.MAX_ATTR_LENGTH \
+                    if len(key) < util.MAX_ATTR_LENGTH \
                         and len(value) < util.MAX_ATTR_LENGTH \
                         and util.is_valid_phen_attr(value):
                         phen_attr["name"] = str(key.strip())
@@ -111,13 +111,20 @@ class PpFile(GenericFile):
                         phen_attr_list.append(phen_attr.copy())
                         attr_count = attr_count + 1
 
-                #Dict of phenomenon attributes.
+                # Dict of phenomenon attributes.
                 if len(phen_attr_list) > 0:
+
+                    # phenomenon 		is a dictionary type
+                    # phen_attr_list	is a list
+                    # attr_count		is an INT
                     new_phenomenon = phenomenon.copy() 
                     new_phenomenon["attributes"] = phen_attr_list
                     new_phenomenon["attribute_count"] = attr_count
 
-                    phen_list.append(new_phenomenon)
+                    # JAR 11-Oct-2016
+                    # Append to list if new_phenomenon is NOT already in the phen_list
+                    if new_phenomenon not in phen_list:
+                        phen_list.append(new_phenomenon)
 
             pp_file_content.close()
 
@@ -127,14 +134,15 @@ class PpFile(GenericFile):
 
     def get_metadata_pp_level2(self):
 
-        #Get basic file info.
+        # Get basic file info.
         file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
             phen_list = self.get_phenomena()
             if phen_list is not None:
-                return file_info +  phen_list
+                return file_info + phen_list
             else:
+                print "No phenom found!!!"
                 return file_info
         else:
             return None
