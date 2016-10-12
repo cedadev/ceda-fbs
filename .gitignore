@@ -12,7 +12,12 @@ man/
 out/
 dist/
 python/src/test/integration/test_files/json/
+<<<<<<< HEAD
+python/src/fbs/gui/lotus_commands.txt
 
+=======
+python/src/fbs/gui/ceda_all_datasets*
+>>>>>>> f391d40f8f61c3cd8b84b9695ff96a903067df31
 *.pyc
 *.egg-info
 *~
