@@ -12,7 +12,6 @@ man/
 out/
 dist/
 python/src/test/integration/test_files/json/
-python/src/fbs/gui/lotus_commands.txt
 
 *.pyc
 *.egg-info
