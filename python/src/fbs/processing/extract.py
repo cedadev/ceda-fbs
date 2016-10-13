@@ -216,7 +216,7 @@ class ExtractSeq(object):
         """
          Extracts metadata information from files and posts them in elastic search.
         """
-        #Sanity check.
+        # Sanity check.
         if self.file_list is None:
             self.logger.info("File list is empty.")
             return
@@ -232,7 +232,7 @@ class ExtractSeq(object):
             if te[0] == 400:
                 pass
             else:
-            	#pdb.set_trace()
+                # pdb.set_trace()
                 raise TransportError(te)
 
         doc = {}
@@ -242,23 +242,22 @@ class ExtractSeq(object):
         if len(self.file_list) > 0:
 
             for filename in self.file_list:
-                #file_path = f
+                # file_path = f
 
-                #self.logger.info("Metadata extraction started for file %s", file_path)
+                # self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
 
                 self.logger.debug("Scanning file {} at level {}.".format(filename, level))
                 doc = self.process_file_seq(filename, level, self.es)
 
-
                 if doc is not None:
 
-                    #es_query = json.dumps(doc)
+                    # es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
                     self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
-                    #this wher ethe new logic will be inserted.
+                    # this where the new logic will be inserted.
                     try:
-                        #self.index_attributes_seq(doc, es_id)
+                        # self.index_attributes_seq(doc, es_id)
                         self.index_metadata(doc, es_id)
                     except Exception as ex:
                         end = datetime.datetime.now()
@@ -280,7 +279,7 @@ class ExtractSeq(object):
                     self.files_properties_errors = self.files_properties_errors + 1
                     continue
 
-            #At the end print some statistical info.
+            # At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
             self.logger.info("Summary information for Dataset id : %s, files indexed : %s, database errors : %s,"
                              " properties errors : %s, total files : %s "
@@ -288,31 +287,32 @@ class ExtractSeq(object):
                              str(self.files_properties_errors), str(self.total_number_of_files))
                             )
 
-    #***Functionality for traversing dataset dir and storing paths to file.***
+    # ***Functionality for traversing dataset dir and storing paths to file.***
     def prepare_logging_sdf(self):
 
         """
         initializes  logging.
         """
-
-        #Check if logging directory exists and if necessary create it.
+        print("John Rainnie")
+        # Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
 
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        #kltsa 15/09/2015 changes for issue :23221.
-        #if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
+        # kltsa 15/09/2015 changes for issue :23221.
+        # if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         #    log_fname = "%s_%s_%s_%s_%s.log" \
         #                %(self.conf("es-configuration")["es-ops"], self.conf("filename").replace("/", "|"),\
         #                self.conf("start"), self.conf("num-files"), socket.gethostname())
-        #else:
+        # else:
         log_fname = "%s_%s_%s.log" \
                     %(self.conf("es-configuration")["es-index"],\
                     self.conf("dataset"), socket.gethostname())
 
+        pdb.set_trace()
 
-        #create the path where to create the log files.
+        # create the path where to create the log files.
         fpath = os.path.join(log_dir,
                              log_fname
                             )
@@ -374,7 +374,6 @@ class ExtractSeq(object):
         """
         initializes  logging.
         """
-
         #Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
 
@@ -383,17 +382,27 @@ class ExtractSeq(object):
 
         #kltsa 15/09/2015 changes for issue :23221.
         #READ_DATASET_FROM_FILE_AND_SCAN:
-        log_fname = "%s_%s_%s_%s_%s.log" \
-                    %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
-                    self.conf("start"), self.conf("num-files"), socket.gethostname())
+        # log_fname = "%s_%s_%s_%s_%s.log" \
+        #             %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
+        #             self.conf("start"), self.conf("num-files"), socket.gethostname())
 
-        #create the path where to create the log files.
+        # JAR 13-Oct-2016. Changed log filename (as per Trac ticket 23413)
+        log_fname = "%s__%s_%s_%s_%s.log" %(self.conf("es-configuration")["es-index"], \
+                                   os.path.basename(self.conf("filename")), \
+                                   self.conf("start"), \
+                                   self.conf("num-files"), \
+                                   socket.gethostname())
+
+        # Was: 'ceda-archive-level-2_|group_workspaces|jasmin|cedaproc|jrainnie|fbs|datasets_test|
+        #       badc__ukmo-assim.txt_0_1_jasmin-sci1.ceda.ac.uk.log'
+        # Is now: 'ceda-archive-level-2__badc__ukmo-assim.txt_0_1_jasmin-sci1.ceda.ac.uk.log'
+
+        # create the path where to create the log files.
         fpath = os.path.join(log_dir,
                              log_fname
                             )
 
         conf_log_level = self.conf("core")["log-level"]
-
 
         log_format = self.conf("core")["format"]
         level = util.log_levels.get(conf_log_level, logging.NOTSET)
@@ -408,7 +417,7 @@ class ExtractSeq(object):
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
-        #es_log.addHandler(logging.FileHandler(fpath_es))
+        # es_log.addHandler(logging.FileHandler(fpath_es))
 
 
         nappy_log = logging.getLogger("nappy")
@@ -426,7 +435,6 @@ class ExtractSeq(object):
         Reads file paths form a given file and returns a subset of them
         in a list.
         """
-
         #Set up logger and handler class.
         self.prepare_logging_rdf()
         self.logger.debug("***Scanning started.***")
@@ -488,7 +496,6 @@ class ExtractSeq(object):
                     %(self.conf("es-configuration")["es-index"],\
                     self.conf("dataset"), socket.gethostname())
 
-
         #create the path where to create the log files.
         fpath = os.path.join(log_dir,
                              log_fname
@@ -505,7 +512,6 @@ class ExtractSeq(object):
         and add the one used in this script.
         """
         logging.root.handlers = []
-
 
         logging.basicConfig( filename=fpath,
                              filemode="a+",
