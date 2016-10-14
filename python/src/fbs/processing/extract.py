@@ -232,7 +232,6 @@ class ExtractSeq(object):
             if te[0] == 400:
                 pass
             else:
-                # pdb.set_trace()
                 raise TransportError(te)
 
         doc = {}
@@ -293,7 +292,6 @@ class ExtractSeq(object):
         """
         initializes  logging.
         """
-        print("John Rainnie")
         # Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
 
@@ -309,8 +307,6 @@ class ExtractSeq(object):
         log_fname = "%s_%s_%s.log" \
                     %(self.conf("es-configuration")["es-index"],\
                     self.conf("dataset"), socket.gethostname())
-
-        pdb.set_trace()
 
         # create the path where to create the log files.
         fpath = os.path.join(log_dir,
