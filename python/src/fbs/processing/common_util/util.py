@@ -59,7 +59,6 @@ class Parameter(object):
         """Return the list of parameter items"""
         return self.items
 
-    #kltsa : 04/10/2015
     def get_name(self):
         """Return the name of the phenomenon."""
         return self.name
@@ -193,6 +192,7 @@ def build_file_list(path):
     file_list = []
     for root, _, files in os.walk(path, followlinks=True):
         for each_file in files:
+            if each_file[0] == ".": continue
             file_list.append(os.path.join(root, each_file))
 
     return file_list

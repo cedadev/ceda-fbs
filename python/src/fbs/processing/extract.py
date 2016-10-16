@@ -376,22 +376,12 @@ class ExtractSeq(object):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        #kltsa 15/09/2015 changes for issue :23221.
-        #READ_DATASET_FROM_FILE_AND_SCAN:
-        # log_fname = "%s_%s_%s_%s_%s.log" \
-        #             %(self.conf("es-configuration")["es-index"], self.conf("filename").replace("/", "|"),\
-        #             self.conf("start"), self.conf("num-files"), socket.gethostname())
-
-        # JAR 13-Oct-2016. Changed log filename (as per Trac ticket 23413)
+        # Set log file name
         log_fname = "%s__%s_%s_%s_%s.log" %(self.conf("es-configuration")["es-index"], \
                                    os.path.basename(self.conf("filename")), \
                                    self.conf("start"), \
                                    self.conf("num-files"), \
                                    socket.gethostname())
-
-        # Was: 'ceda-archive-level-2_|group_workspaces|jasmin|cedaproc|jrainnie|fbs|datasets_test|
-        #       badc__ukmo-assim.txt_0_1_jasmin-sci1.ceda.ac.uk.log'
-        # Is now: 'ceda-archive-level-2__badc__ukmo-assim.txt_0_1_jasmin-sci1.ceda.ac.uk.log'
 
         # create the path where to create the log files.
         fpath = os.path.join(log_dir,
@@ -413,8 +403,6 @@ class ExtractSeq(object):
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
-        # es_log.addHandler(logging.FileHandler(fpath_es))
-
 
         nappy_log = logging.getLogger("nappy")
         nappy_log.setLevel(logging.ERROR)
