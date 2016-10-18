@@ -16,7 +16,6 @@ from elasticsearch.exceptions import TransportError
 from com.factory import ElasticsearchClientFactory
 from com import index
 
-#kltsa 14/08/2015 issue #23203.
 class ExtractSeq(object):
 
     """
@@ -26,26 +25,27 @@ class ExtractSeq(object):
     """
     def __init__(self, conf):
 
-        # Extract.__init__(self, None)
-
         self.configuration = conf
-        #self.status = status
         self.logger = None
         self.handler_factory_inst = None
         self.file_list = []
+
         self.es = None
         self.dataset_id = None
         self.dataset_dir = None
-        #some constants
+
+        # Define constants
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
-        #Varialbes for storing statistical information.
+
+        # Variables for storing statistical information.
         self.database_errors = 0
         self.files_properties_errors = 0
         self.files_indexed = 0
         self.total_number_of_files = 0
-        #Database connection information.
+
+        # Database connection information.
         self.es_index = self.conf("es-configuration")["es-index"]
         self.es_types = (self.conf("es-configuration")["es-mapping"]).split(",")
         self.es_type_file = self.es_types[0]

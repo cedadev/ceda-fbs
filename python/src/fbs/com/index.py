@@ -27,11 +27,11 @@ def create_index(config, elasticsearch):
     index_settings_path = config["es-configuration"]["es-index-settings"]
     index_name = config["es-configuration"]["es-index"]
 
-    import simplejson as json  # Import here as unused in rest of module
     with open(index_settings_path, 'r') as settings:
         index_settings = json.load(settings)
 
     elasticsearch.indices.create(index=index_name, body=index_settings)
+
 
 def search_database(es, index_l, type_l, query):
 
