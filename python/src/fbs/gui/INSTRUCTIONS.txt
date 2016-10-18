@@ -28,6 +28,10 @@ vi ../../../config/ceda_fbs.ini
 
 ./create_datasets_ini_file.sh
 
+# Make sure the "~/.forward" file contains your email address so that you get sent 
+# messages about errors on LOTUS
+vi ~/.forward
+
 # Make file lists for all datasets:
 #  - this will write every file path in the archive to big test files
 #    (one per dataset)
