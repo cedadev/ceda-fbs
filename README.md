@@ -36,7 +36,7 @@ export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs
 
 You need to tell `ceda-fbs` some key things in the config file (ceda_fbs.ini) at:
 
- $BASEDIR/ceda-fbs/python/config/ceda_fbs.ini
+`$BASEDIR/ceda-fbs/python/config/ceda_fbs.ini`
 
 You will need to edit the following sections:
 
