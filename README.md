@@ -48,3 +48,5 @@ You will need to edit the following sections:
  num-files = 10000		
  num-processes = 128		
 ```
+
+NOTE: change `__INSERT_USERID_HERE__` to your userid.
