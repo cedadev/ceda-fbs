@@ -8,6 +8,7 @@
 #
 
 OUT_FILE=ceda_all_datasets.ini
+TMP_FILE=${OUT_FILE}.tmp
 
 items=$(find -L /badc /neodc -maxdepth 2 -name data | sort -u)
 
@@ -18,4 +19,9 @@ for i in $items; do
         id=$(echo $i | cut -c2- | cut -d/ -f1,2 | sed 's/\//__/g')
         echo ${id}=${i}
     fi
-done > $OUT_FILE
+done > $TMP_FILE
+
+cat $TMP_FILE | sort -u > $OUT_FILE
+rm $TMP_FILE
+
+echo "Wrote datasets file to: $OUT_FILE"
