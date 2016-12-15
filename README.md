@@ -29,7 +29,8 @@ ceda-fbs  install-ceda-fbs.sh  venv-ceda-fbs
 ```
 $ cat setup_env.sh
 export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/fbs
-export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs
+export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs:$PYTHONPATH
+export PATH=$PATH:$BASEDIR/ceda-fbs/python/src/fbs/gui
 . venv-ceda-fbs/bin/activate
 ```
 
@@ -84,3 +85,26 @@ $ python make_file_lists.py -f ceda_all_datasets.ini -m $JRAINNIE/fbs/datasets -
 ```
 
 This will submit lots of jobs to LOTUS...and wait...and try to submit more.
+
+## 3. Execute the scan commands on LOTUS
+
+Before you do this: Create: `~/.forward` (containing just your email address) - so that LOTUS messages will be mailed to you.
+
+Next, run the `run_commands_in_lotus.py` script to work its way through the list of commands inside the `lotus_commands.txt` file by submitting up to 128 at any one time.
+
+On `jasmin-sci[12].ceda.ac.uk`, run:
+
+```
+$ nohup python run_commands_in_lotus.py -f lotus_commands.txt -p 128 > /dev/null 2>&1 &
+```
+
+## 4. Watch the file count building
+
+You can see how things are progressing in the web-interface:
+
+ http://jasmin-es1.ceda.ac.uk:9200/_plugin/head/
+ 
+Or, you can use the `Sense` plugin in Chrome, and try: 
+
+`GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
+
