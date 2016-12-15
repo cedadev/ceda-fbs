@@ -42,7 +42,7 @@ You need to tell `ceda-fbs` some key things in the config file (ceda_fbs.ini) at
 You will need to edit the following sections:
 
 ```
- log-path - make it local to the cedaproc area						
+ log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/log
  es-host = jasmin-es1ceda.ac.uk.							
  es-index = ceda-archive-level-2							
  es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_3_settings_1.json	
@@ -59,7 +59,7 @@ $ ceda-fbs/python/src/fbs/gui/create_datasets_ini_file.sh
 Wrote datasets file to: ceda_all_datasets.ini
 ```
 
-You should now have a file mapping identifiers to dataset paths, i.e.:
+You should now have an INI file that maps identifiers to dataset paths, i.e.:
 
 ```
 $ head -3 ceda_all_datasets.ini
@@ -68,4 +68,19 @@ badc__accacia=/badc/accacia/data
 badc__accmip=/badc/accmip/data
 ```
 
+## 2. Create file lists for every dataset (ready for the actual scanning)
 
+Make directories ready for file lists and log files:
+
+```
+$ mkdir logs datasets
+```
+!WARNING: files lists can be *many Gbytes in size* so don't do this in your home directory.
+
+Now run the first LOTUS jobs to generate lists of all files in each dataset.
+
+```
+$ python make_file_lists.py -f ceda_all_datasets.ini -m $JRAINNIE/fbs/datasets --host lotus -p 256
+```
+
+This will submit lots of jobs to LOTUS...and wait...and try to submit more.
