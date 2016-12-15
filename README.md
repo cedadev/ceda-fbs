@@ -30,6 +30,7 @@ ceda-fbs  install-ceda-fbs.sh  venv-ceda-fbs
 $ cat setup_env.sh
 export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/fbs
 export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs
+. venv-ceda-fbs/bin/activate
 ```
 
 ## Configure servers and Elasticsearch index
@@ -50,3 +51,21 @@ You will need to edit the following sections:
 ```
 
 NOTE: change `__INSERT_USERID_HERE__` to your userid.
+
+## 1. Scan the file system for a list of all CEDA datasets
+
+```
+$ ceda-fbs/python/src/fbs/gui/create_datasets_ini_file.sh
+Wrote datasets file to: ceda_all_datasets.ini
+```
+
+You should now have a file mapping identifiers to dataset paths, i.e.:
+
+```
+$ head -3 ceda_all_datasets.ini
+badc__abacus=/badc/abacus/data
+badc__accacia=/badc/accacia/data
+badc__accmip=/badc/accmip/data
+```
+
+
