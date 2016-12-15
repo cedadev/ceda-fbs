@@ -113,8 +113,8 @@ Or, you can use the `Sense` plugin in Chrome, and try:
 Using `curl`, `wget` or the `Sense` plugin, call:
 
 ```
-PUT jasmin-es1.ceda.ac.uk:9200/ceda-di-testing/_settings
+PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
 {
-    "index.routing.allocation.disable_allocation": false
+    "number_of_replicas": 0
 }
 ```
