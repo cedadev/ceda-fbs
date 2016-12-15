@@ -108,3 +108,13 @@ Or, you can use the `Sense` plugin in Chrome, and try:
 
 `GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
 
+## 5. Set the Index to NOT use replica shards
+
+Using `curl`, `wget` or the `Sense` plugin, call:
+
+```
+PUT jasmin-es1.ceda.ac.uk:9200/ceda-di-testing/_settings
+{
+    "index.routing.allocation.disable_allocation": false
+}
+```
