@@ -81,10 +81,24 @@ $ mkdir logs datasets
 Now run the first LOTUS jobs to generate lists of all files in each dataset.
 
 ```
-$ python make_file_lists.py -f ceda_all_datasets.ini -m $BASEDIR/fbs/datasets --host lotus -p 256
+$ make_file_lists.py -f ceda_all_datasets.ini -m $BASEDIR/datasets --host lotus -p 256
 ```
 
 This will submit lots of jobs to LOTUS...and wait...and try to submit more.
+
+*NOTE:* To run a subset of these jobs locally you might do:
+
+```
+$ make_file_lists.py -f redo_datasets.ini -m $BASEDIR/datasets --host localhost
+```
+
+*NOTE:* And to run just one you can do:
+
+```
+$ scan_dataset.py -f redo_datasets.ini -d  badc__ukmo-nimrod --make-list /$BASEDIR/datasets/badc__ukmo-nimrod.txt
+```
+
+At this stage you might want to examine which datasets were not scanned - and why. The above command gives you a method of running for individual datasets.
 
 ## 3. Execute the scan commands on LOTUS
 
