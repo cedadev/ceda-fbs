@@ -81,7 +81,7 @@ $ mkdir logs datasets
 Now run the first LOTUS jobs to generate lists of all files in each dataset.
 
 ```
-$ python make_file_lists.py -f ceda_all_datasets.ini -m $JRAINNIE/fbs/datasets --host lotus -p 256
+$ python make_file_lists.py -f ceda_all_datasets.ini -m $BASEDIR/fbs/datasets --host lotus -p 256
 ```
 
 This will submit lots of jobs to LOTUS...and wait...and try to submit more.
