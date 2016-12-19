@@ -132,13 +132,25 @@ Or, you can use the `Sense` plugin in Chrome, and try:
 
 `GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
 
-## 6. Set the Index to NOT use replica shards
+## 6. Make some optimisations to the Elasticsearch settings
 
-Using `curl`, `wget` or the `Sense` plugin, call:
+Make these settings using `curl`, `wget` or the `Sense` plugin.
+
+Set the Index to NOT use replica shards by calling the following:
 
 ```
 PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
 {
     "number_of_replicas": 0
+}
+```
+
+Set the number of shards for each host to 1 by calling the following:
+
+```
+PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
+{
+    "index.routing.allocation.total_shards_per_node": 1
+
 }
 ```
