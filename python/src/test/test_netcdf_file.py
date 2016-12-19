@@ -4,7 +4,7 @@
 import netCDF4
 import json
 
-from src.fbs.processing.file_handlers.netcdf_file import NetCDFFile  
+from src.fbs.proc.file_handlers.netcdf_file import NetCDFFile  
 from elasticsearch import Elasticsearch
  
 def main():

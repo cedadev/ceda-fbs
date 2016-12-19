@@ -30,7 +30,7 @@ ceda-fbs  install-ceda-fbs.sh  venv-ceda-fbs
 $ cat setup_env.sh
 export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/fbs
 export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs:$PYTHONPATH
-export PATH=$PATH:$BASEDIR/ceda-fbs/python/src/fbs/gui
+export PATH=$PATH:$BASEDIR/ceda-fbs/python/src/fbs/cmdline
 . venv-ceda-fbs/bin/activate
 ```
 
@@ -56,7 +56,7 @@ NOTE: change `__INSERT_USERID_HERE__` to your userid.
 ## 1. Scan the file system for a list of all CEDA datasets
 
 ```
-$ ceda-fbs/python/src/fbs/gui/create_datasets_ini_file.sh
+$ ceda-fbs/python/src/fbs/cmdline/create_datasets_ini_file.sh
 Wrote datasets file to: ceda_all_datasets.ini
 ```
 

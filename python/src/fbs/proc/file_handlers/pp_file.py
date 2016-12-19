@@ -1,10 +1,10 @@
 import cdms2 as cdms
 import os
-import processing.common_util.util as util
+import proc.common_util.util as util
 import datetime
 
 
-from processing.file_handlers.generic_file import GenericFile
+from proc.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """

@@ -3,8 +3,8 @@ Created on 31 May 2016
 
 @author: kleanthis
 '''
-from processing.file_handlers.generic_file import GenericFile
-import processing.common_util.util as util
+from proc.file_handlers.generic_file import GenericFile
+import proc.common_util.util as util
 import zipfile
 import xmltodict
 import os

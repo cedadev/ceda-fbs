@@ -1,6 +1,6 @@
-from processing.file_handlers.generic_file import GenericFile
+from proc.file_handlers.generic_file import GenericFile
 import nappy
-import processing.common_util.util as util
+import proc.common_util.util as util
 
 
 class NasaAmesFile(GenericFile):

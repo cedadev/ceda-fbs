@@ -10,11 +10,11 @@ import re
 import hashlib
 import socket
 import pdb
-import processing.common_util.util as util
-import processing.file_handlers.handler_picker as handler_picker
+import proc.common_util.util as util
+import proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
-from com.factory import ElasticsearchClientFactory
-from com import index
+from es_iface.factory import ElasticsearchClientFactory
+from es_iface import index
 
 class ExtractSeq(object):
 

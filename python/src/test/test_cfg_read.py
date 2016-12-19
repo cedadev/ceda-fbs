@@ -7,7 +7,7 @@ import os
 
 import ConfigParser
 
-from src.fbs.processing.file_handlers.netcdf_file import NetCDFFile  
+from src.fbs.proc.file_handlers.netcdf_file import NetCDFFile  
 from elasticsearch import Elasticsearch
  
 def cfg_read(filename):

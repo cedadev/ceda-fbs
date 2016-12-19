@@ -25,11 +25,11 @@ Options:
 import os
 
 from docopt import docopt
-import src.fbs.processing.common_util.util as util
-from gui import __version__   # Grab version from package __init__.py
+import src.fbs.proc.common_util.util as util
+from cmdline import __version__   # Grab version from package __init__.py
 import datetime
 import subprocess
-import processing.constants.constants as constants
+import proc.constants.constants as constants
 
 SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
 

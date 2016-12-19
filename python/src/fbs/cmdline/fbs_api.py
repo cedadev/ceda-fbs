@@ -8,7 +8,7 @@ import sys
 import time
 from elasticsearch import Elasticsearch
 import datetime
-import src.fbs.processing.common_util.util as util
+import src.fbs.proc.common_util.util as util
 import os
 
 """
