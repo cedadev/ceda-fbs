@@ -105,7 +105,7 @@ At this stage you might want to examine which datasets were not scanned - and wh
 Create a set of commands ready to send to LOTUS that will scan the entire archive. They will use the file list files from (2) as their inputs.
 
 ```
-$ scan_archive.py --file-paths-dir $BASEDIR/datasets/ --num-files 10000 --level 2 --host lotus
+$ scan_archive.py --file-paths-dir $BASEDIR/datasets --num-files 10000 --level 2 --host lotus
 ```
 
 This generates a file inside the current directory called: `lotus_commands.txt`. Each command specifies a list of up to 10,000 data files that are to be scanned when the job runs on LOTUS. (The `lotus_commands.txt` file will contain about 25,000 lines/commands).
