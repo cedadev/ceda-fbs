@@ -426,25 +426,14 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             if len(task_list) == 0:
                 break
 
-            #Is there an extract op ?
+            # Is there an extract op ?
             task = task_list[0]
             task_list.remove(task)
 
-            #-R select[type==any]
-            #default max duration for every job.
-            command = "bsub -W 168:00 %s" %(task)
-
-
-            info_msg = "%s. Executng : %s" %(str(i +1), command)
-            if logger is not None:
-                logger.INFO(info_msg)
-
-            print info_msg
-
+            command = _make_bsub_command(task, i, logger=logger)
             subprocess.call(command, shell=True)
 
-
-        info_msg = "Number of tasks waiting to be submitted : %s." %(str(len(task_list)))
+        info_msg = "Number of tasks waiting to be submitted : %s." % len(task_list)
         if logger is not None:
             logger.INFO(info_msg)
 
@@ -526,18 +515,17 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
 
         print info_msg
 
-        info_msg = "Number of jobs running  : %s." %(str(num_of_running_tasks))
+        info_msg = "Number of jobs running: %s." %(str(num_of_running_tasks))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        info_msg = "Number of jobs to submit in this step : %s." %(str(num_of_tasks_to_submit))
+        info_msg = "Number of jobs to submit in this step: %s." %(str(num_of_tasks_to_submit))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
-
 
         #Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
@@ -545,26 +533,17 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
             if len(task_list) == 0:
                 break
 
-            #Is there an extract op ?
+            # Is there an extract op ?
             task = task_list[0]
             task_list.remove(task)
-            #-R select[type==any]
-            #default max duration for every job.
-            command = "bsub -W 168:00 %s" %(task)
 
-
-            info_msg = "%s. Executng : %s" %(str(i +1), command)
-            if logger is not None:
-                logger.INFO(info_msg)
-
-            print info_msg
-
+            command = _make_bsub_command(task, i, logger=logger)
             subprocess.call(command, shell=True)
-            #save list to file.
+
+            # save list to file.
             write_list_to_file(task_list, task_file)
 
-
-        info_msg = "Number of tasks waiting to be submitted : %s." %(str(len(task_list)))
+        info_msg = "Number of tasks waiting to be submitted : %s." % len(task_list)
         if logger is not None:
             logger.INFO(info_msg)
 
@@ -591,3 +570,11 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
 
         print "==============================="
 
+
+def _make_bsub_command(task, count, logger=None):
+    "Construct bsub command for task and return it."
+    command = "bsub -q par-single -W 48:00 %s" % task
+    info_msg = "%s. Executing : %s" % ((count + 1), command)
+    if logger is not None: logger.INFO(info_msg)
+    print info_msg
+    return command

@@ -31,6 +31,8 @@ import datetime
 import subprocess
 import processing.constants.constants as constants
 
+SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
+
 
 def get_stat_and_defs(com_args):
 
@@ -75,19 +77,16 @@ def store_datasets_to_files_in_lotus(status, config):
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
-    current_dir = os.getcwd()
-    directroy_to_save_files = config["make-list"]
+    directory_to_save_files = config["make-list"]
 
     #Create the commands that will create the
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s.txt"\
-                  %(current_dir, filename, datasets_ids[i],\
-                  directroy_to_save_files, datasets_ids[i])
+        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s.txt" \
+                  % (SCRIPT_DIR, filename, datasets_ids[i], directory_to_save_files, datasets_ids[i])
 
         scan_commands.append(command)
-
 
     lotus_max_processes = config["num-processes"]
 
@@ -108,18 +107,16 @@ def store_datasets_to_files_in_localhost(status, config):
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
-    current_dir = os.getcwd()
-    directroy_to_save_files = config["make-list"]
+    directory_to_save_files = config["make-list"]
 
     #Create the commands that will create the
     #files containing the paths to data files.
     for i in range(0, num_datasets):
 
         command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s.txt" \
-                  %(current_dir, filename, datasets_ids[i],  \
-                  directroy_to_save_files, datasets_ids[i])
+                  % (SCRIPT_DIR, filename, datasets_ids[i], directory_to_save_files, datasets_ids[i])
 
-        print "executing : %s" %(command)
+        print "Executing: %s" % command
 
         subprocess.call(command, shell=True)
 

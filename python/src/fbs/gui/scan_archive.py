@@ -4,13 +4,13 @@
 Usage:
   scan_archive.py --help
   scan_archive.py --version
-  scan_archive.py (-f <filename> | --filename <filename>)
+  scan_archive.py (-f <file_paths_dir> | --file-paths-dir <file_paths_dir>)
                   (-d <dataset_id> | --dataset <dataset_id> )
                   (-l <level> | --level <level>)
                   (-h <hostname> | --host <hostname>)
                   [-p <number_of_processes> | --num-processes <number_of_processes>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
- scan_archive.py  (-f <filename> | --filename <filename>)
+ scan_archive.py  (-f <file_paths_dir> | --file-paths-dir <file_paths_dir>)
                   (-l <level> | --level <level>)
                   (-h <hostname> | --host <hostname>)
                   [-p <number_of_processes> | --num-processes <number_of_processes>]
@@ -21,8 +21,7 @@ Options:
   --help                                     Show this screen.
   --version                                  Show version.
   -d --dataset=<dataset_id>                  Dataset id.
-  -f --filename=<filename>                   File from where the dataset
-                                             will be read
+  -f --file-paths-dir=<file_paths_dir>       Directory that contains files listing all file paths to scan.
                                              [default: datasets.ini].
   -l --level=<level>                         Level of search:
                                              Level 1: File names and sizes
@@ -49,6 +48,7 @@ import datetime
 import subprocess
 import src.fbs.processing.constants.constants as constants
 
+SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
 
 
 def get_stat_and_defs(com_args):
@@ -109,13 +109,10 @@ def get_stat_and_defs(com_args):
 
 def read_and_scan_datasets_in_lotus(config):
 
-    filename = config["filename"]
+    file_paths_dir = config["file-paths-dir"]
     level = config["level"]
 
-    current_dir = os.getcwd()
-
-
-    dataset_ids = util.find_dataset(filename, "all")
+    dataset_ids = util.find_dataset(file_paths_dir, "all")
     keys = dataset_ids.keys()
     number_of_datasets = len(keys)
     commands = []
@@ -124,7 +121,7 @@ def read_and_scan_datasets_in_lotus(config):
     for i in range(0, number_of_datasets):
 
         command = ("python %s/scan_dataset.py -f  %s -d  %s  -l  %s" 
-                   %(current_dir, filename, keys[i], level))
+                   % (SCRIPT_DIR, file_paths_dir, keys[i], level))
 
 
         print "created command :" + command
@@ -135,28 +132,17 @@ def read_and_scan_datasets_in_lotus(config):
                             user_wait_time=30)
 
 def read_and_scan_datasets_sub_in_lotus(config):
-    #Get basic options.
-    filename = config["filename"]
-    dataset_id = config["dataset"]
+    file_paths_dir = config["file-paths-dir"]
+    dataset_ids = config["dataset"].split(",")
     level = config["level"]
-    current_dir = os.getcwd()
 
-    if ',' in dataset_id:
-        dataset_ids_list = dataset_id.split(",")
-        for dataset_id_item in dataset_ids_list:
-
-            command = "bsub python %s/scan_dataset.py -f %s -d %s -l %s" \
-                      %(current_dir, filename, dataset_id_item, level)
-
-            print "executng : %s" %(command)
-            subprocess.call(command, shell=True)
-    else:
-        command = "bsub python %s/scan_dataset.py -f %s -d  %s -l %s" \
-                  %(current_dir, filename, dataset_id, level)
-
-
-        print "executng : %s" %(command)
+    for dataset_id in dataset_ids:
+        command = "bsub -q par-single -W 48:00 python %s/scan_dataset.py -f %s -d %s -l %s" \
+                      % (SCRIPT_DIR, file_paths_dir, dataset_id, level)
+   
+        print "Executing: %s" % command
         subprocess.call(command, shell=True)
+
 
 def read_datasets_from_files_and_scan_in_lotus(config):
 
@@ -173,58 +159,46 @@ def read_datasets_from_files_and_scan_in_lotus(config):
     """
 
     #Get basic options.
-    filename_path = config["filename"]
+    file_paths_dir = config["file-paths-dir"]
     level = config["level"]
     num_files = config["num-files"]
     start = config["start"]
-    current_dir = os.getcwd()
 
 
-    #Go to directory and create the file list.
-    list_of_cache_files = util.build_file_list(filename_path)
+    # Go to directory and create the file list.
+    list_of_cache_files = util.build_file_list(file_paths_dir)
     commands = []
     step = int(num_files)
 
     for filename in list_of_cache_files:
-
         num_of_lines = util.find_num_lines_in_file(filename)
 
         if num_of_lines == 0:
             continue
 
-        #calculate number of jobs.
-        number_of_jobs = num_of_lines  / int(num_files)
-        remainder = num_of_lines  % int(num_files)
+        # Calculate number of jobs.
+        number_of_jobs = num_of_lines / int(num_files)
+        remainder = num_of_lines % int(num_files)
 
         start = 0
         for i in range(0, number_of_jobs):
-
-            command = " python %s/scan_dataset.py -f %s --num-files %s --start %d  -l %s"\
-                        %(current_dir, filename, num_files, start, level)
-
-
             start += step
+            _add_scan_cmd_to_list(filename, remainder, start, level, commands)
 
-            print "created command : %s" %(command)
-            commands.append(command)
-
-
-        #include remaning files
+        # Include remaining files
         if remainder > 0:
+            _add_scan_cmd_to_list(filename, remainder, start, level, commands)
 
-            command = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s" \
-                      %(current_dir, filename, remainder, start, level)
-
-            print "created command : %s" %(command)
-            commands.append(command)
-
-
-    #Run each command in lotus.
-    #lotus_max_processes = config["num-processes"]
-    #util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
-    #                        user_wait_time=30)
-    #ok, we are going to create a file with the commands instead. 
+    # Write each command to a file - which can then be issued to LOTUS
     util.write_list_to_file_nl(commands, "lotus_commands.txt")
+
+
+def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
+    cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s"
+    command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
+    print "Created command: %s" % command 
+    commands_list.append(command)
+
 
 def scan_datasets_in_lotus(config, scan_status):
 
@@ -245,15 +219,13 @@ def scan_datasets_in_lotus(config, scan_status):
 def read_datasets_from_files_and_scan_in_localhost(config):
 
     #Get basic options.
-    filename_path = config["filename"]
+    file_paths_dir = config["file-paths-dir"]
     level = config["level"]
     num_files = config["num-files"]
     start = config["start"]
-    current_dir = os.getcwd()
-
 
     #Go to directory and create the file list.
-    list_of_cache_files = util.build_file_list(filename_path)
+    list_of_cache_files = util.build_file_list(file_paths_dir)
     commands = []
     step = int(num_files)
 
@@ -261,8 +233,7 @@ def read_datasets_from_files_and_scan_in_localhost(config):
 
         num_of_lines = util.find_num_lines_in_file(filename)
 
-        if num_of_lines == 0:
-            continue
+        if num_of_lines == 0: continue
 
         #calculate number of jobs.
         number_of_tasks = num_of_lines  / int(num_files)
@@ -270,31 +241,18 @@ def read_datasets_from_files_and_scan_in_localhost(config):
 
         start = 0
         for i in range(0, number_of_tasks):
-
-            command = ( " python %s/scan_dataset.py -f %s"
-                        " --num-files %s  --start %d  -l %s"
-                        %(current_dir, filename, num_files, start, level)
-                      )
-
+            command = " python %s/scan_dataset.py -f %s --num-files %s  --start %d  -l %s" \
+                        % (SCRIPT_DIR, filename, num_files, start, level)
             start += step
-
-            #print "created command :" + command
             commands.append(command)
 
-
-        #include remaning files
+        #include remaining files
         if remainder > 0:
-
-            command = "python %s/scan_dataset.py -f %s  \
-                      --num-files %d  --start %d -l %s" \
-                      %(current_dir, filename, remainder, start, level)
-
-
-            #print "created command : %s" %(command)
+            command = "python %s/scan_dataset.py -f %s --num-files %d  --start %d -l %s" \
+                      % (SCRIPT_DIR, filename, remainder, start, level)
             commands.append(command)
 
-
-    #Run each command in localhost.
+    # Run each command in localhost.
     number_of_commands = len(commands)
     for i in range(0, number_of_commands):
         print "Executing command : %s" %(commands[i])
@@ -307,48 +265,47 @@ def scan_datasets_in_localhost(config, scan_status):
     """
 
     #Get basic options.
-    filename = config["filename"]
+    file_paths_dir = config["file-paths-dir"]
     level = config["level"]
-    current_dir = os.getcwd()
 
-    #Manage the options given.
+    # Manage the options given.
     if scan_status == constants.Script_status.READ_AND_SCAN_DATASETS_SUB:
         dataset_id = config["dataset"]
         if ',' in dataset_id:
             dataset_ids_list = dataset_id.split(",")
             for dataset_id_item in dataset_ids_list:
                 command = "python %s/scan_dataset.py -f %s -d %s -l %s"\
-                          %(current_dir, filename, dataset_id_item, level)
+                          % (SCRIPT_DIR, filename, dataset_id_item, level)
 
 
                 print "executng : %s" %(command)
                 subprocess.call(command, shell=True)
-                #os.system(command)
         else:
             command = "python %s/scan_dataset.py -f %s -d %s -l %s" \
-                      %(current_dir, filename, dataset_id, level)
+                      % (SCRIPT_DIR, filename, dataset_id, level)
 
 
             print "executng : %s"  %(command)
             subprocess.call(command, shell=True)
 
     elif scan_status == constants.Script_status.READ_AND_SCAN_DATASETS:
-        dataset_ids = util.find_dataset(filename, "all")
+        dataset_ids = util.find_dataset(file_paths_dir, "all")
 
         for key, value in dataset_ids.iteritems():
             dataset_id = key
-            command = "python  %s/scan_dataset.py -f %s -d  %s -l %s"\
-                        %(current_dir, filename, dataset_id, level)
+            command = "python %s/scan_dataset.py -f %s -d  %s -l %s"\
+                        % (SCRIPT_DIR, filename, dataset_id, level)
 
             print "executng : %s" %(command)
             subprocess.call(command, shell=True)
+
     elif scan_status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         read_datasets_from_files_and_scan_in_localhost(config)
 
-def main():
 
+def main():
     """
-    Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23204
+    Script to scan entire archive (by managing multiple calls to ``scan_dataset.py``.
     """
 
     start = datetime.datetime.now()
@@ -361,23 +318,22 @@ def main():
 
     #Sets default values and determione what operations the script will perform.
     status_and_defaults = get_stat_and_defs(com_args)
-
-    config_file = status_and_defaults[0]
-    run_status = status_and_defaults[1]
-    scan_status = status_and_defaults[2]
+    config_file, run_status, scan_status = status_and_defaults[0:3]
 
     #Calls appropriate functions.
     if run_status == constants.Script_status.RUN_SCRIPT_IN_LOTUS:
         scan_datasets_in_lotus(config_file, scan_status)
+
     elif run_status == constants.Script_status.RUN_SCRIPT_IN_LOCALHOST:
         scan_datasets_in_localhost(config_file, scan_status)
+
     else:
         print "Some options could not be recognized.\n"
 
 
     end = datetime.datetime.now()
-    print "Script ended at : %s  it ran for : %s." \
-          %(str(end), str(end - start))
+    print "Script ended at: %s  it ran for : %s." \
+          % (str(end), str(end - start))
     print "==============================="
 
 
