@@ -100,7 +100,17 @@ $ scan_dataset.py -f redo_datasets.ini -d  badc__ukmo-nimrod --make-list /$BASED
 
 At this stage you might want to examine which datasets were not scanned - and why. The above command gives you a method of running for individual datasets.
 
-## 3. Execute the scan commands on LOTUS
+## 3. Create a set of commands to run the full scan
+
+Create a set of commands ready to send to LOTUS that will scan the entire archive. They will use the file list files from (2) as their inputs.
+
+```
+$ scan_archive.py --file-paths-dir $BASEDIR/datasets/ --num-files 10000 --level 2 --host lotus
+```
+
+This generates a file inside the current directory called: `lotus_commands.txt`. Each command specifies a list of up to 10,000 data files that are to be scanned when the job runs on LOTUS. (The `lotus_commands.txt` file will contain about 25,000 lines/commands).
+
+## 4. Execute the scan commands on LOTUS
 
 Before you do this: Create: `~/.forward` (containing just your email address) - so that LOTUS messages will be mailed to you.
 
@@ -109,10 +119,10 @@ Next, run the `run_commands_in_lotus.py` script to work its way through the list
 On `jasmin-sci[12].ceda.ac.uk`, run:
 
 ```
-$ nohup python run_commands_in_lotus.py -f lotus_commands.txt -p 128 > /dev/null 2>&1 &
+$ nohup run_commands_in_lotus.py -f lotus_commands.txt -p 128 2>&1 > scan.output.txt &
 ```
 
-## 4. Watch the file count building
+## 5. Watch the file count building
 
 You can see how things are progressing in the web-interface:
 
@@ -122,7 +132,7 @@ Or, you can use the `Sense` plugin in Chrome, and try:
 
 `GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
 
-## 5. Set the Index to NOT use replica shards
+## 6. Set the Index to NOT use replica shards
 
 Using `curl`, `wget` or the `Sense` plugin, call:
 
