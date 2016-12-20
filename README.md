@@ -170,3 +170,81 @@ PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
 
 }
 ```
+
+# Querying the results
+
+Here are some example queries you might use:
+
+## Query everything
+
+```
+POST _search
+{
+  "size": 20, 
+   "query": {
+      "match_all": {}
+   }
+}
+```
+
+Note the "size" tag is the number of results to return (the default is 10).
+
+## Query a specific filename
+
+Let’s look for the file: `SCI_NL__1PWDPA20100911_194148_000060212092_00472_44614_2837.N1.gz`
+
+```
+POST _search
+{
+   "query": {
+      "query_string": {
+         "query": "SCI_NL__1PWDPA20100911_194148_000060212092_00472_44614_2837.N1.gz",
+         "fields": ["info.name"]
+      }
+   }
+}
+```
+
+The important thing here is that we are searching for "info.name".
+
+## Filter specific file type (extension)
+
+```
+POST _search
+{
+   "query": {
+      "constant_score": {
+         "filter": {
+            "term": {
+               "info.type": "nc"
+            }
+         }
+      }
+   }
+}
+```
+
+## List the contents of a directory
+
+```
+POST _search
+{
+   "query": {
+      "constant_score": {
+         "filter": {
+            "term": {
+               "info.directory": "/neodc/sciamachy/data/l1b/v7-04/2010/09/11"
+            }
+         }
+      }
+   }
+}
+```
+
+Some useful (internal to CEDA) links on querying ES:
+
+http://team.ceda.ac.uk/trac/ceda/wiki/FBS/PhenomenonSearch
+
+http://team.ceda.ac.uk/trac/ceda/wiki/ElasticSearch/BasicQueries
+
+http://team.ceda.ac.uk/trac/ceda/ticket/23247
