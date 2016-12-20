@@ -53,6 +53,22 @@ You will need to edit the following sections:
 
 NOTE: change `__INSERT_USERID_HERE__` to your userid.
 
+## Check that your userid has access to the required groups to read the archive
+
+The CEDA archive is made up of numerous datasets that are managed through Unix group permissions. You will need access to the following in order to successfully read files across the archive:
+
+* byacl
+* open
+* badcint
+* gws_specs
+* cmip5_research
+* esacat1
+* ecmwf
+* ukmo
+* eurosat
+* ukmo_wx
+* ukmo_clim
+
 ## 1. Scan the file system for a list of all CEDA datasets
 
 ```
