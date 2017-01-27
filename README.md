@@ -53,6 +53,22 @@ You will need to edit the following sections:
 
 NOTE: change `__INSERT_USERID_HERE__` to your userid.
 
+## Check that your userid has access to the required groups to read the archive
+
+The CEDA archive is made up of numerous datasets that are managed through Unix group permissions. You will need access to the following in order to successfully read files across the archive:
+
+* byacl
+* open
+* badcint
+* gws_specs
+* cmip5_research
+* esacat1
+* ecmwf
+* ukmo
+* eurosat
+* ukmo_wx
+* ukmo_clim
+
 ## 1. Scan the file system for a list of all CEDA datasets
 
 ```
@@ -105,7 +121,7 @@ At this stage you might want to examine which datasets were not scanned - and wh
 Create a set of commands ready to send to LOTUS that will scan the entire archive. They will use the file list files from (2) as their inputs.
 
 ```
-$ scan_archive.py --file-paths-dir $BASEDIR/datasets/ --num-files 10000 --level 2 --host lotus
+$ scan_archive.py --file-paths-dir $BASEDIR/datasets --num-files 10000 --level 2 --host lotus
 ```
 
 This generates a file inside the current directory called: `lotus_commands.txt`. Each command specifies a list of up to 10,000 data files that are to be scanned when the job runs on LOTUS. (The `lotus_commands.txt` file will contain about 25,000 lines/commands).
@@ -132,9 +148,11 @@ Or, you can use the `Sense` plugin in Chrome, and try:
 
 `GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
 
-## 6. Set the Index to NOT use replica shards
+## 6. Make some optimisations to the Elasticsearch settings
 
-Using `curl`, `wget` or the `Sense` plugin, call:
+Make these settings using `curl`, `wget` or the `Sense` plugin.
+
+Set the Index to NOT use replica shards by calling the following:
 
 ```
 PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
@@ -142,3 +160,91 @@ PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
     "number_of_replicas": 0
 }
 ```
+
+Set the number of shards for each host to 1 by calling the following:
+
+```
+PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
+{
+    "index.routing.allocation.total_shards_per_node": 1
+
+}
+```
+
+# Querying the results
+
+Here are some example queries you might use:
+
+## Query everything
+
+```
+POST _search
+{
+  "size": 20, 
+   "query": {
+      "match_all": {}
+   }
+}
+```
+
+Note the "size" tag is the number of results to return (the default is 10).
+
+## Query a specific filename
+
+Let’s look for the file: `SCI_NL__1PWDPA20100911_194148_000060212092_00472_44614_2837.N1.gz`
+
+```
+POST _search
+{
+   "query": {
+      "query_string": {
+         "query": "SCI_NL__1PWDPA20100911_194148_000060212092_00472_44614_2837.N1.gz",
+         "fields": ["info.name"]
+      }
+   }
+}
+```
+
+The important thing here is that we are searching for "info.name".
+
+## Filter specific file type (extension)
+
+```
+POST _search
+{
+   "query": {
+      "constant_score": {
+         "filter": {
+            "term": {
+               "info.type": "nc"
+            }
+         }
+      }
+   }
+}
+```
+
+## List the contents of a directory
+
+```
+POST _search
+{
+   "query": {
+      "constant_score": {
+         "filter": {
+            "term": {
+               "info.directory": "/neodc/sciamachy/data/l1b/v7-04/2010/09/11"
+            }
+         }
+      }
+   }
+}
+```
+
+Some useful (internal to CEDA) links on querying ES:
+
+http://team.ceda.ac.uk/trac/ceda/wiki/FBS/PhenomenonSearch
+
+http://team.ceda.ac.uk/trac/ceda/wiki/ElasticSearch/BasicQueries
+
+http://team.ceda.ac.uk/trac/ceda/ticket/23247
