@@ -22,11 +22,16 @@ def parse_args():
     Returns parser object: argparse.ArgumentParser
     """
     parser = argparse.ArgumentParser(description="Finds files that have and haven't been indexed in Elasticsearch.")
-    parser.add_argument("-i", "--index", required=True,
+    parser.add_argument("-i", "--index", required=True, 
                       help="The full path to the elasticsearch index (e.g. 'jasmin-es1.ceda.ac.uk:9200/sentinel/geo_metadata')") 
     parser.add_argument("-d", "--directory", required=True,
                       help="The directory under which to look for files (recursively).")
     config = parser.parse_args()
+
+    # Do some validation
+    if config.index.find(":") < 0:
+        raise Exception("Please provide index argument as: <host>:<port>/<index>")
+
     return config 
 
 
@@ -73,6 +78,8 @@ def search_database_for_files(cfg):
     files_not_indexed = 0 
 
     for filename in file_list:
+        if os.path.basename(filename).startswith("."): continue
+        print "Querying: {}".format(filename)
         query = { "query": { "matchPhrase" : { "file.path" : filename } } }
 
         res = es_conn.search(index=es_index, doc_type=es_type, body=query,

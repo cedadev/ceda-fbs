@@ -4,16 +4,19 @@
 extract_moles_phenomena.py
 ==========================
 
+Writes HTML listings of all the MOLES phenomena found to HTML files in the local 
+"htmls/" directory.
+
 """
 
 import urllib, re, os, sys
 sys.path.append(".")
 import src.fbs.cmdline.fbs_api as fbs_api
 
-
 TIME_UNIT_REGEX = re.compile("^(years|months|weeks|days|hours|minutes|seconds)\s+since\s+\d+")
 VERBOSE = False
 OUT_DIR = "htmls"
+
 if not os.path.isdir(OUT_DIR): os.mkdir(OUT_DIR)
 
 PAGE_TEMPLATE = """<!DOCTYPE html>
@@ -72,14 +75,17 @@ def create_phens_list(phens):
 
     return phens_list
 
+
 def check_filter_out(phen):
     "Return True if phenonemon should not be shown or False."
     if "units" in phen.keys():
         units = phen["units"]
+
         if TIME_UNIT_REGEX.match(units):
             return True
         if units in ("degrees_north", "degrees_east"):
             return True 
+
 
 def render_results(ob_url, data_path, results, count, total):
     """
@@ -187,6 +193,7 @@ def process_obs_to_html(paths_page="http://catalogue.ceda.ac.uk/export/paths/"):
 
         print "Wrote: %s" % fpath
         page_number += 1
+
 
 if __name__ == "__main__":
 

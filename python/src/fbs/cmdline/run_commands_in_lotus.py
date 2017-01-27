@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Usage:
   run_commands_in_lotus.py --help

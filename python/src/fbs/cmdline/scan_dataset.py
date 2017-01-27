@@ -136,12 +136,12 @@ def get_stat_and_defs(com_args):
         conf_path = os.path.join(direc, "../../../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
-    #Creates a dictionary with default settings some of them
-    #where loaded from th edefaults file.
+    # Create a dictionary with default settings some of them
+    # where loaded from th edefaults file.
     config = util.get_settings(com_args["config"], com_args)
 
 
-    #Set defaults if not supplied by user.
+    # Set defaults if not supplied by user.
     if "start" not in config or not config["start"]:
         config["start"] = config["scanning"]["start"]
 
@@ -150,59 +150,49 @@ def get_stat_and_defs(com_args):
 
     status_and_defaults.append(config)
 
-    if ("make-list" in config) and ("dataset" in config) \
-       and  ("filename" in config):
+    if ("make-list" in config) and ("dataset" in config) and ("filename" in config):
+        status_and_defaults.append(constants.Script_status.STORE_DATASET_TO_FILE)
 
-        status_and_defaults.append(\
-        constants.Script_status.STORE_DATASET_TO_FILE)
+    elif ("dataset" in config) and  ("filename" in config) and ("level" in config):
+        status_and_defaults.append(constants.Script_status.READ_AND_SCAN_DATASET)
 
-    elif ("dataset" in config) and  ("filename" in config) \
-          and ("level" in config):
-
-        status_and_defaults.append(\
-        constants.Script_status.READ_AND_SCAN_DATASET)
-
-    elif ("filename" in config) and ("start" in config) and \
-          ("num-files" in config) and ("level" in config):
-
-        status_and_defaults.append\
-        (constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
-
-    #config["cf_tempdir"] = config["scanning"]["cf_tempdir"]
+    elif ("filename" in config) and ("start" in config) and ("num-files" in config) and ("level" in config):
+        status_and_defaults.append(constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN)
 
     return status_and_defaults
+
 
 def main():
 
     """
     Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23203
     """
-    #Get command line arguments.
+    # Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
-    #Insert defaults
+    # Insert defaults
     status_and_defaults = get_stat_and_defs(com_args)
 
     config = status_and_defaults[0]
     status = status_and_defaults[1]
 
-    #checks the validity of command line arguments.
+    # Check the validity of command line arguments.
     try:
         ckeck_com_args_validity(config, status)
     except ValueError as err:
         print err
         return
 
-
     start = datetime.datetime.now()
     print "Script started at: %s" %(str(start))
 
-
-    #Manage the options given.
+    # Manage the options given.
     if status == constants.Script_status.STORE_DATASET_TO_FILE:
         store_dataset_to_file(config, status)
+
     elif status == constants.Script_status.READ_AND_SCAN_DATASET:
         read_and_scan_dataset(config, status)
+
     elif status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
         read_dataset_from_file_and_scan(config, status)
 
@@ -211,4 +201,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()

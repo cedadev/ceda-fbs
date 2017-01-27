@@ -212,9 +212,8 @@ class ExtractSeq(object):
 
 
     def scan_files(self):
-
         """
-         Extracts metadata information from files and posts them in elastic search.
+        Extracts metadata information from files and posts them in elastic search.
         """
         # Sanity check.
         if self.file_list is None:
@@ -241,9 +240,7 @@ class ExtractSeq(object):
         if len(self.file_list) > 0:
 
             for filename in self.file_list:
-                # file_path = f
 
-                # self.logger.info("Metadata extraction started for file %s", file_path)
                 start = datetime.datetime.now()
 
                 self.logger.debug("Scanning file {} at level {}.".format(filename, level))
@@ -283,14 +280,12 @@ class ExtractSeq(object):
             self.logger.info("Summary information for Dataset id : %s, files indexed : %s, database errors : %s,"
                              " properties errors : %s, total files : %s "
                              % ( self.dataset_id, str(self.files_indexed), str(self.database_errors),
-                             str(self.files_properties_errors), str(self.total_number_of_files))
-                            )
+                             str(self.files_properties_errors), str(self.total_number_of_files)))
 
-    # ***Functionality for traversing dataset dir and storing paths to file.***
+
     def prepare_logging_sdf(self):
-
         """
-        initializes  logging.
+        Initializes  logging.
         """
         # Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
@@ -298,20 +293,10 @@ class ExtractSeq(object):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        # kltsa 15/09/2015 changes for issue :23221.
-        # if self.status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
-        #    log_fname = "%s_%s_%s_%s_%s.log" \
-        #                %(self.conf("es-configuration")["es-ops"], self.conf("filename").replace("/", "|"),\
-        #                self.conf("start"), self.conf("num-files"), socket.gethostname())
-        # else:
-        log_fname = "%s_%s_%s.log" \
-                    %(self.conf("es-configuration")["es-index"],\
-                    self.conf("dataset"), socket.gethostname())
+        log_fname = "%s_%s_%s.log" % (self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
 
         # create the path where to create the log files.
-        fpath = os.path.join(log_dir,
-                             log_fname
-                            )
+        fpath = os.path.join(log_dir, log_fname)
 
         conf_log_level = self.conf("core")["log-level"]
 
@@ -324,21 +309,14 @@ class ExtractSeq(object):
         """
         logging.root.handlers = []
 
-
-        logging.basicConfig( filename=fpath,
-                             filemode="a+",
-                             format=log_format,
-                             level=level
-                           )
+        logging.basicConfig( filename=fpath, filemode="a+", format=log_format, level=level)
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
         #es_log.addHandler(logging.FileHandler(fpath_es))
 
-
         nappy_log = logging.getLogger("nappy")
         nappy_log.setLevel(logging.ERROR)
-
 
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
@@ -346,14 +324,15 @@ class ExtractSeq(object):
 
         self.logger = logging.getLogger(__name__)
 
-    def store_dataset_to_file(self):
 
+    def store_dataset_to_file(self):
         """
         Stores filenames of files within a dataset to a file.
         """
         self.prepare_logging_sdf()
         self.logger.debug("***Scanning started.***")
         self.file_list = self.read_dataset()
+
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
             try :
@@ -362,15 +341,14 @@ class ExtractSeq(object):
                 self.logger.error("Could not save the python list of files to file...{}".format(ex))
             else:
                 self.logger.debug("Paths written in file: {}.".format(files_written))
-                self.logger.debug("file {} ,containing paths to files in given dataset, has been created.".format(file_to_store_paths))
+                self.logger.debug("File {}, containing paths to files in given dataset, has been created.".format(file_to_store_paths))
 
-    #***Functionality for reading paths from file and then extracting metadata.***
+
     def prepare_logging_rdf(self):
-
         """
-        initializes  logging.
+        Initializes logging.
         """
-        #Check if logging directory exists and if necessary create it.
+        # Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
 
         if not os.path.exists(log_dir):
@@ -383,30 +361,21 @@ class ExtractSeq(object):
                                    self.conf("num-files"), \
                                    socket.gethostname())
 
-        # create the path where to create the log files.
-        fpath = os.path.join(log_dir,
-                             log_fname
-                            )
+        # Create the path where to create the log files.
+        fpath = os.path.join(log_dir, log_fname)
 
         conf_log_level = self.conf("core")["log-level"]
-
         log_format = self.conf("core")["format"]
         level = util.log_levels.get(conf_log_level, logging.NOTSET)
 
         logging.root.handlers = []
-
-        logging.basicConfig( filename=fpath,
-                             filemode="a+",
-                             format=log_format,
-                             level=level
-                           )
+        logging.basicConfig(filename=fpath, filemode="a+", format=log_format, level=level)
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
 
         nappy_log = logging.getLogger("nappy")
         nappy_log.setLevel(logging.ERROR)
-
 
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
