@@ -116,11 +116,11 @@ def cfg_read(filename):
     :param filename: Path to the INI configuration file.
     :returns: Dict containing parsed ini conf.
     """
-    #Read the config file
+    # Read the config file
     config = ConfigParser.ConfigParser()
     config.read(filename)
 
-    #get sections
+    # get sections
     sections = config.sections()
 
     conf = {}

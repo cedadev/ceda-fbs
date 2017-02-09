@@ -16,6 +16,7 @@ from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
 
+
 class ExtractSeq(object):
 
     """
@@ -85,7 +86,6 @@ class ExtractSeq(object):
         """
         Indexes metadata in Elasticsearch.
         """
-
         self.es.index(index=self.conf("es-configuration")["es-index"],\
                       doc_type=self.conf("es-configuration")["es-mapping"],\
                       body=body,\
@@ -94,22 +94,25 @@ class ExtractSeq(object):
                      )
 
     def process_file_seq(self, filename, level, es):
-
         """
         Returns metadata from the given file.
         """
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
+
             if handler is not None:
                 handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
-                metadata = handler_inst.get_metadata()
+                metadata = handler_inst.get_metadata_NEW()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
+
             else:
                 self.logger.error("{} could not be read by any handler.".format(filename))
                 return None
+
         except Exception as ex:
             self.logger.error("Could not process file: {}".format(ex))
+
 
     def is_valid_result(self, result):
 
@@ -125,12 +128,11 @@ class ExtractSeq(object):
         else:
             return None
 
+
     def create_location_json(self, lid, coordinates):
-        record = {\
-                   "coordinates": coordinates["coordinates"],
-                   "id" : lid
-                 }
+        record = {"coordinates": coordinates["coordinates"], "id" : lid}
         return record
+
 
     def index_location(self, coordinates):
 
@@ -142,6 +144,7 @@ class ExtractSeq(object):
         query = index.create_sp_query(lid)
         res = index.search_database(self.es, self.es_index, self.es_type_loc, query)
         lid_found = self.is_valid_result(res)
+
         if lid_found is None:
             lmeta = self.create_location_json(lid, coordinates)
             index.index_file(self.es, self.es_index, self.es_type_loc, lid, lmeta)
@@ -160,7 +163,7 @@ class ExtractSeq(object):
         5. This is done for all files in the list. Current size is 700.
         """
         fmeta = metadata[0]
-        #fid = hashlib.sha1(fmeta["info"]["name"]).hexdigest()
+
         if len(metadata) == 1:
             index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
             return
@@ -194,17 +197,16 @@ class ExtractSeq(object):
                         self.logger.debug("Phen created : " + str(phen_id))
 
                     index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
-                    #if wait_init:
-                    #    time.sleep(1)
-                    #    wait_init = False
 
                 fmeta["info"]["phenomena"] = phen_ids
 
             if len(metadata) == 3:
+
                 if metadata[2] != None:
                     lid = self.index_location(metadata[2])
                     fmeta["info"]["location"] = lid
-        #if something fails at least index the basic information.
+
+        # if something fails at least index the basic information.
         except Exception as ex:
             pass
 
@@ -248,19 +250,19 @@ class ExtractSeq(object):
 
                 if doc is not None:
 
-                    # es_query = json.dumps(doc)
                     es_id = hashlib.sha1(filename).hexdigest()
                     self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
-                    # this where the new logic will be inserted.
+
                     try:
-                        # self.index_attributes_seq(doc, es_id)
                         self.index_metadata(doc, es_id)
+
                     except Exception as ex:
                         end = datetime.datetime.now()
-                        self.logger.error(("Database error: %s" %ex))
+                        self.logger.error(("Indexing error: %s" %ex))
                         self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                               self.FILE_INDEX_ERROR, str(end - start))))
                         self.database_errors = self.database_errors + 1
+
                     else:
                         end = datetime.datetime.now()
                         self.logger.debug(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
@@ -269,11 +271,10 @@ class ExtractSeq(object):
 
                 else:
                     end = datetime.datetime.now()
-
                     self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
                                                          self.FILE_PROPERTIES_ERROR, str(end - start)))
                     self.files_properties_errors = self.files_properties_errors + 1
-                    continue
+
 
             # At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
