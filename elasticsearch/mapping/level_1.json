@@ -1,33 +1,36 @@
 {
-  "mappings" : {
-   "file" : {
-        "properties" : {
-          "info" : {
-            "properties" : {
-              "directory" : { 
-               "type" : "string", "index" : "not_analyzed" 
-              },
-              "format" : {
-                "type" : "string"
-              },
-              "md5" : {
-                "type" : "string"
-              },
-              "name" : { 
-                "type" : "string", "index" : "not_analyzed" 
-              },
-              "name_auto" : { 
-                "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
-              },
-              "size" : {
-                "type" : "long"
-              },
-              "type" : {
-                "type" : "string"
-              }
+  "mappings": {
+    "file": {
+      "properties": {
+        "info": {
+          "properties": {
+            "directory": { 
+              "type": "string", "index": "not_analyzed" 
+            },
+            "format": {
+              "type": "string"
+            },
+            "md5": {
+              "type": "string"
+            },
+            "name": { 
+              "type": "string", "index": "not_analyzed" 
+            },
+            "name_auto": { 
+              "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
+            },
+            "size": {
+              "type": "long"
+            },
+            "type": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string", "null_value": "on_disk" 
             }
           }
+        }
       }
     }
-   }
-   }
+  }
+}

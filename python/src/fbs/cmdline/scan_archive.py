@@ -166,7 +166,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
 
     # Go to directory and create the file list.
-    list_of_cache_files = util.build_file_list(file_paths_dir)
+    list_of_cache_files = sorted(util.build_file_list(file_paths_dir))
     commands = []
     step = int(num_files)
 

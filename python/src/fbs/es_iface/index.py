@@ -34,32 +34,24 @@ def create_index(config, elasticsearch):
 
 
 def search_database(es, index_l, type_l, query):
-
     """
     Executes a DSL query and returns the result.
     A delay is used because high rate of queries cause the 
     database to return an error.
     """
-
-    res = es.search( index=index_l,
-                     doc_type=type_l, 
-                     body=query
-                   )
+    res = es.search(index=index_l, doc_type=type_l, body=query)
     time.sleep(0.1)
     return res
 
 
 def index_file(es, index_l, type_l, fid, fjson):
-
-    """Indexes a document. """
-
+    "Indexes a document."
     es.index(index=index_l, doc_type=type_l, id=fid, body=fjson, request_timeout=60)
     time.sleep(0.01)
 
 bulk_requests = []
 bulk = False
 def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
-
     """
     Indexes a phenomenon of a file.
     Returns the id that the phenomenon will have in the database.
@@ -85,8 +77,6 @@ def index_phenomenon(es, index_l, type_l, phenomenon = None, threshold=0):
             bulk_requests.append(pjson)
 
         if len(bulk_requests) > threshold:
-
-            #print "indexing "  + str(len(bulk_requests)) + " phenomena."
 
             for item in bulk_requests:
                 pjson = pjson + item
