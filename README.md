@@ -43,10 +43,10 @@ You need to tell `ceda-fbs` some key things in the config file (ceda_fbs.ini) at
 You will need to edit the following sections:
 
 ```
- log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/logs
+ log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/logs-level-2
  es-host = jasmin-es1ceda.ac.uk.							
  es-index = ceda-archive-level-2							
- es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_3.json	
+ es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_2.json	
  num-files = 10000		
  num-processes = 128		
 ```
@@ -248,3 +248,28 @@ http://team.ceda.ac.uk/trac/ceda/wiki/FBS/PhenomenonSearch
 http://team.ceda.ac.uk/trac/ceda/wiki/ElasticSearch/BasicQueries
 
 http://team.ceda.ac.uk/trac/ceda/ticket/23247
+
+## 5. Analyse the log files to see where there were failures
+
+There is a script to help us work which files we could not scan:
+
+```
+$ scan_logfiles.py log-levels-2
+```
+
+It shows a table of details like:
+
+```
+Dataset                                  Indexed              Total files          Properties errors    Database errors      Status
+---------------------------------------------------------------------------------------------------------------------------------------------------
+badc__abacus                             6                    6                    0                    0                    ok
+badc__accacia                            1398                 1408                 10                   0                    ok
+badc__accmip                             93322                283218               0                    0                    errors
+badc__acid-deposition                    20                   20                   0                    0                    ok
+badc__acsoe                              2106                 2106                 0                    0                    ok
+badc__active                             92                   92                   0                    0                    ok
+badc__adriex                             4222                 4222                 0                    0                    ok
+badc__amazonica                          5                    5                    0                    0                    ok
+badc__amma                               177118               189322               0                    0                    errors
+badc__amps_antarctic                     7953                 7953                 0                    0                    ok
+```
