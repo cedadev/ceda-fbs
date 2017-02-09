@@ -43,10 +43,10 @@ You need to tell `ceda-fbs` some key things in the config file (ceda_fbs.ini) at
 You will need to edit the following sections:
 
 ```
- log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/log
+ log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/logs
  es-host = jasmin-es1ceda.ac.uk.							
  es-index = ceda-archive-level-2							
- es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_3_settings_1.json	
+ es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_3.json	
  num-files = 10000		
  num-processes = 128		
 ```
