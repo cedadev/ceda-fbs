@@ -273,3 +273,5 @@ badc__amazonica                          5                    5                 
 badc__amma                               177118               189322               0                    0                    errors
 badc__amps_antarctic                     7953                 7953                 0                    0                    ok
 ```
+
+NOTE: The FBS package will *ignore* files that are symbolic links. These will show up as "Properties errors".
