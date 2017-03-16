@@ -1,100 +1,89 @@
 {
- "mappings" : 
- {
-  "phenomenon" :
-  {
-   "properties" :
-   {
-    "id" :
-    {
-     "type" : "string"
-    },
-    "attribute_count": 
-    {
-     "type" : "short"
-    },
-    "attributes" :
-    {
-     "type" : "nested",
-     "properties":
-     {
-      "name" : {"type": "string" },
-      "value" : {"type": "string" }
-     }
-    }
-   }
-  },
-  "locations" :
-  {
-   "properties" :
-   {
-    "id" :
-    {
-     "type" : "string"
-    },
-    "coordinates" : 
-    { 
-      "type": "geo_shape", 
-      "tree": "quadtree", 
-      "precision": "5km" 
-    }
-   }
-  },
-  "file" : 
-  {
-   "properties" : 
-   {
-    "info" : 
-    {
-     "properties" : 
-     {
-      "directory" : 
-      {
-       "type" : "string", "index" : "not_analyzed" 
+   "mappings": {
+      "phenomenon": {
+         "properties": {
+            "id": {
+               "type": "string"
+            },
+            "attribute_count": {
+               "type": "short"
+            },
+            "attributes": {
+               "type": "nested",
+               "properties": {
+                  "name": {
+                     "type": "string"
+                  },
+                  "value": {
+                     "type": "string"
+                  }
+               }
+            }
+         }
       },
-      "format" : 
-      {
-       "type" : "string"
+      "locations": {
+         "properties": {
+            "id": {
+               "type": "string"
+            },
+            "coordinates": {
+               "type": "geo_shape",
+               "tree": "quadtree",
+               "precision": "5km"
+            }
+         }
       },
-      "md5" : 
-      {
-       "type" : "string"
-      },
-      "name" : 
-      {
-       "type" : "string", "index" : "not_analyzed" 
-      },
-      "name_auto" : 
-      { 
-       "type": "completion", "search_analyzer": "simple", "analyzer": "simple", "payloads": false
-      },
-      "phenomena" : 
-      {
-       "type" : "string"
-      },
-      "location" : 
-      {
-       "type" : "string"
-      },
-      "size" : 
-      {
-       "type" : "long"
-      },
-      "type" : 
-      {
-       "type" : "string"
-      },
-      "temporal" : 
-      {
-        "properties" : 
-        {
-         "end_time"  : { "type": "date", "format": "dateOptionalTime" },
-         "start_time": { "type": "date", "format": "dateOptionalTime" }
-        }
+      "file": {
+         "properties": {
+            "info": {
+               "properties": {
+                  "directory": {
+                     "type": "string",
+                     "index": "not_analyzed"
+                  },
+                  "format": {
+                     "type": "string"
+                  },
+                  "md5": {
+                     "type": "string"
+                  },
+                  "name": {
+                     "type": "string",
+                     "index": "not_analyzed"
+                  },
+                  "name_auto": {
+                     "type": "completion",
+                     "search_analyzer": "simple",
+                     "analyzer": "simple",
+                     "payloads": false
+                  },
+                  "phenomena": {
+                     "type": "string"
+                  },
+                  "location": {
+                     "type": "string"
+                  },
+                  "size": {
+                     "type": "long"
+                  },
+                  "type": {
+                     "type": "string"
+                  },
+                  "temporal": {
+                     "properties": {
+                        "end_time": {
+                           "type": "date",
+                           "format": "dateOptionalTime"
+                        },
+                        "start_time": {
+                           "type": "date",
+                           "format": "dateOptionalTime"
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
-     }
-    }
    }
-  }
- }
 }
