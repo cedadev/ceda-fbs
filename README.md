@@ -44,7 +44,7 @@ You will need to edit the following sections:
 
 ```
  log-path = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/logs-level-2
- es-host = jasmin-es1.ceda.ac.uk.							
+ es-host = jasmin-es1.ceda.ac.uk						
  es-index = ceda-archive-level-2							
  es-index-settings = /group_workspaces/jasmin/cedaproc/__INSERT_USERID_HERE__/fbs/ceda-fbs/elasticsearch/mapping/level_2.json	
  num-files = 10000		
