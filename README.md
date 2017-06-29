@@ -92,7 +92,8 @@ Make directories ready for file lists and log files:
 ```
 $ mkdir logs datasets
 ```
-!WARNING: files lists can be *many Gbytes in size* so don't do this in your home directory.
+
+*!WARNING: files lists can be *many Gbytes in size* so don't do this in your home directory.*
 
 Now run the first LOTUS jobs to generate lists of all files in each dataset.
 
@@ -105,13 +106,14 @@ This will submit lots of jobs to LOTUS...and wait...and try to submit more.
 *NOTE:* To run a subset of these jobs locally you might do:
 
 ```
+$ head -4 ceda_all_datasets.ini > redo_datasets.ini
 $ make_file_lists.py -f redo_datasets.ini -m $BASEDIR/datasets --host localhost
 ```
 
-*NOTE:* And to run just one you can do:
+*NOTE:* And to run just one you can do something like this (and telling it where to write the output file):
 
 ```
-$ scan_dataset.py -f redo_datasets.ini -d  badc__ukmo-nimrod --make-list /$BASEDIR/datasets/badc__ukmo-nimrod.txt
+$ scan_dataset.py -f ceda_all_datasets.ini -d badc__ukmo-nimrod --make-list $BASEDIR/datasets/badc__ukmo-nimrod.txt
 ```
 
 At this stage you might want to examine which datasets were not scanned - and why. The above command gives you a method of running for individual datasets.
