@@ -142,6 +142,12 @@ On `jasmin-sci[12].ceda.ac.uk`, run:
 $ nohup run_commands_in_lotus.py -f lotus_commands.txt -p 128 2>&1 > scan.output.txt &
 ```
 
+You can then view your job queue on lotus with:
+
+```
+$ bjobs
+```
+
 ## 5. Watch the file count building
 
 You can see how things are progressing in the web-interface:
