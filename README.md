@@ -110,7 +110,9 @@ $ head -4 ceda_all_datasets.ini > redo_datasets.ini
 $ make_file_lists.py -f redo_datasets.ini -m $BASEDIR/datasets --host localhost
 ```
 
-*NOTE:* And to run just one you can do something like this (and telling it where to write the output file):
+### Running a test scan
+
+You can run a test scan at this point. This will scan a single dataset on the local host - and post the content to Elasticsearch:
 
 ```
 $ scan_dataset.py -f ceda_all_datasets.ini -d badc__ukmo-nimrod --make-list $BASEDIR/datasets/badc__ukmo-nimrod.txt
