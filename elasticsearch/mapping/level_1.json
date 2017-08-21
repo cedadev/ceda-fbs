@@ -5,33 +5,30 @@
             "info": {
                "properties": {
                   "directory": {
-                     "type": "string",
-                     "index": "not_analyzed"
+                     "type": "keyword"
                   },
                   "format": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "md5": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "name": {
-                     "type": "string",
-                     "index": "not_analyzed"
+                     "type": "keyword"
                   },
                   "name_auto": {
                      "type": "completion",
                      "search_analyzer": "simple",
-                     "analyzer": "simple",
-                     "payloads": false
+                     "analyzer": "simple"
                   },
                   "size": {
                      "type": "long"
                   },
                   "type": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "location": {
-                     "type": "string",
+                     "type": "keyword",
                      "null_value": "on_disk"
                   }
                }

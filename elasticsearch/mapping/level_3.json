@@ -3,7 +3,7 @@
       "phenomenon": {
          "properties": {
             "id": {
-               "type": "string"
+               "type": "text"
             },
             "attribute_count": {
                "type": "short"
@@ -12,10 +12,10 @@
                "type": "nested",
                "properties": {
                   "name": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "value": {
-                     "type": "string"
+                     "type": "text"
                   }
                }
             }
@@ -24,7 +24,7 @@
       "locations": {
          "properties": {
             "id": {
-               "type": "string"
+               "type": "text"
             },
             "coordinates": {
                "type": "geo_shape",
@@ -38,36 +38,33 @@
             "info": {
                "properties": {
                   "directory": {
-                     "type": "string",
-                     "index": "not_analyzed"
+                     "type": "keyword"
                   },
                   "format": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "md5": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "name": {
-                     "type": "string",
-                     "index": "not_analyzed"
+                     "type": "keyword"
                   },
                   "name_auto": {
                      "type": "completion",
                      "search_analyzer": "simple",
-                     "analyzer": "simple",
-                     "payloads": false
+                     "analyzer": "simple"
                   },
                   "phenomena": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "location": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "size": {
                      "type": "long"
                   },
                   "type": {
-                     "type": "string"
+                     "type": "text"
                   },
                   "temporal": {
                      "properties": {
