@@ -44,7 +44,7 @@
                      "type": "text"
                   },
                   "md5": {
-                     "type": "text"
+                     "type": "keyword"
                   },
                   "name": {
                      "type": "keyword"
