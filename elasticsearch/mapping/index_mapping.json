@@ -38,7 +38,13 @@
             "info": {
                "properties": {
                   "directory": {
-                     "type": "keyword"
+                     "type": "keyword",
+                     "fields": {
+                        "analyzed": {
+                           "type": "text"
+                        }
+                     }
+
                   },
                   "format": {
                      "type": "text"
@@ -47,7 +53,12 @@
                      "type": "keyword"
                   },
                   "name": {
-                     "type": "keyword"
+                     "type": "keyword",
+                     "fields": {
+                        "analyzed": {
+                           "type": "text"
+                        }
+                     }
                   },
                   "name_auto": {
                      "type": "completion",
