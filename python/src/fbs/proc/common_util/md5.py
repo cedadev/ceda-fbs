@@ -333,7 +333,7 @@ class ElasticsearchUpdater(object):
         def params(item):
             return {"filename": os.path.basename(item), "dirname": os.path.dirname(item)}
 
-        msearch_query_list = self.gen_msearch_json(query_templ, params, file_list, blocksize=800)
+        msearch_query_list = self.gen_msearch_json(query_templ, params, file_list, blocksize=threshold)
 
         file_in_index = self._get_and_process_results(msearch_query_list,file_list, threshold, file_in_index, raw_resp)
 
