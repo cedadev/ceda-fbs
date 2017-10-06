@@ -41,6 +41,8 @@ class  GenericFile(object):
         info["name"] = os.path.basename(self.file_path) #ntpath.basename(file_path)
         info["name_auto"] = info["name"]
         info["directory"] = os.path.dirname(self.file_path)
+        info["location"] = "on_disk"
+
 
         info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
 
