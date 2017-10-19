@@ -45,3 +45,4 @@ wheel==0.24.0
 xmltodict
 enum34
 plotly
+tqdm

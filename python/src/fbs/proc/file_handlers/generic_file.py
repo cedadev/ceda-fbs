@@ -30,7 +30,7 @@ class  GenericFile(object):
         #and that it is not a symbolic link.
         if ( self.file_path is None
              or not os.path.isfile(self.file_path)
-             or os.path.islink(self.file_path)
+             # or os.path.islink(self.file_path)
            ):
             return None
 
