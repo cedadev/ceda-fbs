@@ -40,6 +40,7 @@ scipy==0.14.0
 sh==1.09
 simplejson
 six==1.8.0
+tqdm
 urllib3==1.9.1
 wheel==0.24.0
 xmltodict
