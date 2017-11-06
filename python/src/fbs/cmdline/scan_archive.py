@@ -183,8 +183,8 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
         start = 0
         for i in range(0, number_of_jobs):
+            _add_scan_cmd_to_list(filename, step, start, level, commands)
             start += step
-            _add_scan_cmd_to_list(filename, remainder, start, level, commands)
 
         # Include remaining files
         if remainder > 0:
