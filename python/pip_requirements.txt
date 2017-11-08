@@ -1,7 +1,7 @@
 Babel==1.3
 Biggus==0.7.0
-Cartopy==0.11.0
 Cython==0.21.1
+Cartopy==0.11.0
 exifRead
 Jinja2==2.7.3
 MarkupSafe==0.23
@@ -15,7 +15,7 @@ coverage==3.7.1
 docopt
 docutils==0.12
 git+https://github.com/SciTools/iris.git#egg=Iris
-svn+http://proj.badc.rl.ac.uk/svn/cows/cows_support/nappy/trunk/#egg=nappy
+git+https://github.com/cedadev/nappy.git
 elasticsearch
 filemagic
 flake8==2.3.0
