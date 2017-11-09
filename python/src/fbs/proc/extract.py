@@ -15,6 +15,7 @@ import proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
+import simplejson as json
 
 
 class ExtractSeq(object):
@@ -36,6 +37,7 @@ class ExtractSeq(object):
         self.dataset_dir = None
 
         # Define constants
+        self.blocksize = 800
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
@@ -93,7 +95,7 @@ class ExtractSeq(object):
                       request_timeout=60\
                      )
 
-    def process_file_seq(self, filename, level, es):
+    def process_file_seq(self, filename, level):
         """
         Returns metadata from the given file.
         """
@@ -212,6 +214,95 @@ class ExtractSeq(object):
 
         index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
 
+    def create_bulk_index_json(self, file_list, level, blocksize):
+        """
+        Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
+        the index JSON. This is to get around any problems caused by files with properties errors which produces None
+        when self.process_file_seq is called.
+
+        :param file_list: List of files to create actions from
+        :param level: Level of detail to get from file
+        :param blocksize: Size of chunks to send to Elasticsearch.
+
+        :return: bulk_list - list of JSON strings to send to ES,
+                 files_to_index - list of lists with each inner list containing the matching files to the query.
+        """
+        bulk_json = ""
+        bulk_list = []
+        files_to_index = []
+        file_array = []
+
+        self.logger.debug("Creating bulk json with block of %d" % blocksize)
+
+        doc_type = self.es_type_file
+
+        for i, filename in enumerate(file_list,1):
+            start = datetime.datetime.now()
+            doc = self.process_file_seq(filename, level)
+
+            if doc is not None:
+                es_id = hashlib.sha1(filename).hexdigest()
+
+                action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
+                body = json.dumps(doc[int(level)-1]) + "\n"
+
+                bulk_json += action + body
+                file_array.append(filename)
+
+            else:
+                end = datetime.datetime.now()
+                self.logger.error("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename),self.FILE_PROPERTIES_ERROR, str(end - start)))
+                self.files_properties_errors = self.files_properties_errors + 1
+
+            if i % blocksize == 0:
+                json_len =  bulk_json.count("\n")/2
+                self.logger.debug("Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (i,json_len,(blocksize-json_len),blocksize))
+                bulk_list.append(bulk_json)
+                files_to_index.append(file_array)
+
+                # Reset building blocks
+                bulk_json = ""
+                file_array = []
+
+        if bulk_json:
+            # Add any remaining files
+            bulk_list.append(bulk_json)
+            files_to_index.append(file_array)
+
+
+        return bulk_list, files_to_index
+
+
+    def bulk_index(self, file_list, level, blocksize):
+        """
+        Creates the JSON and performs a bulk index operation
+        """
+        action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
+
+        for action, files in zip(action_list, files_to_index):
+            r = self.es.bulk(body=action,request_timeout=60)
+            self.process_response_for_errors(r, files)
+
+    def process_response_for_errors(self, response, files):
+        if response['errors']:
+            for i, item in enumerate(response['items']):
+                if item['index']['status'] not in [200,201]:
+                    filename = files[i]
+                    error = item['index']['error']
+                    ex = ": ".join([error['type'],error['reason']])
+                    self.logger.error("Indexing error: %s" % ex)
+                    self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), \
+                                                              self.FILE_INDEX_ERROR),''))
+                    self.database_errors += 1
+
+                else:
+                    self.files_indexed += 1
+        else:
+            batch_count = len(files)
+            self.files_indexed += batch_count
+            self.logger.debug("Added %i files to index" % batch_count)
+
+
 
     def scan_files(self):
         """
@@ -241,39 +332,41 @@ class ExtractSeq(object):
         self.logger.debug("File list contains {} files.".format(len(self.file_list)))
         if len(self.file_list) > 0:
 
-            for filename in self.file_list:
+            self.bulk_index(self.file_list, level, self.blocksize)
 
-                start = datetime.datetime.now()
-
-                self.logger.debug("Scanning file {} at level {}.".format(filename, level))
-                doc = self.process_file_seq(filename, level, self.es)
-
-                if doc is not None:
-
-                    es_id = hashlib.sha1(filename).hexdigest()
-                    self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
-
-                    try:
-                        self.index_metadata(doc, es_id)
-
-                    except Exception as ex:
-                        end = datetime.datetime.now()
-                        self.logger.error(("Indexing error: %s" %ex))
-                        self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                              self.FILE_INDEX_ERROR, str(end - start))))
-                        self.database_errors = self.database_errors + 1
-
-                    else:
-                        end = datetime.datetime.now()
-                        self.logger.debug(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                             self.FILE_INDEXED, str(end - start))))
-                        self.files_indexed = self.files_indexed + 1
-
-                else:
-                    end = datetime.datetime.now()
-                    self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                         self.FILE_PROPERTIES_ERROR, str(end - start)))
-                    self.files_properties_errors = self.files_properties_errors + 1
+            # for filename in self.file_list:
+            #
+            #     start = datetime.datetime.now()
+            #
+            #     self.logger.debug("Scanning file {} at level {}.".format(filename, level))
+            #     doc = self.process_file_seq(filename, level)
+            #
+            #     if doc is not None:
+            #
+            #         es_id = hashlib.sha1(filename).hexdigest()
+            #         self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
+            #
+            #         try:
+            #             self.index_metadata(doc, es_id)
+            #
+            #         except Exception as ex:
+            #             end = datetime.datetime.now()
+            #             self.logger.error(("Indexing error: %s" %ex))
+            #             self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+            #                                                   self.FILE_INDEX_ERROR, str(end - start))))
+            #             self.database_errors = self.database_errors + 1
+            #
+            #         else:
+            #             end = datetime.datetime.now()
+            #             self.logger.debug(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+            #                                                  self.FILE_INDEXED, str(end - start))))
+            #             self.files_indexed = self.files_indexed + 1
+            #
+            #     else:
+            #         end = datetime.datetime.now()
+            #         self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
+            #                                              self.FILE_PROPERTIES_ERROR, str(end - start)))
+            #         self.files_properties_errors = self.files_properties_errors + 1
 
 
             # At the end print some statistical info.
