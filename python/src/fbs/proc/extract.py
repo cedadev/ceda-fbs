@@ -106,6 +106,7 @@ class ExtractSeq(object):
                 handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
+                print metadata
                 return metadata
 
             else:

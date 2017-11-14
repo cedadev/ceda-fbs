@@ -18,6 +18,7 @@ class BadcCsvFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
+    @util.simple_phenomena
     def get_phenomena(self, fp):
 
         phen_list = []

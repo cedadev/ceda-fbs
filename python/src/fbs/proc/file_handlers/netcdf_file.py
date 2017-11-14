@@ -112,6 +112,21 @@ class   NetCdfFile(GenericFile):
             return True
         return False
 
+    def is_valid_phenomena(self,key,value):
+        """
+        Wrapper to hide test in main function
+        """
+
+        if not self.is_valid_parameter(key, value):
+            return False
+
+        if not util.is_valid_phen_attr(value):
+            return False
+
+        # Returns true if both the tests above pass as true
+        return True
+
+    @util.simple_phenomena
     def get_phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
@@ -139,8 +154,7 @@ class   NetCdfFile(GenericFile):
             attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
 
-                if not   self.is_valid_parameter(key, value) \
-                   or  not util.is_valid_phen_attr(value):
+                if not self.is_valid_phenomena(key,value):
                     continue
 
                 phen_attr["name"] = str(key.strip())

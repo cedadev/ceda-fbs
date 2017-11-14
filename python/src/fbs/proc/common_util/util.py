@@ -578,3 +578,63 @@ def _make_bsub_command(task, count, logger=None):
     if logger is not None: logger.INFO(info_msg)
     print info_msg
     return command
+
+def simple_phenomena(func):
+    """
+    @Decorator
+    Flattens output from get_phenomena from:
+
+     [{"attributes": [
+                {
+                    "name":"---",
+                    "value":"---"
+                },
+                ...
+            ]
+     }]
+
+
+    to:
+
+    [
+        {
+            "var_id" : "---",
+            "units" : "---",
+            "names" : ["--",...]
+        },
+        ...
+    ]
+
+    :param func: Function to decorate
+    :return: wrapped function
+    """
+    def func_wrapper(*args,**kwargs):
+        phenom_list = []
+
+        data = func(*args,**kwargs)
+        if not data:
+            return phenom_list
+
+        name_filter = ["units", "var_id"]
+
+        for phenom in data:
+            phen_dict = {}
+            names = []
+            for attr in phenom["attributes"]:
+                if attr["name"] in name_filter:
+                    phen_dict[attr["name"]] = attr["value"]
+                else:
+                    value = attr["value"]
+                    if value not in names:
+                        names.append(attr["value"])
+
+            if names:
+                phen_dict["names"] = names
+
+            if phen_dict:
+                phenom_list.append(phen_dict)
+
+        return phenom_list
+
+    return func_wrapper
+

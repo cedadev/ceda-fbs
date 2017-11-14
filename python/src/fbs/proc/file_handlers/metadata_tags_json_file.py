@@ -21,6 +21,7 @@ class MetadataTagsJsonFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
+    @util.simple_phenomena
     def get_phenomena(self, json_file):
 
         phenomena = json_file["phenomena"]

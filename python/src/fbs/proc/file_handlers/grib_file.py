@@ -16,6 +16,7 @@ class GribFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
+    @util.simple_phenomena
     def get_phenomena(self):
 
         phen_list = []

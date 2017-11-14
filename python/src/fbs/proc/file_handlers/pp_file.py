@@ -72,6 +72,7 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
+    @util.simple_phenomena
     def get_phenomena(self):
         phenomenon =\
         {

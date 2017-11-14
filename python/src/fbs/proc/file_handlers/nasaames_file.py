@@ -36,6 +36,7 @@ class NasaAmesFile(GenericFile):
         except Exception:
             return None
 
+    @util.simple_phenomena
     def get_phenomena(self):
 
         phen_list = []
