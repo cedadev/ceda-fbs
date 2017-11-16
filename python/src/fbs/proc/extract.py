@@ -106,7 +106,6 @@ class ExtractSeq(object):
                 handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
-                print metadata
                 return metadata
 
             else:
@@ -215,6 +214,24 @@ class ExtractSeq(object):
 
         index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
 
+    def create_body(self, fdata):
+        """
+        Takes the information returned by the file handlers and builds the JSON to send to elasticsearch.
+
+        :param fdata: Tuple containing file metatadata, parameters and temporal data.
+        :return: JSON to index  into elasticsearch
+        """
+        if len(fdata) ==  1:
+            doc = fdata[0]
+
+        if len(fdata) > 1:
+            doc = fdata[0]
+
+            if fdata[1] is not None:
+                doc["info"]["phenomena"] = fdata[1]
+
+        return json.dumps(doc)
+
     def create_bulk_index_json(self, file_list, level, blocksize):
         """
         Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
@@ -245,7 +262,7 @@ class ExtractSeq(object):
                 es_id = hashlib.sha1(filename).hexdigest()
 
                 action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
-                body = json.dumps(doc[int(level)-1]) + "\n"
+                body = self.create_body(doc) + "\n" #json.dumps(doc[0]) + "\n"
 
                 bulk_json += action + body
                 file_array.append(filename)
@@ -279,6 +296,7 @@ class ExtractSeq(object):
         Creates the JSON and performs a bulk index operation
         """
         action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
+        # print action_list
 
         for action, files in zip(action_list, files_to_index):
             r = self.es.bulk(body=action,request_timeout=60)
@@ -292,8 +310,7 @@ class ExtractSeq(object):
                     error = item['index']['error']
                     ex = ": ".join([error['type'],error['reason']])
                     self.logger.error("Indexing error: %s" % ex)
-                    self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), \
-                                                              self.FILE_INDEX_ERROR),''))
+                    self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR,' ')))
                     self.database_errors += 1
 
                 else:
