@@ -292,7 +292,7 @@ class ExtractSeq(object):
                     ex = ": ".join([error['type'],error['reason']])
                     self.logger.error("Indexing error: %s" % ex)
                     self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), \
-                                                              self.FILE_INDEX_ERROR),''))
+                                                              self.FILE_INDEX_ERROR,'')))
                     self.database_errors += 1
 
                 else:
