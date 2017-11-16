@@ -327,6 +327,33 @@ def is_valid_phen_attr(attribute):
     else:
         return True
 
+def is_valid_parameter(name, value):
+    valid_parameters = [ "standard_name",
+                         "long_name",
+                         "title",
+                         "name",
+                         "units"
+                       ]
+    if name in valid_parameters \
+       and len(value) < MAX_ATTR_LENGTH\
+       and len(name) < MAX_ATTR_LENGTH:
+        return True
+    return False
+
+def is_valid_phenomena(key,value):
+    """
+    Wrapper to hide test in main function
+    """
+
+    if not is_valid_parameter(key, value):
+        return False
+
+    if not is_valid_phen_attr(value):
+        return False
+
+    # Returns true if both the tests above pass as true
+    return True
+
 def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
 
     """
@@ -625,7 +652,7 @@ def simple_phenomena(func):
                     phen_dict[attr["name"]] = attr["value"]
                 else:
                     value = attr["value"]
-                    if value not in names:
+                    if is_valid_parameter(attr["name"],value) and value not in names:
                         names.append(attr["value"])
 
             if names:

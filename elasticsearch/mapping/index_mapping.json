@@ -1,97 +1,124 @@
 {
-   "mappings": {
-      "phenomenon": {
-         "properties": {
-            "id": {
-               "type": "text"
+  "mappings": {
+    "phenomenon": {
+      "properties": {
+        "id": {
+          "type": "text"
+        },
+        "attribute_count": {
+          "type": "short"
+        },
+        "attributes": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "text"
             },
-            "attribute_count": {
-               "type": "short"
-            },
-            "attributes": {
-               "type": "nested",
-               "properties": {
-                  "name": {
-                     "type": "text"
-                  },
-                  "value": {
-                     "type": "text"
-                  }
-               }
+            "value": {
+              "type": "text"
             }
-         }
-      },
-      "locations": {
-         "properties": {
-            "id": {
-               "type": "text"
-            },
-            "coordinates": {
-               "type": "geo_shape",
-               "tree": "quadtree",
-               "precision": "5km"
-            }
-         }
-      },
-      "file": {
-         "properties": {
-            "info": {
-               "properties": {
-                  "directory": {
-                     "type": "keyword",
-                     "fields": {
-                        "analyzed": {
-                           "type": "text"
-                        }
-                     }
-
-                  },
-                  "format": {
-                     "type": "text"
-                  },
-                  "md5": {
-                     "type": "keyword"
-                  },
-                  "name": {
-                     "type": "keyword",
-                     "fields": {
-                        "analyzed": {
-                           "type": "text"
-                        }
-                     }
-                  },
-                  "name_auto": {
-                     "type": "completion",
-                     "search_analyzer": "simple",
-                     "analyzer": "simple"
-                  },
-                  "phenomena": {
-                     "type": "text"
-                  },
-                  "location": {
-                     "type": "text"
-                  },
-                  "size": {
-                     "type": "long"
-                  },
-                  "type": {
-                     "type": "text"
-                  },
-                  "temporal": {
-                     "properties": {
-                        "end_time": {
-                           "type": "date",
-                           "format": "dateOptionalTime"
-                        },
-                        "start_time": {
-                           "type": "date",
-                           "format": "dateOptionalTime"
-                        }
-                     }
-                  }
-               }
-            }
-         }
+          }
+        }
       }
-   }
+    },
+    "locations": {
+      "properties": {
+        "id": {
+          "type": "text"
+        },
+        "coordinates": {
+          "type": "geo_shape",
+          "tree": "quadtree",
+          "precision": "5km"
+        }
+      }
+    },
+    "file": {
+      "properties": {
+        "info": {
+          "properties": {
+            "directory": {
+              "type": "keyword",
+              "fields": {
+                "analyzed": {
+                  "type": "text"
+                }
+              }
+            },
+            "format": {
+              "type": "text"
+            },
+            "md5": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword",
+              "fields": {
+                "analyzed": {
+                  "type": "text"
+                }
+              }
+            },
+            "name_auto": {
+              "type": "completion",
+              "search_analyzer": "simple",
+              "analyzer": "simple"
+            },
+            "phenomena": {
+              "properties": {
+                "names": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "units": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "var_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
+            "location": {
+              "type": "text"
+            },
+            "size": {
+              "type": "long"
+            },
+            "type": {
+              "type": "text"
+            },
+            "temporal": {
+              "properties": {
+                "end_time": {
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                },
+                "start_time": {
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

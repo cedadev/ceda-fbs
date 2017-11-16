@@ -102,14 +102,16 @@ class PpFile(GenericFile):
 
                     value = str(metadata_dict[key])
 
-                    if len(key) < util.MAX_ATTR_LENGTH \
-                        and len(value) < util.MAX_ATTR_LENGTH \
-                        and util.is_valid_phen_attr(value):
-                        phen_attr["name"] = str(key.strip())
-                        phen_attr["value"] = str(unicode(value).strip())
+                    if not util.is_valid_phenomena(key,value):
+                        continue
+                    # if len(key) < util.MAX_ATTR_LENGTH \
+                    #     and len(value) < util.MAX_ATTR_LENGTH \
+                    #     and util.is_valid_phen_attr(value):
+                    phen_attr["name"] = str(key.strip())
+                    phen_attr["value"] = str(unicode(value).strip())
 
-                        phen_attr_list.append(phen_attr.copy())
-                        attr_count = attr_count + 1
+                    phen_attr_list.append(phen_attr.copy())
+                    attr_count = attr_count + 1
 
                 # Dict of phenomenon attributes.
                 if len(phen_attr_list) > 0:
