@@ -313,9 +313,9 @@ def find_num_lines_in_file(filename):
             num_lines += 1
     return num_lines
 
-def check_attributes_length(item):
-    if len(item["value"]) < MAX_ATTR_LENGTH\
-        and len(item["name"]) < MAX_ATTR_LENGTH:
+def valid_attr_length(name, value):
+    if len(value) < MAX_ATTR_LENGTH\
+        and len(name) < MAX_ATTR_LENGTH:
         return True
     return False
 
@@ -335,8 +335,7 @@ def is_valid_parameter(name, value):
                          "units"
                        ]
     if name in valid_parameters \
-       and len(value) < MAX_ATTR_LENGTH\
-       and len(name) < MAX_ATTR_LENGTH:
+       and valid_attr_length(name,value):
         return True
     return False
 

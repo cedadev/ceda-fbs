@@ -1,6 +1,4 @@
 import os
-import ntpath
-import json
 import re
 
 from proc.common_util.util import FileFormatError
