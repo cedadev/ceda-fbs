@@ -18,10 +18,8 @@ class BadcCsvFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    @util.simple_phenomena
-    def get_phenomena(self, fp):
+    def csv_parse(self, fp):
 
-        phen_list = []
         phenomenon =\
         {
          "id" : "",
@@ -32,8 +30,8 @@ class BadcCsvFile(GenericFile):
         date = None
         location = None
 
-
         reader = csv.reader(fp)
+
         for row in reader:
             if row[0] == "data":
                 break
@@ -44,7 +42,7 @@ class BadcCsvFile(GenericFile):
                     location = row[2]
                 continue
             else:
-                if row[1] in phenomena: 
+                if row[1] in phenomena:
                     phenomena[row[1]]["attributes"] .append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
                     phenomena[row[1]]["attribute_count"] = phenomena[row[1]]["attribute_count"] + 1
                 else:
@@ -54,10 +52,19 @@ class BadcCsvFile(GenericFile):
                     new_phenomenon["attribute_count"] = 1
                     phenomena[row[1]] = new_phenomenon
 
+        return (phenomena, date, location)
+
+    @util.simple_phenomena
+    def get_phenomena(self, fp):
+
+        phen_list = []
+
+        phenomena, _, _ = self.csv_parse(fp)
+
         for key in phenomena.keys():
             phen_list.append(phenomena[key])
 
-        return (phen_list, location, date)
+        return phen_list
 
     def get_metadata_badccsv_level2(self):
         self.handler_id = "Csv handler level 2."
@@ -68,7 +75,7 @@ class BadcCsvFile(GenericFile):
             fp = open(self.file_path)
             phen = self.get_phenomena(fp)
 
-            return  file_info +  (phen[0],)
+            return  file_info +  phen
         else:
             return None
 
@@ -79,7 +86,8 @@ class BadcCsvFile(GenericFile):
 
         if file_info is not None:
             fp = open(self.file_path)
-            phen = self.get_phenomena(fp)
+            phen = self.csv_parse(fp)
+            phenomena = self.get_phenomena()
 
 
             #l1  =  max(geospatial["lat"])
@@ -93,7 +101,7 @@ class BadcCsvFile(GenericFile):
             if phen[2] is not None:
                 file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
 
-            return file_info +  (phen[0],)
+            return file_info +  phenomena
         else:
             return None
 

@@ -639,7 +639,7 @@ def simple_phenomena(func):
 
         data = func(*args,**kwargs)
         if not data:
-            return phenom_list
+            return (None,)
 
         name_filter = ["units", "var_id"]
 
@@ -660,7 +660,7 @@ def simple_phenomena(func):
             if phen_dict:
                 phenom_list.append(phen_dict)
 
-        return phenom_list
+        return (phenom_list,)
 
     return func_wrapper
 

@@ -98,10 +98,10 @@ class GribFile(GenericFile):
 
             self.handler_id = "grib handler level 2."
 
-            if grib_phenomena is None:
+            if grib_phenomena[0] is None:
                 return file_info
 
-            return  file_info +  (grib_phenomena, )
+            return  file_info +  grib_phenomena
 
         else:
             return None
@@ -276,7 +276,7 @@ class GribFile(GenericFile):
         elif self.level == "3":
             res = self.get_metadata_grib_level3()
 
-        #Sice file format is decided it can be added. 
+        #Sice file format is decided it can be added.
         res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res

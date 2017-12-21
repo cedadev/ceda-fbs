@@ -187,9 +187,9 @@ class   NetCdfFile(GenericFile):
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
                     netcdf_phenomena = self.get_phenomena(netcdf_object)
-                return file_info +  (netcdf_phenomena, )
+                return file_info +  netcdf_phenomena
             except Exception:
-                return (file_info, None)
+                return file_info + (None,)
         else:
             return None
 

@@ -130,7 +130,7 @@ class PpFile(GenericFile):
 
             pp_file_content.close()
 
-            return (phen_list, )
+            return phen_list
         except Exception as ex:
             return None
 

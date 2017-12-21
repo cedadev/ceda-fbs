@@ -55,7 +55,7 @@ class NasaAmesFile(GenericFile):
 
         nasaames_phenomena = self.phenomena()
 
-        if nasaames_phenomena is None:
+        if not nasaames_phenomena:
             return None
 
         #List of phenomena
@@ -76,10 +76,10 @@ class NasaAmesFile(GenericFile):
 
             phen_list.append(new_phenomenon)
 
-        return (phen_list, )
+        return phen_list
 
 
-    def get_metadata_nanaames_level2(self):
+    def get_metadata_nasaames_level2(self):
 
         #Get basic file info.
         file_info = self.get_metadata_generic_level1()
@@ -94,8 +94,8 @@ class NasaAmesFile(GenericFile):
         else:
             return None
 
-    def get_metadata_nanaames_level3(self):
-        res = self.get_metadata_nanaames_level2()
+    def get_metadata_nasaames_level3(self):
+        res = self.get_metadata_nasaames_level2()
         self.handler_id = "Nasaames handler level 3."
         return res
 
@@ -104,9 +104,9 @@ class NasaAmesFile(GenericFile):
         if self.level == "1":
             res = self.get_metadata_generic_level1()
         elif self.level == "2":
-            res = self.get_metadata_nanaames_level2()
+            res = self.get_metadata_nasaames_level2()
         elif self.level == "3":
-            res = self.get_metadata_nanaames_level3()
+            res = self.get_metadata_nasaames_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
