@@ -626,7 +626,8 @@ def simple_phenomena(func):
         {
             "var_id" : "---",
             "units" : "---",
-            "names" : ["--",...]
+            "standard_name" : "---"
+            "names" : ["---",...]
         },
         ...
     ]
@@ -641,7 +642,7 @@ def simple_phenomena(func):
         if not data:
             return (None,)
 
-        name_filter = ["units", "var_id"]
+        name_filter = ["units", "var_id", "standard_name"]
 
         for phenom in data:
             phen_dict = {}
@@ -652,7 +653,11 @@ def simple_phenomena(func):
                 else:
                     value = attr["value"]
                     if is_valid_parameter(attr["name"],value) and value not in names:
-                        names.append(attr["value"])
+                        names.append(value)
+
+                # Make sure standard name is also in the names list.
+                if attr["name"] == "standard_name" and attr["value"] not in names:
+                    names.append(attr["value"])
 
             if names:
                 phen_dict["names"] = names

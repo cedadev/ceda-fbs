@@ -142,9 +142,11 @@ class PpFile(GenericFile):
         if file_info is not None:
             phen_list = self.get_phenomena()
             if phen_list is not None:
+                file_info[0]["info"]["read_status"] = "Successful"
                 return file_info + phen_list
             else:
-                print "No phenom found!!!"
+                # get_phenomena is None, file read error
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
         else:
             return None

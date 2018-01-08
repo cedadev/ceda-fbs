@@ -55,7 +55,7 @@ class NasaAmesFile(GenericFile):
 
         nasaames_phenomena = self.phenomena()
 
-        if not nasaames_phenomena:
+        if nasaames_phenomena is None:
             return None
 
         #List of phenomena
@@ -89,7 +89,13 @@ class NasaAmesFile(GenericFile):
             self.handler_id = "Nasaames handler level 2."
 
             phen_list = self.get_phenomena()
-            return file_info +  phen_list
+            if phen_list != None:
+                file_info[0]["info"]["read_status"] = "Successful"
+                return file_info +  phen_list
+            else:
+                # get_phenomena is None, error reading file.
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info
 
         else:
             return None

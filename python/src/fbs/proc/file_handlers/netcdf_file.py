@@ -187,8 +187,11 @@ class   NetCdfFile(GenericFile):
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
                     netcdf_phenomena = self.get_phenomena(netcdf_object)
+                    file_info[0]["info"]["read_status"] = "Successful"
                 return file_info +  netcdf_phenomena
             except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
+
                 return file_info + (None,)
         else:
             return None

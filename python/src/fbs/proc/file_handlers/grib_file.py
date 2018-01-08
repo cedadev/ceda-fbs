@@ -98,10 +98,13 @@ class GribFile(GenericFile):
 
             self.handler_id = "grib handler level 2."
 
-            if grib_phenomena[0] is None:
+            if grib_phenomena is None:
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
 
-            return  file_info +  grib_phenomena
+            else:
+                file_info[0]["info"]["read_status"] = "Successful"
+                return  file_info +  grib_phenomena
 
         else:
             return None

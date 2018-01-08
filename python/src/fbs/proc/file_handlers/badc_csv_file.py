@@ -75,6 +75,7 @@ class BadcCsvFile(GenericFile):
             fp = open(self.file_path)
             phen = self.get_phenomena(fp)
 
+            file_info[0]["info"]["read_status"] = "Successful"
             return  file_info +  phen
         else:
             return None
