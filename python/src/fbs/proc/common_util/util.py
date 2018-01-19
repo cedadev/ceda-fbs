@@ -628,6 +628,7 @@ def simple_phenomena(func):
             "units" : "---",
             "standard_name" : "---"
             "names" : ["---",...]
+            "agg_string" : "var_id: ---, standard_name": ---, ... , names: name1;name2;..."
         },
         ...
     ]
@@ -647,9 +648,12 @@ def simple_phenomena(func):
         for phenom in data:
             phen_dict = {}
             names = []
+            agg_string = ""
+            agg_string_list = []
             for attr in phenom["attributes"]:
                 if attr["name"] in name_filter:
                     phen_dict[attr["name"]] = attr["value"]
+                    agg_string_list.append("{}:{}".format(attr["name"],attr["value"]))
                 else:
                     value = attr["value"]
                     if is_valid_parameter(attr["name"],value) and value not in names:
@@ -659,10 +663,18 @@ def simple_phenomena(func):
                 if attr["name"] == "standard_name" and attr["value"] not in names:
                     names.append(attr["value"])
 
+            if agg_string_list:
+                agg_string = ",".join(agg_string_list)
+
             if names:
                 phen_dict["names"] = names
+                if agg_string:
+                    agg_string += ",{}:{}".format("names",";".join(names))
+                else:
+                    agg_string = "{}:{}".format("names",";".join(names))
 
             if phen_dict:
+                phen_dict["agg_string"] = agg_string
                 phenom_list.append(phen_dict)
 
         return (phenom_list,)

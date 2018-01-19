@@ -101,6 +101,9 @@
                       "ignore_above": 256
                     }
                   }
+                },
+                "agg_string":{
+                  "type":"keyword"
                 }
               }
             },

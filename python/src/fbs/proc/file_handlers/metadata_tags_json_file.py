@@ -65,9 +65,14 @@ class MetadataTagsJsonFile(GenericFile):
         if file_info is not None:
 
             self.handler_id = "Metadata tags json handler level 2."
-            metadata = json.loads(open(self.file_path).read())
+            try:
+                metadata = json.loads(open(self.file_path).read())
+                file_info[0]["info"]["read_status"] = "Successful"
+                phen_list = self.get_phenomena(metadata)
 
-            phen_list = self.get_phenomena(metadata)
+            except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
+                phen_list = None
 
         else:
             return None
