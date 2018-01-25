@@ -44,10 +44,6 @@ print "Creating output list"
 for line in log_mapping:
     if not line.strip(): continue
     spot, directory = line.strip().split()
-    if "test" in spot : continue
-    
-    # Only append spots
-    if not spot.startswith("spot-"): continue
     
     # Only add path to output list if it is a real directory
     if os.path.exists(directory):    

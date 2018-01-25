@@ -608,7 +608,9 @@ def _make_bsub_command(task, count, logger=None):
 def simple_phenomena(func):
     """
     @Decorator
-    Flattens output from get_phenomena from:
+    Flattens output of get_phenomena() from:
+
+    -------------------------------------------------------------------------------------------------------------------
 
      [{"attributes": [
                 {
@@ -619,8 +621,11 @@ def simple_phenomena(func):
             ]
      }]
 
+    -------------------------------------------------------------------------------------------------------------------
 
     to:
+
+    -------------------------------------------------------------------------------------------------------------------
 
     [
         {
@@ -628,10 +633,17 @@ def simple_phenomena(func):
             "units" : "---",
             "standard_name" : "---"
             "names" : ["---",...]
-            "agg_string" : "var_id: ---, standard_name": ---, ... , names: name1;name2;..."
+            "agg_string" : '"var_id": "---", "standard_name": "---", ... , "names": "name1";"name2";"..."'
         },
         ...
     ]
+
+    -------------------------------------------------------------------------------------------------------------------
+
+    This can be split using regex:
+
+    r',*(?P<names>\"names\":[A-Za-z0-9 ,:;_\"]*)?,*(?P<standard_name>\"standard_name\":[A-Za-z0-9_\"]*)?,*(?P<units>\"units\":[A-Za-z0-9 -\"]*)?,*(?P<var_id>\"var_id\":[A-Za-z0-9_\"]*)?,*'
+
 
     :param func: Function to decorate
     :return: wrapped function
@@ -653,25 +665,25 @@ def simple_phenomena(func):
             for attr in phenom["attributes"]:
                 if attr["name"] in name_filter:
                     phen_dict[attr["name"]] = attr["value"]
-                    agg_string_list.append("{}:{}".format(attr["name"],attr["value"]))
+                    agg_string_list.append('"{}":"{}"'.format(attr["name"],attr["value"]))
                 else:
                     value = attr["value"]
                     if is_valid_parameter(attr["name"],value) and value not in names:
-                        names.append(value)
+                        names.append('"{}"'.format(value))
 
                 # Make sure standard name is also in the names list.
                 if attr["name"] == "standard_name" and attr["value"] not in names:
-                    names.append(attr["value"])
+                    names.append('"{}"'.format(attr["value"]))
 
-            if agg_string_list:
-                agg_string = ",".join(agg_string_list)
 
             if names:
+                names.sort()
                 phen_dict["names"] = names
-                if agg_string:
-                    agg_string += ",{}:{}".format("names",";".join(names))
-                else:
-                    agg_string = "{}:{}".format("names",";".join(names))
+                agg_string_list.append('"names":{}'.format(';'.join(names)))
+
+            if agg_string_list:
+                agg_string_list.sort()
+                agg_string = ','.join(agg_string_list)
 
             if phen_dict:
                 phen_dict["agg_string"] = agg_string
