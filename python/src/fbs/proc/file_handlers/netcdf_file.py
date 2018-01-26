@@ -237,11 +237,16 @@ class   NetCdfFile(GenericFile):
                     except AttributeError:
                         pass
 
-                    return file_info  + (netcdf_phenomena, spatial, )
+                    file_info[0]["info"]["read_status"] = "Successful"
+
+                    return file_info  + netcdf_phenomena + (spatial, )
             except Exception as ex:
                 if netcdf_phenomena is not None:
+
+                    file_info[0]["info"]["read_status"] = "Successful"
                     return file_info + (netcdf_phenomena, )
                 else:
+                    file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
                 return file_info
         else:

@@ -2,6 +2,7 @@ import gribapi as gapi
 import proc.common_util.util as util
 
 from proc.file_handlers.generic_file import GenericFile
+from datetime import datetime
 
 class GribFile(GenericFile):
     """
@@ -111,20 +112,6 @@ class GribFile(GenericFile):
 
     def get_metadata_level3(self):
 
-        phen_list = []
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-         "name" : "",
-         "value": ""
-        }
-
         lat_f_l = []
         lon_f_l = []
         lat_l_l = []
@@ -133,15 +120,7 @@ class GribFile(GenericFile):
         date_t_l = []
 
         phen_keys = [
-                      "paramId",
-                      "cfNameECMF",
-                      "cfName",
-                      "cfVarName",
-                      "units",
-                      "nameECMF",
-                      "name",
-                      "Ni",
-                      "Nj",
+
                       "latitudeOfFirstGridPointInDegrees",
                       "longitudeOfFirstGridPointInDegrees",
                       "latitudeOfLastGridPointInDegrees",
@@ -182,29 +161,12 @@ class GribFile(GenericFile):
                         date_d_l.append(value)
                     elif key == "dataTime":
                         date_t_l.append(value)
-                    else:
-                        if    len(key) < util.MAX_ATTR_LENGTH \
-                          and len(value) < util.MAX_ATTR_LENGTH \
-                          and util.is_valid_phen_attr(value):
-
-                            phen_attr["name"] = str(key.strip())
-                            phen_attr["value"] = str(unicode(value).strip())
-
-                            if phen_attr not in phen_attr_list:
-                                phen_attr_list.append(phen_attr.copy())
-                                attr_count = attr_count + 1
-
-                if len(phen_attr_list) > 0:
-                    new_phenomenon = phenomenon.copy() 
-                    new_phenomenon["attributes"] = phen_attr_list
-                    new_phenomenon["attribute_count"] = attr_count
-
-                    if new_phenomenon not in phen_list:
-                        phen_list.append(new_phenomenon)
 
                 gapi.grib_release(gid)
 
             fd.close()
+
+            phen_list = self.get_phenomena()
 
             if len(lat_f_l) > 0 \
                and len(lon_f_l) > 0  \
@@ -212,6 +174,9 @@ class GribFile(GenericFile):
                and len(lon_l_l) > 0  \
                and len(date_d_l) > 0 \
                and len(date_t_l):
+
+                print date_d_l
+                print date_t_l
 
                 geospatial_dict = {}
                 geospatial_dict["type"] = "envelope"
@@ -231,12 +196,14 @@ class GribFile(GenericFile):
 
                 geospatial_dict["coordinates"] = [[round(float(lon_f), 3), round(float(lat_f), 3)], [round(float(lon_l), 3), round(float(lat_l), 3) ]]
 
-                temporal_dict["start_time"] = date_d
-                temporal_dict["end_time"] = date_t
+                dt = datetime.strptime(date_d + date_t,'%Y%m%d%H%M').isoformat()
 
-                return (phen_list, geospatial_dict, temporal_dict)
+                temporal_dict["start_time"] = dt
+                temporal_dict["end_time"] = dt
+
+                return phen_list + (geospatial_dict, temporal_dict)
             else:
-                return (phen_list,)
+                return phen_list
 
         except Exception as ex:
             return None
@@ -257,9 +224,14 @@ class GribFile(GenericFile):
             self.handler_id = "grib handler level 3."
 
             if metadata is None:
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
 
+            # If metadata is not None, get_metadata_leve3() did not encounter an error.
+            file_info[0]["info"]["read_status"] = "Successful"
+
             if len(metadata) == 3:
+                # Metadata contains phenomena, geospatial info, temporal info.
                 loc_dict = {}
                 loc_dict["coordinates"] = metadata[1]
                 #file_info[0]["info"]["spatial"] = loc_dict
