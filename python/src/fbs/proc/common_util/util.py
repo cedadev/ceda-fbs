@@ -190,7 +190,7 @@ def build_file_list(path):
     :return: List of files contained withint he specified directory.
     """
     file_list = []
-    for root, _, files in os.walk(path, followlinks=True):
+    for root, _, files in os.walk(path, followlinks=False):
         for each_file in files:
             if each_file[0] == ".": continue
             file_list.append(os.path.join(root, each_file))
