@@ -631,8 +631,9 @@ def simple_phenomena(func):
         {
             "var_id" : "---",
             "units" : "---",
-            "standard_name" : "---"
-            "names" : ["---",...]
+            "standard_name" : "---",
+            "long_name": "---",
+            "names" : ["---",...],
             "agg_string" : '"var_id": "---", "standard_name": "---", ... , "names": "name1";"name2";"..."'
         },
         ...
@@ -655,7 +656,7 @@ def simple_phenomena(func):
         if not data:
             return (None,)
 
-        name_filter = ["units", "var_id", "standard_name"]
+        name_filter = ["units", "var_id", "standard_name", "long_name"]
 
         for phenom in data:
             phen_dict = {}
