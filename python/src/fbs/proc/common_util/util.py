@@ -16,15 +16,15 @@ import re
 import io
 import datetime
 
-
-log_levels = {"debug"   : logging.DEBUG,
-              "info"    : logging.INFO,
-              "warning" : logging.WARNING,
-              "error"   : logging.ERROR,
+log_levels = {"debug": logging.DEBUG,
+              "info": logging.INFO,
+              "warning": logging.WARNING,
+              "error": logging.ERROR,
               "critical": logging.CRITICAL
-             }
+              }
 
 MAX_ATTR_LENGTH = 256
+
 
 class Parameter(object):
     """
@@ -33,6 +33,7 @@ class Parameter(object):
     :param str name: Name of variable/parameter
     :param dict other_params: Optional - Dict containing other param metadata
     """
+
     def __init__(self, name, other_params=None):
         self.items = []
         self.name = name
@@ -63,18 +64,21 @@ class Parameter(object):
         """Return the name of the phenomenon."""
         return self.name
 
+
 class FileFormatError(Exception):
     """
     Exception to raise if there is a error in the file format
     """
     pass
 
+
 def delete_folder(folder):
     try:
-        os.rmdir(folder)#This deletes only empty dirs.
+        os.rmdir(folder)  # This deletes only empty dirs.
     except OSError as ex:
         if ex.errno == errno.ENOTEMPTY:
             pass
+
 
 def sanitise_args(config):
     """
@@ -91,8 +95,8 @@ def sanitise_args(config):
 
     return sane_conf
 
-def read_conf(conf_path):
 
+def read_conf(conf_path):
     """
     Reads configuration file into a dictionary.
 
@@ -108,8 +112,8 @@ def read_conf(conf_path):
             "Can't read configuration file\n%s\n\n" % err_path)
         return {}
 
-def cfg_read(filename):
 
+def cfg_read(filename):
     """
     Reads configuration file into a dictionary.
 
@@ -147,10 +151,8 @@ def cfg_read(filename):
             except:
                 section_options[option] = None
 
-
         conf[section] = section_options.copy()
         section_options.clear()
-
 
     regx_details = {}
     regxs = {}
@@ -163,17 +165,18 @@ def cfg_read(filename):
 
     conf["handlers"] = regxs.copy()
 
-    return  conf
+    return conf
+
 
 def get_settings(conf_path, args):
     # Default configuration options
     # These are overridden by the config file and command-line arguments
     defaults = {}
 
-    #conf_file = read_conf(conf_path)
+    # conf_file = read_conf(conf_path)
     conf_file = cfg_read(conf_path)
 
-    #print conf_file
+    # print conf_file
 
     # Apply updates to CONFIG dictionary in priority order
     # Configuration priority: CONFIG < CONF_FILE < ARGS
@@ -183,8 +186,8 @@ def get_settings(conf_path, args):
 
     return defaults
 
-def build_file_list(path):
 
+def build_file_list(path):
     """
     :param path : A file path
     :return: List of files contained withint he specified directory.
@@ -197,8 +200,8 @@ def build_file_list(path):
 
     return file_list
 
-def write_list_to_file_nl(file_list, filename):
 
+def write_list_to_file_nl(file_list, filename):
     """
     :param file_list : A list of files.
     :param filename : Where the list of files is going to be saved.
@@ -208,14 +211,14 @@ def write_list_to_file_nl(file_list, filename):
     items_written = 0
 
     for item in file_list:
-        infile.write("%s\n" %item)
+        infile.write("%s\n" % item)
         items_written += 1
 
     infile.close()
     return items_written
+
 
 def write_list_to_file(file_list, filename):
-
     """
     :param file_list : A list of files.
     :param filename : Where the list of files is going to be saved.
@@ -225,11 +228,12 @@ def write_list_to_file(file_list, filename):
     items_written = 0
 
     for item in file_list:
-        infile.write("%s" %item)
+        infile.write("%s" % item)
         items_written += 1
 
     infile.close()
     return items_written
+
 
 def read_file_into_list(filename):
     content = []
@@ -238,20 +242,21 @@ def read_file_into_list(filename):
             content.append(line)
     return content
 
+
 def save_to_file(filename, data):
     with io.FileIO(filename, "a") as fp:
         fp.write(data)
 
-def find_in_list(list_str, str_item):
 
+def find_in_list(list_str, str_item):
     for str in list_str:
         if str_item in str:
             return str
 
     return None
 
-def get_file_header(filename):
 
+def get_file_header(filename):
     """
     :param filename : The file to be read.
     :returns: First line of the file.
@@ -261,8 +266,8 @@ def get_file_header(filename):
 
     return first_line.replace("\n", "")
 
-def get_bytes_from_file(filename, num_bytes):
 
+def get_bytes_from_file(filename, num_bytes):
     """
     :param filename : The file to be read.
     :param num_bytes : number of bytes to read.
@@ -278,8 +283,8 @@ def get_bytes_from_file(filename, num_bytes):
 
     return bytes_read
 
-def find_dataset(filename, dataset_id):
 
+def find_dataset(filename, dataset_id):
     """
     :param filename : file containing dataset information.
     :param dataset_id : dataset to be searched.
@@ -300,8 +305,8 @@ def find_dataset(filename, dataset_id):
         except KeyError as ex:
             return None
 
-def find_num_lines_in_file(filename):
 
+def find_num_lines_in_file(filename):
     """
     :param filename : Name of the file to be read.
     :returns: The number of lines in the given file.
@@ -313,33 +318,37 @@ def find_num_lines_in_file(filename):
             num_lines += 1
     return num_lines
 
+
 def valid_attr_length(name, value):
-    if len(value) < MAX_ATTR_LENGTH\
-        and len(name) < MAX_ATTR_LENGTH:
+    if len(value) < MAX_ATTR_LENGTH \
+            and len(name) < MAX_ATTR_LENGTH:
         return True
     return False
+
 
 def is_valid_phen_attr(attribute):
     if attribute is None:
         return True
-    elif  re.search(r"\d+-\d+-\d+.*", attribute) is not None:
+    elif re.search(r"\d+-\d+-\d+.*", attribute) is not None:
         return False
     else:
         return True
 
+
 def is_valid_parameter(name, value):
-    valid_parameters = [ "standard_name",
-                         "long_name",
-                         "title",
-                         "name",
-                         "units"
-                       ]
+    valid_parameters = ["standard_name",
+                        "long_name",
+                        "title",
+                        "name",
+                        "units"
+                        ]
     if name in valid_parameters \
-       and valid_attr_length(name,value):
+            and valid_attr_length(name, value):
         return True
     return False
 
-def is_valid_phenomena(key,value):
+
+def is_valid_phenomena(key, value):
     """
     Wrapper to hide test in main function
     """
@@ -353,8 +362,8 @@ def is_valid_phenomena(key,value):
     # Returns true if both the tests above pass as true
     return True
 
-def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
 
+def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
     """
     :returns: Number of tasks submitted in lotus.
     """
@@ -367,11 +376,12 @@ def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
     if command_output == empty_task_queue_string:
         num_of_running_tasks = 0
     elif command_output.startswith(non_empty_task_queue_string):
-        num_of_running_tasks = command_output.count("\n") -1
+        num_of_running_tasks = command_output.count("\n") - 1
     else:
         num_of_running_tasks = max_number_of_tasks_to_submit
 
     return num_of_running_tasks
+
 
 def is_date_valid(date_text):
     try:
@@ -380,8 +390,8 @@ def is_date_valid(date_text):
     except ValueError:
         return False
 
-def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
 
+def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
     """
     :param task_list : list of commands to run.
     :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
@@ -401,52 +411,48 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
     dec = 1
     iterations_counter = 0
 
-
     info_msg = "Max number of jobs to submit in each step : %s.\
                \nTotal number commands to run : %s." \
-               %(str(max_number_of_tasks_to_submit), str(len(task_list)))
+               % (str(max_number_of_tasks_to_submit), str(len(task_list)))
 
     if logger is not None:
         logger.INFO(info_msg)
         logger.INFO("===============================")
 
-
     print info_msg
     print "==============================="
 
-
     while len(task_list) > 0:
 
-        #Find out if other jobs can be submitted.
+        # Find out if other jobs can be submitted.
         try:
             num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit)
         except  subprocess.CalledProcessError:
             continue
 
-        #num_of_running_tasks = 0
+        # num_of_running_tasks = 0
         num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks
         iterations_counter = iterations_counter + 1
 
-        info_msg = "Iteration : %s." %(str(iterations_counter))
+        info_msg = "Iteration : %s." % (str(iterations_counter))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        info_msg = "Number of jobs running  : %s." %(str(num_of_running_tasks))
+        info_msg = "Number of jobs running  : %s." % (str(num_of_running_tasks))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        info_msg = "Number of jobs to submit in this step : %s." %(str(num_of_tasks_to_submit))
+        info_msg = "Number of jobs to submit in this step : %s." % (str(num_of_tasks_to_submit))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-
-        #Submit jobs according to availability.
+        # Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
 
             if len(task_list) == 0:
@@ -465,29 +471,27 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
 
         print info_msg
 
-        #Wait in case some process terminates.
-        info_msg = "Waiting for : %s secs." %(str(wait_time))
+        # Wait in case some process terminates.
+        info_msg = "Waiting for : %s secs." % (str(wait_time))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
         time.sleep(wait_time)
 
-
-        #If nothing can be submitted wait again.
+        # If nothing can be submitted wait again.
         if num_of_tasks_to_submit == 0:
             wait_time = wait_time - dec
             if wait_time == 0:
                 wait_time = init_wait_time
-
 
         if logger is not None:
             logger.INFO("===============================")
 
         print "==============================="
 
-def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
 
+def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
     """
     :param task_file : file of commands to run.
     :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
@@ -511,49 +515,47 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
 
     info_msg = "Max number of jobs to submit in each step : %s.\
                \nTotal number commands to run : %s." \
-               %(str(max_number_of_tasks_to_submit), str(len(task_list)))
+               % (str(max_number_of_tasks_to_submit), str(len(task_list)))
 
     if logger is not None:
         logger.INFO(info_msg)
         logger.INFO("===============================")
 
-
     print info_msg
     print "==============================="
 
-
     while len(task_list) > 0:
 
-        #Find out if other jobs can be submitted.
+        # Find out if other jobs can be submitted.
         try:
-            #num_of_running_tasks = 1
+            # num_of_running_tasks = 1
             num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit)
         except  subprocess.CalledProcessError:
             continue
 
-        #num_of_running_tasks = 0
+        # num_of_running_tasks = 0
         num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks
         iterations_counter = iterations_counter + 1
 
-        info_msg = "Iteration : %s." %(str(iterations_counter))
+        info_msg = "Iteration : %s." % (str(iterations_counter))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        info_msg = "Number of jobs running: %s." %(str(num_of_running_tasks))
+        info_msg = "Number of jobs running: %s." % (str(num_of_running_tasks))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        info_msg = "Number of jobs to submit in this step: %s." %(str(num_of_tasks_to_submit))
+        info_msg = "Number of jobs to submit in this step: %s." % (str(num_of_tasks_to_submit))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
 
-        #Submit jobs according to availability.
+        # Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
 
             if len(task_list) == 0:
@@ -575,21 +577,19 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
 
         print info_msg
 
-        #Wait in case some process terminates.
-        info_msg = "Waiting for : %s secs." %(str(wait_time))
+        # Wait in case some process terminates.
+        info_msg = "Waiting for : %s secs." % (str(wait_time))
         if logger is not None:
             logger.INFO(info_msg)
 
         print info_msg
         time.sleep(wait_time)
 
-
-        #If nothing can be submitted wait again.
+        # If nothing can be submitted wait again.
         if num_of_tasks_to_submit == 0:
             wait_time = wait_time - dec
             if wait_time == 0:
                 wait_time = init_wait_time
-
 
         if logger is not None:
             logger.INFO("===============================")
@@ -604,6 +604,7 @@ def _make_bsub_command(task, count, logger=None):
     if logger is not None: logger.INFO(info_msg)
     print info_msg
     return command
+
 
 def simple_phenomena(func):
     """
@@ -649,14 +650,16 @@ def simple_phenomena(func):
     :param func: Function to decorate
     :return: wrapped function
     """
-    def func_wrapper(*args,**kwargs):
+
+    def func_wrapper(*args, **kwargs):
         phenom_list = []
 
-        data = func(*args,**kwargs)
+        data = func(*args, **kwargs)
         if not data:
             return (None,)
 
         name_filter = ["units", "var_id", "standard_name", "long_name"]
+        names_list_filter = ["standard_name", "long_name", "title", "name"]
 
         for phenom in data:
             phen_dict = {}
@@ -664,18 +667,18 @@ def simple_phenomena(func):
             agg_string = ""
             agg_string_list = []
             for attr in phenom["attributes"]:
-                if attr["name"] in name_filter:
-                    phen_dict[attr["name"]] = attr["value"]
-                    agg_string_list.append('"{}":"{}"'.format(attr["name"],attr["value"]))
-                else:
-                    value = attr["value"]
-                    if is_valid_parameter(attr["name"],value) and value not in names:
-                        names.append('"{}"'.format(value))
+                value = attr["value"]
+                name = attr["name"]
 
-                # Make sure standard name is also in the names list.
-                if attr["name"] == "standard_name" and attr["value"] not in names:
-                    names.append('"{}"'.format(attr["value"]))
+                # Remove extra spaces and any quotation marks which will interfere with creating the agg_string
+                value = re.sub('  +',' ', value).replace('"','')
 
+                if name in name_filter:
+                    phen_dict[name] = value
+                    agg_string_list.append('"{}":"{}"'.format(name, value))
+
+                if name in names_list_filter and value not in names:
+                    names.append('"{}"'.format(value))
 
             if names:
                 names.sort()
@@ -693,4 +696,3 @@ def simple_phenomena(func):
         return (phenom_list,)
 
     return func_wrapper
-

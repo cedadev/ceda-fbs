@@ -12,8 +12,15 @@ class BadcCsvFile(GenericFile):
 
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
-        self.handler_id = "Badc csv."
-        self.FILE_FORMAT = "Badc csv."
+        self.handler_id = "Badc csv"
+        self.FILE_FORMAT = self.get_file_format()
+
+    def get_file_format(self):
+        with open(self.file_path) as fp:
+            if 'BADC-CSV' in fp.readline():
+                return 'BADC CSV'
+            else:
+                return 'CSV'
 
     def get_handler_id(self):
         return self.handler_id
@@ -72,8 +79,8 @@ class BadcCsvFile(GenericFile):
         file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
-            fp = open(self.file_path)
-            phen = self.get_phenomena(fp)
+            with open(self.file_path) as fp:
+                phen = self.get_phenomena(fp)
 
             file_info[0]["info"]["read_status"] = "Successful"
             return  file_info +  phen
@@ -86,9 +93,10 @@ class BadcCsvFile(GenericFile):
         file_info = self.get_metadata_generic_level1()
 
         if file_info is not None:
-            fp = open(self.file_path)
-            phen = self.csv_parse(fp)
-            phenomena = self.get_phenomena()
+            with open(self.file_path) as fp:
+                phen = self.csv_parse(fp)
+                fp.seek(0)
+                phenomena = self.get_phenomena(fp)
 
 
             #l1  =  max(geospatial["lat"])
@@ -106,14 +114,18 @@ class BadcCsvFile(GenericFile):
         else:
             return None
 
+
     def get_metadata(self):
 
-        if self.level == "1":
+        if self.FILE_FORMAT == 'CSV':
             res = self.get_metadata_generic_level1()
-        elif self.level == "2":
-            res = self.get_metadata_badccsv_level2()
-        elif self.level == "3":
-            res = self.get_metadata_badccsv_level3()
+        else:
+            if self.level == "1":
+                res = self.get_metadata_generic_level1()
+            elif self.level == "2":
+                res = self.get_metadata_badccsv_level2()
+            elif self.level == "3":
+                res = self.get_metadata_badccsv_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
