@@ -46,7 +46,12 @@
               }
             },
             "format": {
-              "type": "text"
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
             },
             "md5": {
               "type": "keyword"
@@ -108,7 +113,7 @@
               }
             },
             "location": {
-              "type": "text"
+              "type": "keyword"
             },
             "size": {
               "type": "long"
