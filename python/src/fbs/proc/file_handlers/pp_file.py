@@ -72,20 +72,7 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
-    @util.simple_phenomena
     def get_phenomena(self):
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-          "name" : "",
-          "value": ""
-        }
 
         try:
             self.handler_id = "pp handler level 2."
@@ -95,42 +82,35 @@ class PpFile(GenericFile):
             # Filter long values and overwrite duplicates.
             phen_list = []
             for var_id in var_ids:
+                new_phenomenon = {}
                 metadata_dict = pp_file_content[var_id].attributes
                 phen_attr_list = []
-                attr_count = 0
                 for key in metadata_dict.keys():
-
                     value = str(metadata_dict[key])
 
                     if not util.is_valid_phenomena(key,value):
                         continue
-                    # if len(key) < util.MAX_ATTR_LENGTH \
-                    #     and len(value) < util.MAX_ATTR_LENGTH \
-                    #     and util.is_valid_phen_attr(value):
+
+                    phen_attr = {}
+
                     phen_attr["name"] = str(key.strip())
                     phen_attr["value"] = str(unicode(value).strip())
 
-                    phen_attr_list.append(phen_attr.copy())
-                    attr_count = attr_count + 1
+                    phen_attr_list.append(phen_attr)
 
                 # Dict of phenomenon attributes.
                 if len(phen_attr_list) > 0:
-
-                    # phenomenon 		is a dictionary type
-                    # phen_attr_list	is a list
-                    # attr_count		is an INT
-                    new_phenomenon = phenomenon.copy() 
                     new_phenomenon["attributes"] = phen_attr_list
-                    new_phenomenon["attribute_count"] = attr_count
 
-                    # JAR 11-Oct-2016
                     # Append to list if new_phenomenon is NOT already in the phen_list
                     if new_phenomenon not in phen_list:
                         phen_list.append(new_phenomenon)
 
             pp_file_content.close()
 
-            return phen_list
+            file_phenomena = util.build_phenomena(phen_list)
+
+            return file_phenomena
         except Exception as ex:
             return None
 
@@ -288,3 +268,10 @@ class PpFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    # run test
+    file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
+    ppf = PpFile(file,'2')
+    print ppf.get_metadata()
