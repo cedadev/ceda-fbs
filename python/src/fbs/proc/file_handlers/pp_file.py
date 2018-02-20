@@ -196,32 +196,9 @@ class PpFile(GenericFile):
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
 
-                phen_list = []
+                phen_list = self.get_phenomena()
+
                 for var_id in var_ids:
-                    metadata_dict = pp_file_content[var_id].attributes
-                    phen_attr_list = []
-
-                    attr_count = 0
-                    for key in metadata_dict.keys():
-
-                        value = str(metadata_dict[key])
-
-                        if      len(key) < util.MAX_ATTR_LENGTH \
-                            and len(value) < util.MAX_ATTR_LENGTH \
-                            and util.is_valid_phen_attr(value):
-
-                            phen_attr["name"] = str(key.strip())
-                            phen_attr["value"] = str(unicode(value).strip())
-
-                            phen_attr_list.append(phen_attr.copy())
-                            attr_count = attr_count + 1
-
-                    #Dict of phenomenon attributes.
-                    if len(phen_attr_list) > 0:
-                        new_phenomenon = phenomenon.copy() 
-                        new_phenomenon["attributes"] = phen_attr_list
-                        new_phenomenon["attribute_count"] = attr_count
-                        phen_list.append(new_phenomenon)
 
                     try :
                         spatial  = self.getBoundingBox(var_id, pp_file_content)
@@ -264,8 +241,12 @@ class PpFile(GenericFile):
 
                 pp_file_content.close()
 
-                return file_info + (phen_list, spatial, )
+                file_info[0]["info"]["read_status"] = "Successful"
+
+                return file_info + phen_list + (spatial, )
             except Exception as ex:
+                # There was an error reading the file
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
         else:
             return None

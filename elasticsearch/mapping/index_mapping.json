@@ -1,38 +1,5 @@
 {
   "mappings": {
-    "phenomenon": {
-      "properties": {
-        "id": {
-          "type": "text"
-        },
-        "attribute_count": {
-          "type": "short"
-        },
-        "attributes": {
-          "type": "nested",
-          "properties": {
-            "name": {
-              "type": "text"
-            },
-            "value": {
-              "type": "text"
-            }
-          }
-        }
-      }
-    },
-    "locations": {
-      "properties": {
-        "id": {
-          "type": "text"
-        },
-        "coordinates": {
-          "type": "geo_shape",
-          "tree": "quadtree",
-          "precision": "5km"
-        }
-      }
-    },
     "file": {
       "properties": {
         "info": {

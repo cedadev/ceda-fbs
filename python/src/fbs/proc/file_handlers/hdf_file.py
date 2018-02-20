@@ -208,7 +208,13 @@ class HdfFile(GenericFile):
         file_info = self.get_metadata_generic_level1()
 
         #First method for extracting information.
-        self.hdf = HDF(self.file_path)
+        try:
+            self.hdf = HDF(self.file_path)
+            file_info[0]["info"]["read_status"] = "Successful"
+        except Exception:
+            file_info[0]["info"]["read_status"] = "Read Error"
+            return file_info
+
         self.vs = self.hdf.vstart()
         self.v = self.hdf.vgstart()
 
