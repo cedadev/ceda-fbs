@@ -75,7 +75,8 @@ class MetadataTagsJsonFile(GenericFile):
 
         if file_info is not None:
 
-            self.handler_id = "Metadata tags json handler level 2."
+            self.handler_id = "Metadata tags json handler level 3."
+
             metadata = json.loads(open(self.file_path).read())
 
             phen_list = self.get_phenomena(metadata)
@@ -96,7 +97,9 @@ class MetadataTagsJsonFile(GenericFile):
         end_time   = metadata["time"][1]
         file_info[0]["info"]["temporal"] = {'start_time': start_time, 'end_time': end_time }
 
-        return file_info + (phen_list, spatial, )
+        file_info[0]["info"]["read_status"] = "Successful"
+
+        return file_info + phen_list + (spatial, )
 
     def get_metadata(self):
 

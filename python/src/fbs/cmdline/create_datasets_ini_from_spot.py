@@ -47,7 +47,8 @@ for line in log_mapping:
     
     # Only add path to output list if it is a real directory
     if os.path.exists(directory):    
-        path = use_data_dir(directory)
+        # path = use_data_dir(directory)
+        path = directory
         output_list.add('{}={}'.format(spot,path))
 
 print "Writing to file"

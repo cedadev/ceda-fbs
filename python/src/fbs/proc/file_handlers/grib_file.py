@@ -4,7 +4,6 @@ import proc.common_util.util as util
 from proc.file_handlers.generic_file import GenericFile
 import datetime
 
-
 class GribFile(GenericFile):
     """
     Class for returning basic information about the content
@@ -71,7 +70,9 @@ class GribFile(GenericFile):
         except Exception:
             return None
 
+
     def get_geospatial(self):
+
 
         lat_f_l = []
         lon_f_l = []
@@ -86,6 +87,7 @@ class GribFile(GenericFile):
         ]
         with open(self.file_path) as fd:
             while True:
+
                 gid = gapi.grib_new_from_file(fd)
                 if gid is None: break
 
@@ -125,6 +127,7 @@ class GribFile(GenericFile):
             lon_f = min(lon_f_l)
             lat_l = max(lat_l_l)
             lon_l = max(lon_l_l)
+
 
             if float(lon_l) > 180:
                 lon_l = (float(lon_l) - 180) - 180

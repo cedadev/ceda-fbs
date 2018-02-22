@@ -47,59 +47,73 @@ class KmzFile(GenericFile):
                         result.append(key)
                         result.append(item)
 
+
+
     def get_metadata_level3(self):
         self.handler_id = "Manifest handler level 3."
         spatial = None
 
-        res = self.get_metadata_level1()
+        file_info = self.get_metadata_level1()
+
         # this is what i need to find.
         #len(parsed["kml"]["Document"]["Folder"][1]["Placemark"])
 
-        if self.file_path.endswith('.kmz'):
-            archive = zipfile.ZipFile(self.file_path, 'r')
-            uncompressed_file = os.path.basename(self.file_path)
-            uncompressed_file = uncompressed_file.replace(".kmz", ".kml")
-            xml_doc = archive.read(uncompressed_file)
-        else:
-            with open(self.file_path, 'r') as xml_file:
-                xml_doc = xml_file.read()
+        try:
 
-        xml_dict = xmltodict.parse(xml_doc)
+            if self.file_path.endswith('.kmz'):
+                archive = zipfile.ZipFile(self.file_path, 'r')
+                uncompressed_file = os.path.basename(self.file_path)
+                uncompressed_file = uncompressed_file.replace(".kmz", ".kml")
+                xml_doc = archive.read(uncompressed_file)
+            else:
+                with open(self.file_path, 'r') as xml_file:
+                    xml_doc = xml_file.read()
 
-        number_of_records = len(xml_dict["kml"]["Document"]["Folder"][1]["Placemark"])
+            xml_dict = xmltodict.parse(xml_doc)
 
-        lat_l = []
-        lon_l = []
-        lat_u = []
-        lon_u = []
+            number_of_records = len(xml_dict["kml"]["Document"]["Folder"][1]["Placemark"])
 
-        dates = [] 
-        times = []
-        for i in range(0, number_of_records):
-            coordinates = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["LineString"]["coordinates"]
-            date = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][1]["td"][1]
-            time = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][2]["td"][1]
-            lon_l.append(coordinates.split(" ")[0].split(",")[0])
-            lat_l.append(coordinates.split(" ")[0].split(",")[1])
-            lon_u.append(coordinates.split(" ")[1].split(",")[0])
-            lat_u.append(coordinates.split(" ")[1].split(",")[1])
-            dates.append(date) 
-            times.append(time)
+            lat_l = []
+            lon_l = []
+            lat_u = []
+            lon_u = []
+
+            dates = []
+            times = []
+            for i in range(0, number_of_records):
+                print i, xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]
+                coordinates = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["LineString"]["coordinates"]
+                date = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][1]["td"][1]
+                time = xml_dict["kml"]["Document"]["Folder"][1]["Placemark"][i]["description"]["table"]["tr"][2]["td"][1]
+                lon_l.append(coordinates.split(" ")[0].split(",")[0])
+                lat_l.append(coordinates.split(" ")[0].split(",")[1])
+                lon_u.append(coordinates.split(" ")[1].split(",")[0])
+                lat_u.append(coordinates.split(" ")[1].split(",")[1])
+                dates.append(date)
+                times.append(time)
 
 
-        c1 = min(lat_l)
-        c2 = min(lon_l)
-        c3 = max(lat_u)
-        c4 = max(lon_u)
-        dt = datetime.datetime.strptime(min(dates), '%d-%m-%Y')
-        start_date = "{}-{}-{}".format(dt.year, dt.month, dt.day)
-        dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
-        end_date   = "{}-{}-{}".format(dt.year, dt.month, dt.day)
+            c1 = min(lat_l)
+            c2 = min(lon_l)
+            c3 = max(lat_u)
+            c4 = max(lon_u)
+            dt = datetime.datetime.strptime(min(dates), '%d-%m-%Y')
+            start_date = "{}-{}-{}".format(dt.year, dt.month, dt.day)
+            dt = datetime.datetime.strptime(max(dates), '%d-%m-%Y')
+            end_date   = "{}-{}-{}".format(dt.year, dt.month, dt.day)
 
-        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(float(c2), 3), round(float(c1), 3) ], [round(float(c4), 3), round(float(c3), 3)]] } }
-        res[0]["info"]["temporal"] = {'start_time': start_date , 'end_time': end_date }#"1975-01-01"
+            spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(float(c2), 3), round(float(c1), 3) ], [round(float(c4), 3), round(float(c3), 3)]] } }
+            file_info[0]["info"]["temporal"] = {'start_time': start_date , 'end_time': end_date }#"1975-01-01"
 
-        return res + (None, spatial, )
+            file_info[0]["info"]["read_status"] = "Successful"
+
+            return file_info + (None, spatial, )
+
+        except Exception:
+
+            file_info[0]["info"]["read_status"] = "Read Error"
+            return file_info
+
 
     def get_metadata(self):
 

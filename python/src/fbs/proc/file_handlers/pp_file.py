@@ -210,8 +210,14 @@ class PpFile(GenericFile):
 
                 pp_file_content.close()
 
-                return file_info + (phen_list, spatial,)
+
+                file_info[0]["info"]["read_status"] = "Successful"
+
+                return file_info + phen_list + (spatial, )
+
             except Exception as ex:
+                # There was an error reading the file
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
         else:
             return None
