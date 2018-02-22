@@ -340,7 +340,9 @@ def is_valid_parameter(name, value):
                         "long_name",
                         "title",
                         "name",
-                        "units"
+                        "units",
+                        "var_id",
+                        "title"
                         ]
     if name in valid_parameters \
             and valid_attr_length(name, value):
@@ -606,93 +608,45 @@ def _make_bsub_command(task, count, logger=None):
     return command
 
 
-def simple_phenomena(func):
-    """
-    @Decorator
-    Flattens output of get_phenomena() from:
+def build_phenomena(data):
+    if not data:
+        return (None,)
 
-    -------------------------------------------------------------------------------------------------------------------
+    phenom_list = []
 
-     [{"attributes": [
-                {
-                    "name":"---",
-                    "value":"---"
-                },
-                ...
-            ]
-     }]
+    name_filter = ["units", "var_id", "standard_name", "long_name"]
+    names_list_filter = ["standard_name", "long_name", "title", "name"]
 
-    -------------------------------------------------------------------------------------------------------------------
+    for phenom in data:
+        phen_dict = {}
+        names = []
+        agg_string = ""
+        agg_string_list = []
+        for attr in phenom["attributes"]:
+            value = attr["value"]
+            name = attr["name"]
 
-    to:
+            # Remove extra spaces and any quotation marks which will interfere with creating the agg_string
+            value = re.sub('  +', ' ', value).replace('"', '')
 
-    -------------------------------------------------------------------------------------------------------------------
+            if name in name_filter:
+                phen_dict[name] = value
+                agg_string_list.append('"{}":"{}"'.format(name, value))
 
-    [
-        {
-            "var_id" : "---",
-            "units" : "---",
-            "standard_name" : "---",
-            "long_name": "---",
-            "names" : ["---",...],
-            "agg_string" : '"var_id": "---", "standard_name": "---", ... , "names": "name1";"name2";"..."'
-        },
-        ...
-    ]
+            if name in names_list_filter and value not in names:
+                names.append('"{}"'.format(value))
 
-    -------------------------------------------------------------------------------------------------------------------
+        if names:
+            names.sort()
+            phen_dict["names"] = names
+            agg_string_list.append('"names":{}'.format(';'.join(names)))
 
-    This can be split using regex:
+        if agg_string_list:
+            agg_string_list.sort()
+            agg_string = ','.join(agg_string_list)
 
-    r',*(?P<names>\"names\":[A-Za-z0-9 ,:;_\"]*)?,*(?P<standard_name>\"standard_name\":[A-Za-z0-9_\"]*)?,*(?P<units>\"units\":[A-Za-z0-9 -\"]*)?,*(?P<var_id>\"var_id\":[A-Za-z0-9_\"]*)?,*'
+        if phen_dict:
+            phen_dict["agg_string"] = agg_string
+            phenom_list.append(phen_dict)
 
-
-    :param func: Function to decorate
-    :return: wrapped function
-    """
-
-    def func_wrapper(*args, **kwargs):
-        phenom_list = []
-
-        data = func(*args, **kwargs)
-        if not data:
-            return (None,)
-
-        name_filter = ["units", "var_id", "standard_name", "long_name"]
-        names_list_filter = ["standard_name", "long_name", "title", "name"]
-
-        for phenom in data:
-            phen_dict = {}
-            names = []
-            agg_string = ""
-            agg_string_list = []
-            for attr in phenom["attributes"]:
-                value = attr["value"]
-                name = attr["name"]
-
-                # Remove extra spaces and any quotation marks which will interfere with creating the agg_string
-                value = re.sub('  +',' ', value).replace('"','')
-
-                if name in name_filter:
-                    phen_dict[name] = value
-                    agg_string_list.append('"{}":"{}"'.format(name, value))
-
-                if name in names_list_filter and value not in names:
-                    names.append('"{}"'.format(value))
-
-            if names:
-                names.sort()
-                phen_dict["names"] = names
-                agg_string_list.append('"names":{}'.format(';'.join(names)))
-
-            if agg_string_list:
-                agg_string_list.sort()
-                agg_string = ','.join(agg_string_list)
-
-            if phen_dict:
-                phen_dict["agg_string"] = agg_string
-                phenom_list.append(phen_dict)
-
-        return (phenom_list,)
-
-    return func_wrapper
+    return (phenom_list,)

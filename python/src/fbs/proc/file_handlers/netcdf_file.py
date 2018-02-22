@@ -1,6 +1,5 @@
 import netCDF4
 
-
 from proc.file_handlers.generic_file import GenericFile
 import proc.common_util.util as util
 import proc.common_util.geojson as geojson
@@ -126,62 +125,49 @@ class   NetCdfFile(GenericFile):
     #     # Returns true if both the tests above pass as true
     #     return True
 
-    @util.simple_phenomena
     def get_phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
         :returns : List of metadata.product.Parameter objects.
         """
         phen_list = []
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-          "name" : "",
-          "value": ""
-        }
 
         #for all phenomena list.
         for v_name, v_data in netcdf.variables.iteritems():
+            new_phenomenon = {}
             phen_attr_list = []
 
             #for all attributtes in phenomenon.
-            attr_count  = 0
             for key, value in v_data.__dict__.iteritems():
 
                 if not util.is_valid_phenomena(key,value):
                     continue
 
+                phen_attr = {}
+
                 phen_attr["name"] = str(key.strip())
                 phen_attr["value"] = str(unicode(value).strip())
 
-                phen_attr_list.append(phen_attr.copy())
-                attr_count = attr_count + 1
+                phen_attr_list.append(phen_attr)
 
 
             phen_attr["name"] = "var_id"
             phen_attr["value"] = str(v_name)
 
-            phen_attr_list.append(phen_attr.copy())
-            attr_count = attr_count + 1
+            phen_attr_list.append(phen_attr)
 
             if len(phen_attr_list) > 0:
-                new_phenomenon = phenomenon.copy() 
                 new_phenomenon["attributes"] = phen_attr_list
-                new_phenomenon["attribute_count"] = attr_count
 
                 phen_list.append(new_phenomenon)
 
-        return phen_list
+        file_phenomena = util.build_phenomena(phen_list)
 
-    def get_metadata_netcdf_level2(self):
+        return file_phenomena
 
-        file_info = self.get_metadata_generic_level1()
+    def get_metadata_level2(self):
+
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
             try:
@@ -196,14 +182,14 @@ class   NetCdfFile(GenericFile):
         else:
             return None
 
-    def get_metadata_netcdf_level3(self):
+    def get_metadata_level3(self):
 
         """
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
         #level 1
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
         spatial = None
         netcdf_phenomena = None
 
@@ -248,18 +234,17 @@ class   NetCdfFile(GenericFile):
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
-                return file_info
         else:
             return None
 
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_netcdf_level2()
+            res = self.get_metadata_level2()
         elif self.level == "3":
-            res = self.get_metadata_netcdf_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -270,3 +255,22 @@ class   NetCdfFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
+    ncf = NetCdfFile(file,level)
+    start = datetime.datetime.today()
+    print ncf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start
+
