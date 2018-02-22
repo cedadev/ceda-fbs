@@ -36,22 +36,9 @@ class NasaAmesFile(GenericFile):
         except Exception:
             return None
 
-    @util.simple_phenomena
     def get_phenomena(self):
 
         phen_list = []
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-         "name" : "",
-         "value": ""
-        }
 
         nasaames_phenomena = self.phenomena()
 
@@ -61,28 +48,22 @@ class NasaAmesFile(GenericFile):
         #List of phenomena
         for item in nasaames_phenomena:           #get all parameter objects.
 
-            phen_attr_list = []
-            #name = item.get_name()                #get phenomena name.
-            #phen_attr["name"] = "var_id"
-            #phen_attr["value"] = str(unicode(name).strip())
-
             phen_attr_list = item.get()
-            #phen_attr_list.append(phen_attr)
-            attr_count = len(phen_attr_list)
 
-            new_phenomenon = phenomenon.copy()
+            new_phenomenon = {}
             new_phenomenon["attributes"] = phen_attr_list
-            new_phenomenon["attribute_count"] = attr_count
 
             phen_list.append(new_phenomenon)
 
-        return phen_list
+        file_phenomena = util.build_phenomena(phen_list)
+
+        return file_phenomena
 
 
-    def get_metadata_nasaames_level2(self):
+    def get_metadata_level2(self):
 
         #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
 
@@ -100,19 +81,19 @@ class NasaAmesFile(GenericFile):
         else:
             return None
 
-    def get_metadata_nasaames_level3(self):
-        res = self.get_metadata_nasaames_level2()
+    def get_metadata_level3(self):
+        res = self.get_metadata_level2()
         self.handler_id = "Nasaames handler level 3."
         return res
 
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_nasaames_level2()
+            res = self.get_metadata_level2()
         elif self.level == "3":
-            res = self.get_metadata_nasaames_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -123,3 +104,21 @@ class NasaAmesFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/neodc/arsf/2008/VOC_05/VOC_05-2008_307_Chile/aimms/arsf-aimms20_arsf-dornier_20081102_r0_307_voc-05.na'
+    naf = NasaAmesFile(file,level)
+    start = datetime.datetime.today()
+    print naf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

@@ -27,12 +27,6 @@ class BadcCsvFile(GenericFile):
 
     def csv_parse(self, fp):
 
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
         phenomena = {}
         date = None
         location = None
@@ -40,6 +34,8 @@ class BadcCsvFile(GenericFile):
         reader = csv.reader(fp)
 
         for row in reader:
+            new_phenomenon = {}
+
             if row[0] == "data":
                 break
             elif row[1] == "G":
@@ -51,17 +47,13 @@ class BadcCsvFile(GenericFile):
             else:
                 if row[1] in phenomena:
                     phenomena[row[1]]["attributes"] .append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
-                    phenomena[row[1]]["attribute_count"] = phenomena[row[1]]["attribute_count"] + 1
                 else:
-                    new_phenomenon = phenomenon.copy()
                     new_phenomenon["attributes"] = []
                     new_phenomenon["attributes"].append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
-                    new_phenomenon["attribute_count"] = 1
                     phenomena[row[1]] = new_phenomenon
 
         return (phenomena, date, location)
 
-    @util.simple_phenomena
     def get_phenomena(self, fp):
 
         phen_list = []
@@ -71,12 +63,15 @@ class BadcCsvFile(GenericFile):
         for key in phenomena.keys():
             phen_list.append(phenomena[key])
 
-        return phen_list
+        file_phenomena = util.build_phenomena(phen_list)
 
-    def get_metadata_badccsv_level2(self):
+
+        return file_phenomena
+
+    def get_metadata_level2(self):
         self.handler_id = "Csv handler level 2."
 
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
             with open(self.file_path) as fp:
@@ -87,10 +82,10 @@ class BadcCsvFile(GenericFile):
         else:
             return None
 
-    def get_metadata_badccsv_level3(self):
+    def get_metadata_level3(self):
         self.handler_id = "Csv handler level 3."
 
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
             with open(self.file_path) as fp:
@@ -98,17 +93,15 @@ class BadcCsvFile(GenericFile):
                 fp.seek(0)
                 phenomena = self.get_phenomena(fp)
 
-
-            #l1  =  max(geospatial["lat"])
-            #l2  =  min(geospatial["lat"])
-
-            #lo1  = max(geospatial["lon"])
-            #lo2 =  min(geospatial["lon"])
-
+            # l1  =  max(geospatial["lat"])
+            # l2  =  min(geospatial["lat"])
+            #
+            # lo1  = max(geospatial["lon"])
+            # lo2 =  min(geospatial["lon"])
 
             #file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
             if phen[2] is not None:
-                file_info[0]["info"]["temporal"] = {"start_time": phen[2], "end_time": phen[2] }
+                file_info[0]["info"]["temporal"] = {"start_time": phen[1], "end_time": phen[1] }
 
             return file_info +  phenomena
         else:
@@ -118,14 +111,14 @@ class BadcCsvFile(GenericFile):
     def get_metadata(self):
 
         if self.FILE_FORMAT == 'CSV':
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         else:
             if self.level == "1":
-                res = self.get_metadata_generic_level1()
+                res = self.get_metadata_level1()
             elif self.level == "2":
-                res = self.get_metadata_badccsv_level2()
+                res = self.get_metadata_level2()
             elif self.level == "3":
-                res = self.get_metadata_badccsv_level3()
+                res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -136,3 +129,20 @@ class BadcCsvFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
+    baf = BadcCsvFile(file,level)
+    start = datetime.datetime.today()
+    print baf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

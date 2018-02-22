@@ -47,11 +47,11 @@ class KmzFile(GenericFile):
                         result.append(key)
                         result.append(item)
 
-    def get_metadata_kmz_level3(self):
-        self.handler_id = "MAnifest handler level 3."
+    def get_metadata_level3(self):
+        self.handler_id = "Manifest handler level 3."
         spatial = None
 
-        res = self.get_metadata_generic_level1()
+        res = self.get_metadata_level1()
         # this is what i need to find.
         #len(parsed["kml"]["Document"]["Folder"][1]["Placemark"])
 
@@ -104,11 +104,11 @@ class KmzFile(GenericFile):
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "3":
-            res = self.get_metadata_kmz_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -119,3 +119,21 @@ class KmzFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/neodc/arsf/2011/GB11_05/GB11_05-2011_285_London/photography/GB11_05-2011_285.kml'
+    kmf = KmzFile(file,level)
+    start = datetime.datetime.today()
+    print kmf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

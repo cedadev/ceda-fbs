@@ -4,12 +4,11 @@ Created on 3 Jun 2016
 @author: kleanthis
 '''
 from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
+
 from pyhdf.HDF import HDF
-from pyhdf.VS import VS
-from pyhdf.V import V
+
 from pyhdf.error import HDF4Error
-import datetime
+
 from pyhdf.SD import SD, SDC
 
 
@@ -19,9 +18,6 @@ class HdfFile(GenericFile):
         GenericFile.__init__(self, file_path, level)
         self.handler_id = "hdf2."
         self.FILE_FORMAT = "hdf2."
-        #hdf = None
-        #vs = None
-        #v = None
 
     def get_handler_id(self):
         return self.handler_id
@@ -165,25 +161,10 @@ class HdfFile(GenericFile):
 
         return None
 
-    def get_phenomena(self, fp):
-        phen_list = []
-        return phen_list
-
-    def get_metadata_badccsv_level2(self):
-        return None
-
     def get_geolocation(self):
         # Open file.
 
         hdf = SD(self.file_path, SDC.READ)
-
-        # List available SDS datasets.
-        datasets = hdf.datasets()
-
-        # Read dataset.
-        #DATAFIELD_NAME='RelHumid_A'
-        #data3D = hdf.select(DATAFIELD_NAME)
-        #data = data3D[11,:,:]
 
         # Read geolocation dataset.
         try:
@@ -201,11 +182,11 @@ class HdfFile(GenericFile):
 
         return coord
 
-    def get_metadata_badccsv_level3(self):
+    def get_metadata_level3(self):
         self.handler_id = "Hdf handler level 3."
         spatial = None
 
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         #First method for extracting information.
         self.hdf = HDF(self.file_path)
@@ -247,11 +228,11 @@ class HdfFile(GenericFile):
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "3":
-            res = self.get_metadata_badccsv_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -262,3 +243,21 @@ class HdfFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/neodc/arsf/2006/GB05_01/GB05_01-2006_208_Inveresk/L1b/c208031b.hdf'
+    hdf = HdfFile(file,level)
+    start = datetime.datetime.today()
+    print hdf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

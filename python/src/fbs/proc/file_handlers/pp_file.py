@@ -1,7 +1,5 @@
 import cdms2 as cdms
-import os
 import proc.common_util.util as util
-import datetime
 
 
 from proc.file_handlers.generic_file import GenericFile
@@ -72,11 +70,11 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
-    def get_phenomena(self):
+    def get_phenomena(self, pp_file_content):
 
         try:
             self.handler_id = "pp handler level 2."
-            pp_file_content=cdms.open(self.file_path)
+            # pp_file_content=cdms.open(self.file_path)
             var_ids = pp_file_content.listvariables()
 
             # Filter long values and overwrite duplicates.
@@ -106,7 +104,7 @@ class PpFile(GenericFile):
                     if new_phenomenon not in phen_list:
                         phen_list.append(new_phenomenon)
 
-            pp_file_content.close()
+            # pp_file_content.close()
 
             file_phenomena = util.build_phenomena(phen_list)
 
@@ -114,13 +112,17 @@ class PpFile(GenericFile):
         except Exception as ex:
             return None
 
-    def get_metadata_pp_level2(self):
+    def get_metadata_level2(self):
 
         # Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
-            phen_list = self.get_phenomena()
+
+            pp_file_content = cdms.open(self.file_path)
+            phen_list = self.get_phenomena(pp_file_content)
+            pp_file_content.close()
+
             if phen_list is not None:
                 file_info[0]["info"]["read_status"] = "Successful"
                 return file_info + phen_list
@@ -144,24 +146,11 @@ class PpFile(GenericFile):
 
         return coord
 
-    def get_metadata_pp_level3(self):
-
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-          "name" : "",
-          "value": ""
-        }
+    def get_metadata_level3(self):
 
         spatial = None
         #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
             try:
@@ -176,44 +165,19 @@ class PpFile(GenericFile):
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
 
-                phen_list = []
                 for var_id in var_ids:
-                    metadata_dict = pp_file_content[var_id].attributes
-                    phen_attr_list = []
-
-                    attr_count = 0
-                    for key in metadata_dict.keys():
-
-                        value = str(metadata_dict[key])
-
-                        if      len(key) < util.MAX_ATTR_LENGTH \
-                            and len(value) < util.MAX_ATTR_LENGTH \
-                            and util.is_valid_phen_attr(value):
-
-                            phen_attr["name"] = str(key.strip())
-                            phen_attr["value"] = str(unicode(value).strip())
-
-                            phen_attr_list.append(phen_attr.copy())
-                            attr_count = attr_count + 1
-
-                    #Dict of phenomenon attributes.
-                    if len(phen_attr_list) > 0:
-                        new_phenomenon = phenomenon.copy() 
-                        new_phenomenon["attributes"] = phen_attr_list
-                        new_phenomenon["attribute_count"] = attr_count
-                        phen_list.append(new_phenomenon)
 
                     try :
                         spatial  = self.getBoundingBox(var_id, pp_file_content)
                         temporal = self.getTemporalDomain(var_id, pp_file_content)
 
-                        #geospatial data.
+                        # Geospatial data
                         lon_l.append(spatial[0])
                         lat_l.append(spatial[1])
                         lon_u.append(spatial[2])
                         lat_u.append(spatial[3])
 
-                        #temporal
+                        # Temporal data
                         start_time_l.append(temporal[0])
                         end_time_l.append(temporal[1])
 
@@ -242,9 +206,11 @@ class PpFile(GenericFile):
                        and util.is_date_valid(max_time.split("T")[0]):
                         file_info[0]["info"]["temporal"] = {'start_time': min_time, 'end_time': max_time }
 
+                phen_list = self.get_phenomena(pp_file_content)
+
                 pp_file_content.close()
 
-                return file_info + (phen_list, spatial, )
+                return file_info + (phen_list, spatial,)
             except Exception as ex:
                 return file_info
         else:
@@ -253,11 +219,11 @@ class PpFile(GenericFile):
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_pp_level2()
+            res = self.get_metadata_level2()
         elif self.level == "3":
-            res = self.get_metadata_pp_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -271,7 +237,18 @@ class PpFile(GenericFile):
 
 
 if __name__ == "__main__":
+    import datetime
+    import sys
+
     # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
     file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
-    ppf = PpFile(file,'2')
+    ppf = PpFile(file,level)
+    start = datetime.datetime.today()
     print ppf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start
