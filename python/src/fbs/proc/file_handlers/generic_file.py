@@ -2,6 +2,8 @@ import logging
 import os
 import ntpath
 import json
+from pwd import getpwuid
+from grp import getgrgid
 
 class  GenericFile(object):
     """
@@ -16,6 +18,12 @@ class  GenericFile(object):
 
     def get_handler_id(self):
         return self.handler_id
+
+    def _get_file_ownership(self):
+        return (
+            getpwuid(os.stat(self.file_path).st_uid).pw_name,
+            getgrgid(os.stat(self.file_path).st_gid).gr_name
+        )
 
     def get_metadata_level1(self):
         """
@@ -43,6 +51,9 @@ class  GenericFile(object):
         info["directory"] = os.path.dirname(self.file_path)
         info["location"] = "on_disk"
 
+        uid,gid = self._get_file_ownership()
+        info["user"] = uid
+        info["group"] = gid
 
         info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
 
