@@ -23,6 +23,12 @@
             "md5": {
               "type": "keyword"
             },
+            "user": {
+              "type": "keyword"
+            },
+            "group": {
+              "type": "keyword"
+            },
             "name": {
               "type": "keyword",
               "fields": {
@@ -74,8 +80,8 @@
                     }
                   }
                 },
-                "agg_string":{
-                  "type":"keyword"
+                "agg_string": {
+                  "type": "keyword"
                 }
               }
             },
