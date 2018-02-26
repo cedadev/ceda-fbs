@@ -156,6 +156,10 @@ class ExtractSeq(object):
             if fdata[1] is not None:
                 doc["info"]["phenomena"] = fdata[1]
 
+            if len(fdata) == 3:
+                if fdata[2] is not None:
+                    doc["info"]["spatial"] = fdata[2]
+
         return json.dumps(doc)
 
     def create_bulk_index_json(self, file_list, level, blocksize):

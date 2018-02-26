@@ -111,6 +111,17 @@
                   "format": "dateOptionalTime"
                 }
               }
+            },
+            "spatial": {
+              "properties": {
+                "coordinates": {
+                  "properties": {
+                    "coordinates":{
+                      "type": "geo_point"
+                    }
+                  }
+                }
+              }
             }
           }
         }

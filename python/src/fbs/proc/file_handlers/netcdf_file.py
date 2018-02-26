@@ -98,33 +98,6 @@ class   NetCdfFile(GenericFile):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
         return self.temporal(ncdf, time_name) 
 
-    # def is_valid_parameter(self, name, value):
-    #     valid_parameters = [ "standard_name",
-    #                          "long_name",
-    #                          "title",
-    #                          "name",
-    #                          "units"
-    #                        ]
-    #     if name in valid_parameters \
-    #        and len(value) < util.MAX_ATTR_LENGTH\
-    #        and len(name) < util.MAX_ATTR_LENGTH:
-    #         return True
-    #     return False
-    #
-    # def is_valid_phenomena(self,key,value):
-    #     """
-    #     Wrapper to hide test in main function
-    #     """
-    #
-    #     if not self.is_valid_parameter(key, value):
-    #         return False
-    #
-    #     if not util.is_valid_phen_attr(value):
-    #         return False
-    #
-    #     # Returns true if both the tests above pass as true
-    #     return True
-
     def get_phenomena(self, netcdf):
         """
         Construct list of Phenomena based on variables in NetCDF file.
