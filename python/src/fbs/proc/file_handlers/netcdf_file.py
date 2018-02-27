@@ -70,7 +70,6 @@ class   NetCdfFile(GenericFile):
 
         return None
 
-    #ok lets try something new.
     def get_geospatial(self, ncdf):
         lat_name = self.find_var_by_standard_name(ncdf, self.file_path, "latitude")
         lon_name = self.find_var_by_standard_name(ncdf, self.file_path, "longitude")
@@ -123,12 +122,11 @@ class   NetCdfFile(GenericFile):
 
                 phen_attr_list.append(phen_attr)
 
-
+            phen_attr = {}
             phen_attr["name"] = "var_id"
             phen_attr["value"] = str(v_name)
 
             phen_attr_list.append(phen_attr)
-
             if len(phen_attr_list) > 0:
                 new_phenomenon["attributes"] = phen_attr_list
 
@@ -240,7 +238,9 @@ if __name__ == "__main__":
     except IndexError:
         level = '1'
 
-    file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
+    # file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
+    file= '/badc/ccmval/data/CCMVal-2/Observations_SPARCCCMValReport/Chapter6/smr_clono2.nc'
+
     ncf = NetCdfFile(file,level)
     start = datetime.datetime.today()
     print ncf.get_metadata()

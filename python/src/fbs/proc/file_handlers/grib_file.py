@@ -45,9 +45,7 @@ class GribFile(GenericFile):
                             continue
 
                         value = str(gapi.grib_get(gid, key))
-                        if len(key) < util.MAX_ATTR_LENGTH \
-                                and len(value) < util.MAX_ATTR_LENGTH \
-                                and util.is_valid_phen_attr(value):
+                        if util.is_valid_phenomena(key,value):
 
                             phen_attr["name"] = str(key.strip())
                             phen_attr["value"] = str(unicode(value).strip())

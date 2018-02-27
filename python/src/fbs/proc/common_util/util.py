@@ -608,6 +608,11 @@ def _make_bsub_command(task, count, logger=None):
     return command
 
 def get_best_name(phenomena):
+    """
+    Create a best_name field which takes the best name as defined by the preference order
+    :param phenomena: phenomena attributes in form [{"name":"standard_name","value":"time"},{"name":"---","value":"---"},{}...]
+    :return: best_name(string)
+    """
     preference_order = ["long_name","standard_name","title","name","short_name","var_id"]
     attributes = phenomena["attributes"]
 
@@ -617,6 +622,34 @@ def get_best_name(phenomena):
             return best_name[0]
     return None
 
+
+def long_name_is_standard_name(phenomena):
+    """
+    If the long name and the standard name are the same and the long_name contains _
+    return True
+    :param phenomena: phenomena attributes in form [{"name":"standard_name","value":"time"},{"name":"---","value":"---"},{}...]
+    :return: Boolean
+    """
+    attributes = phenomena["attributes"]
+
+    long_name = None
+    standard_name = None
+
+    for d in attributes:
+        if d["name"] == "long_name":
+            long_name = d["value"]
+
+        if d["name"] == "standard_name":
+            standard_name = d["value"]
+
+    if long_name is None or standard_name is None:
+        # If one of them is missing then don't need to do next checks.
+        return False
+
+    if long_name.strip() == standard_name.strip() and '_' in long_name:
+            return True
+    else:
+        return False
 
 
 def build_phenomena(data):
@@ -636,6 +669,8 @@ def build_phenomena(data):
 
         best_name = get_best_name(phenom)
 
+        long_name_check = long_name_is_standard_name(phenom)
+
         for attr in phenom["attributes"]:
 
             value = attr["value"]
@@ -649,6 +684,12 @@ def build_phenomena(data):
                 agg_string_list.append('"{}":"{}"'.format(name, value))
 
             if name in names_list_filter and value not in names:
+
+                # if long_name containes "_" and is the same as standard name, include a version in the names
+                # list with the "_" replaced by " "
+                if name == "long_name" and long_name_check:
+                    value = value.replace("_"," ")
+
                 names.append('"{}"'.format(value))
 
         if names:
