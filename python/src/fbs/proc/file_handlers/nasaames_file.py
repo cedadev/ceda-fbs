@@ -40,13 +40,14 @@ class NasaAmesFile(GenericFile):
 
         phen_list = []
 
+        #List of phenomena
         nasaames_phenomena = self.phenomena()
 
         if nasaames_phenomena is None:
             return None
 
-        #List of phenomena
-        for item in nasaames_phenomena:           #get all parameter objects.
+        # get all parameter objects.
+        for item in nasaames_phenomena:
 
             phen_attr_list = item.get()
 

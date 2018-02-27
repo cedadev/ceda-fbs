@@ -166,8 +166,7 @@ class PpFile(GenericFile):
                 var_ids = pp_file_content.listvariables()
 
                 for var_id in var_ids:
-
-                    try :
+                    try:
                         spatial  = self.getBoundingBox(var_id, pp_file_content)
                         temporal = self.getTemporalDomain(var_id, pp_file_content)
 
@@ -184,24 +183,20 @@ class PpFile(GenericFile):
                     except Exception as ex:
                         continue
 
-
-                if     len(lat_l) > 0  \
-                   and len(lon_l) > 0  \
-                   and len(lat_u) > 0  \
-                   and len(lon_u) > 0:
+                # Make sure that there are values in all the lists
+                if all(v for v in [lat_l,lon_l,lat_u,lon_u]):
 
                     min_lon_l = self.normalize_lon(min(lon_l))
                     min_lat_l = self.normalize_lat(min(lat_l))
                     max_lon_u = self.normalize_lon(max(lon_u))
                     max_lat_u = self.normalize_lat(max(lat_u))
 
-                    spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
+                    spatial = {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
 
-                #kltsa 22/07/2016 change for issue 23341: validation of dates added.
-                if     len(start_time_l) > 0 \
-                   and len(end_time_l) > 0:
+                if start_time_l and end_time_l:
                     min_time = min(start_time_l)
                     max_time = max(end_time_l)
+
                     if util.is_date_valid(min_time.split("T")[0])\
                        and util.is_date_valid(max_time.split("T")[0]):
                         file_info[0]["info"]["temporal"] = {'start_time': min_time, 'end_time': max_time }

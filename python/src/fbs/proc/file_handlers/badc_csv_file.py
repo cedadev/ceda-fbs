@@ -65,7 +65,6 @@ class BadcCsvFile(GenericFile):
 
         file_phenomena = util.build_phenomena(phen_list)
 
-
         return file_phenomena
 
     def get_metadata_level2(self):
@@ -93,15 +92,8 @@ class BadcCsvFile(GenericFile):
                 fp.seek(0)
                 phenomena = self.get_phenomena(fp)
 
-            # l1  =  max(geospatial["lat"])
-            # l2  =  min(geospatial["lat"])
-            #
-            # lo1  = max(geospatial["lon"])
-            # lo2 =  min(geospatial["lon"])
-
-            #file_info[0]["info"]["spatial"] =  {"coordinates": {"type": "envelope", "coordinates": [[l1, lo1], [l2, lo2]] } }
-            if phen[2] is not None:
-                file_info[0]["info"]["temporal"] = {"start_time": phen[1], "end_time": phen[1] }
+            if phen[1] is not None:
+                file_info[0]["info"]["temporal"] = {"start_time": phen[1], "end_time": phen[1]}
 
             return file_info +  phenomena
         else:

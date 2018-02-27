@@ -238,8 +238,8 @@ if __name__ == "__main__":
     except IndexError:
         level = '1'
 
-    # file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
-    file= '/badc/ccmval/data/CCMVal-2/Observations_SPARCCCMValReport/Chapter6/smr_clono2.nc'
+    file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
+    # file= '/badc/ccmval/data/CCMVal-2/Observations_SPARCCCMValReport/Chapter6/smr_clono2.nc'
 
     ncf = NetCdfFile(file,level)
     start = datetime.datetime.today()
