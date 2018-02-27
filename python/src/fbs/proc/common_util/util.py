@@ -607,6 +607,17 @@ def _make_bsub_command(task, count, logger=None):
     print info_msg
     return command
 
+def get_best_name(phenomena):
+    preference_order = ["long_name","standard_name","title","name","short_name","var_id"]
+    attributes = phenomena["attributes"]
+
+    for name in preference_order:
+        best_name = [d['value'] for d in attributes if d['name'] == name]
+        if best_name:
+            return best_name[0]
+    return None
+
+
 
 def build_phenomena(data):
     if not data:
@@ -622,7 +633,11 @@ def build_phenomena(data):
         names = []
         agg_string = ""
         agg_string_list = []
+
+        best_name = get_best_name(phenom)
+
         for attr in phenom["attributes"]:
+
             value = attr["value"]
             name = attr["name"]
 
@@ -645,8 +660,12 @@ def build_phenomena(data):
             agg_string_list.sort()
             agg_string = ','.join(agg_string_list)
 
+        if best_name:
+            phen_dict["best_name"] = best_name
+
         if phen_dict:
             phen_dict["agg_string"] = agg_string
             phenom_list.append(phen_dict)
+
 
     return (phenom_list,)
