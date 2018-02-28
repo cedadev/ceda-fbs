@@ -84,6 +84,8 @@ class BadcCsvFile(GenericFile):
     def get_metadata_level3(self):
         self.handler_id = "Csv handler level 3."
 
+        loc = (None,)
+
         file_info = self.get_metadata_level1()
 
         if file_info is not None:
@@ -95,7 +97,11 @@ class BadcCsvFile(GenericFile):
             if phen[1] is not None:
                 file_info[0]["info"]["temporal"] = {"start_time": phen[1], "end_time": phen[1]}
 
-            return file_info +  phenomena
+            if phen[2] is not None:
+                if phen[2] == 'global':
+                    loc = ({'coordinates': {'type': 'envelope', 'coordinates': [[-180.0,90.0], [180.0, -90.0]]}},)
+
+            return file_info + phenomena + loc
         else:
             return None
 
