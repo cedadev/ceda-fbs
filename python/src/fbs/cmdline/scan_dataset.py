@@ -16,6 +16,7 @@ Usage:
                   [-n <n_files> | --num-files <n_files>]
                   [-s <start_number> | --start <start_number>]
                   (-l <level> | --level <level>)
+                  [-i <index> | --index <index>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
 
 Options:
@@ -35,6 +36,7 @@ Options:
   -n --num-files=<n_files>            Number of files to scan.
   -s --start=<start_number>           Starting point within the cache file
                                       containing filenames.
+  -i --index=<index>                  The index to update
  """
 
 import os
@@ -137,7 +139,7 @@ def get_stat_and_defs(com_args):
         com_args["config"] = conf_path
 
     # Create a dictionary with default settings some of them
-    # where loaded from th edefaults file.
+    # where loaded from the defaults file.
     config = util.get_settings(com_args["config"], com_args)
 
 
@@ -170,11 +172,17 @@ def main():
     # Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
+
     # Insert defaults
     status_and_defaults = get_stat_and_defs(com_args)
 
+
     config = status_and_defaults[0]
     status = status_and_defaults[1]
+
+    if "index" in com_args:
+        config["es-configuration"]["es-index"]=com_args["index"]
+
 
     # Check the validity of command line arguments.
     try:
