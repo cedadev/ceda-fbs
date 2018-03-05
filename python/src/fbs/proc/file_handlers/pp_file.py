@@ -118,18 +118,22 @@ class PpFile(GenericFile):
         file_info = self.get_metadata_level1()
 
         if file_info is not None:
+            try:
+                pp_file_content = cdms.open(self.file_path)
+                phen_list = self.get_phenomena(pp_file_content)
+                pp_file_content.close()
 
-            pp_file_content = cdms.open(self.file_path)
-            phen_list = self.get_phenomena(pp_file_content)
-            pp_file_content.close()
+                if phen_list is not None:
+                    file_info[0]["info"]["read_status"] = "Successful"
+                    return file_info + phen_list
+                else:
+                    file_info[0]["info"]["read_status"] = "Read Error"
+                    return file_info
 
-            if phen_list is not None:
-                file_info[0]["info"]["read_status"] = "Successful"
-                return file_info + phen_list
-            else:
-                # get_phenomena is None, file read error
+            except Exception:
                 file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
+
         else:
             return None
 
