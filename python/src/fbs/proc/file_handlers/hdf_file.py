@@ -11,6 +11,11 @@ from pyhdf.error import HDF4Error
 
 from pyhdf.SD import SD, SDC
 
+# Need to explicitly import these packages even though they are not directly used as per the note in HDF.py.
+# This allows the vstart and vgstart methods to work.
+# https://github.com/hdfeos/pyhdf/blob/master/pyhdf/HDF.py
+from pyhdf import VS,V
+
 
 class HdfFile(GenericFile):
 

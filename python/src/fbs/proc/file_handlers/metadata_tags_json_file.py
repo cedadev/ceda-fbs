@@ -77,7 +77,13 @@ class MetadataTagsJsonFile(GenericFile):
 
             self.handler_id = "Metadata tags json handler level 3."
 
-            metadata = json.loads(open(self.file_path).read())
+            try:
+                metadata = json.loads(open(self.file_path).read())
+
+            except Exception:
+                # Error reading the file
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info
 
             phen_list = self.get_phenomena(metadata)
 

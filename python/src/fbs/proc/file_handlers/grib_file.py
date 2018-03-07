@@ -239,6 +239,7 @@ class GribFile(GenericFile):
 
         if file_info is not None:
             self.handler_id = "grib handler level 3."
+            file_info[0]["info"]["read_status"] = "Successful"
 
             if temporal is not None:
                 file_info[0]["info"]["temporal"] = temporal

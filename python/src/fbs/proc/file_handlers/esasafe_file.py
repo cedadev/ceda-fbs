@@ -160,10 +160,17 @@ class EsaSafeFile(GenericFile):
 
         res = self.get_metadata_level1()
 
-        self._open_file()
+        try:
+            self._open_file()
+
+        except Exception:
+            # Error reading file
+            res[0]["info"]["read_status"] = "Read Error"
+            return res
+
+        # File read successful
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
-
 
         lat_u =  max(geospatial["lat"])
         lat_l =  min(geospatial["lat"])
@@ -171,9 +178,9 @@ class EsaSafeFile(GenericFile):
         lon_u = max(geospatial["lon"])
         lon_l =  min(geospatial["lon"])
 
-
         spatial = {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]] } }
         res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
+        res[0]["info"]["read_status"] = "Successful"
 
         phenomena = None
 

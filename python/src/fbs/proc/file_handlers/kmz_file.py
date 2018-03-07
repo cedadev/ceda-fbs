@@ -50,7 +50,7 @@ class KmzFile(GenericFile):
 
 
     def get_metadata_level3(self):
-        self.handler_id = "Manifest handler level 3."
+        self.handler_id = "kmz handler level 3."
         spatial = None
 
         file_info = self.get_metadata_level1()

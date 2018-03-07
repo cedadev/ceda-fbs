@@ -12,7 +12,7 @@ class BadcCsvFile(GenericFile):
 
     def __init__(self, file_path, level, additional_param=None):
         GenericFile.__init__(self, file_path, level)
-        self.handler_id = "Badc csv"
+        self.handler_id = "BADC CSV"
         self.FILE_FORMAT = self.get_file_format()
 
     def get_file_format(self):
@@ -68,38 +68,57 @@ class BadcCsvFile(GenericFile):
         return file_phenomena
 
     def get_metadata_level2(self):
-        self.handler_id = "Csv handler level 2."
+        self.handler_id = "CSV handler level 2."
 
         file_info = self.get_metadata_level1()
 
         if file_info is not None:
-            with open(self.file_path) as fp:
-                phen = self.get_phenomena(fp)
+            try:
+                with open(self.file_path) as fp:
+                    phen = self.get_phenomena(fp)
 
-            file_info[0]["info"]["read_status"] = "Successful"
-            return  file_info +  phen
+            except Exception:
+                # Error reading file or getting phenomena
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info
+
+            else:
+                # successful file read
+                file_info[0]["info"]["read_status"] = "Successful"
+
+                return file_info + phen
+
         else:
             return None
 
     def get_metadata_level3(self):
-        self.handler_id = "Csv handler level 3."
+        self.handler_id = "CSV handler level 3."
 
         loc = (None,)
 
         file_info = self.get_metadata_level1()
 
         if file_info is not None:
-            with open(self.file_path) as fp:
-                phen = self.csv_parse(fp)
-                fp.seek(0)
-                phenomena = self.get_phenomena(fp)
+            try:
+                with open(self.file_path) as fp:
+                    meta = self.csv_parse(fp)
+                    fp.seek(0)
+                    phenomena = self.get_phenomena(fp)
 
-            if phen[1] is not None:
-                file_info[0]["info"]["temporal"] = {"start_time": phen[1], "end_time": phen[1]}
+            except Exception:
+                # Problem reading file or extracting metadata
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info
 
-            if phen[2] is not None:
-                if phen[2] == 'global':
+            # Read Successful
+            if meta[1] is not None:
+                file_info[0]["info"]["temporal"] = {"start_time": meta[1], "end_time": meta[1]}
+
+            if meta[2] is not None:
+                if meta[2] == 'global':
                     loc = ({'coordinates': {'type': 'envelope', 'coordinates': [[-180.0,90.0], [180.0, -90.0]]}},)
+
+            file_info[0]["info"]["read_status"] = "Successful"
 
             return file_info + phenomena + loc
         else:
