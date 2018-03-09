@@ -4,6 +4,7 @@ import ntpath
 import json
 from pwd import getpwuid
 from grp import getgrgid
+import datetime
 
 class  GenericFile(object):
     """
@@ -45,6 +46,8 @@ class  GenericFile(object):
         file_info = {}
         info = {}
 
+        file_stats = os.stat(self.file_path)
+
         #Basic information. 
         info["name"] = os.path.basename(self.file_path) #ntpath.basename(file_path)
         info["name_auto"] = info["name"]
@@ -55,7 +58,9 @@ class  GenericFile(object):
         info["user"] = uid
         info["group"] = gid
 
-        info["size"] = round(os.path.getsize(self.file_path) / (1024*1024.0), 3)
+        info["last_modified"] = datetime.datetime.fromtimestamp(file_stats.st_mtime).isoformat()
+
+        info["size"] = os.path.getsize(self.file_path)
 
         file_type = os.path.splitext(info["name"])[1]
         if len(file_type) == 0:
