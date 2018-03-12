@@ -15,7 +15,7 @@ from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
 import simplejson as json
-
+from proc.common_util.spot_mapping import SpotMapping
 
 class ExtractSeq(object):
 
@@ -34,6 +34,9 @@ class ExtractSeq(object):
         self.es = None
         self.dataset_id = None
         self.dataset_dir = None
+
+        # Spot data
+        self.spots = SpotMapping()
 
         # Define constants
         self.blocksize = 800
@@ -189,8 +192,15 @@ class ExtractSeq(object):
             start = datetime.datetime.now()
             doc = self.process_file_seq(filename, level)
 
+            # Get spot information
+            spot = self.spots.get_spot(filename)
+
             if doc is not None:
                 es_id = hashlib.sha1(filename).hexdigest()
+
+                # Add spot to level1 info
+                if spot is not None:
+                    doc[0]['info']['spot_name'] = spot
 
                 action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
                 body = self.create_body(doc) + "\n"
