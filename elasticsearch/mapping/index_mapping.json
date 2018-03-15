@@ -42,6 +42,9 @@
               "search_analyzer": "simple",
               "analyzer": "simple"
             },
+            "last_modified":{
+              "type": "date"
+            },
             "phenomena": {
               "properties": {
                 "names": {
