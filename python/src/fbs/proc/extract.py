@@ -36,7 +36,7 @@ class ExtractSeq(object):
         self.dataset_dir = None
 
         # Spot data
-        self.spots = SpotMapping()
+        self.spots = SpotMapping(from_file=True, spot_file='ceda_all_datasets.ini')
 
         # Define constants
         self.blocksize = 800

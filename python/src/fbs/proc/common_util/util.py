@@ -601,7 +601,7 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
 
 def _make_bsub_command(task, count, logger=None):
     "Construct bsub command for task and return it."
-    command = "bsub -q par-single -W 48:00 %s" % task
+    command = "bsub -q par-single -W 48:00 {command}".format(command=task)
     info_msg = "%s. Executing : %s" % ((count + 1), command)
     if logger is not None: logger.INFO(info_msg)
     print info_msg

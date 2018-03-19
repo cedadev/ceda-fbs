@@ -12,17 +12,27 @@ class SpotMapping(object):
     spot2pathmapping = {}
     path2spotmapping = {}
 
-    def __init__(self, test=False):
+    def __init__(self, test=False, from_file=False, spot_file=None):
 
         if test:
             self.spot2pathmapping['spot-1400-accacia'] = "/badc/accacia"
             self.spot2pathmapping['abacus'] = "/badc/abacus"
+
+        elif from_file:
+            with open(spot_file) as reader:
+                lines = reader.readlines()
+                for line in lines:
+                    spot, path = line.strip().split('=')
+                    self.spot2pathmapping[spot] = path
+                    self.path2spotmapping[path] = spot
+
         else:
             response = requests.get(self.url)
             log_mapping = response.text.split('\n')
 
             for line in log_mapping:
                 if not line.strip(): continue
+                print line.strip().split()
                 spot, path = line.strip().split()
                 if spot in ("spot-2502-backup-test",): continue
                 self.spot2pathmapping[spot] = path
