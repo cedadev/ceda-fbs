@@ -165,6 +165,14 @@ class ExtractSeq(object):
 
         return json.dumps(doc)
 
+    def calculate_md5(self, filename):
+        hash_md5 = hashlib.md5()
+        with open(filename, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+
+
     def create_bulk_index_json(self, file_list, level, blocksize):
         """
         Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
@@ -201,6 +209,9 @@ class ExtractSeq(object):
                 # Add spot to level1 info
                 if spot is not None:
                     doc[0]['info']['spot_name'] = spot
+
+                # Add md5 to level 1
+                doc[0]['info']['md5'] = self.calculate_md5(filename)
 
                 action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
                 body = self.create_body(doc) + "\n"

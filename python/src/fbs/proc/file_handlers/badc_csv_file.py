@@ -80,7 +80,7 @@ class BadcCsvFile(GenericFile):
             except Exception:
                 # Error reading file or getting phenomena
                 file_info[0]["info"]["read_status"] = "Read Error"
-                return file_info
+                return file_info + (None,)
 
             else:
                 # successful file read

@@ -215,15 +215,18 @@ class GribFile(GenericFile):
             grib_phenomena = self.get_phenomena()
 
             self.handler_id = "grib handler level 2."
+            try:
+                if grib_phenomena is None:
+                    file_info[0]["info"]["read_status"] = "Read Error"
+                    return file_info + (None,)
 
-            if grib_phenomena is None:
+                else:
+                    # todo Change this so that errors proagate back up and are caugh, not just hidden by a None response.
+                    file_info[0]["info"]["read_status"] = "Successful"
+                    return file_info + grib_phenomena
+            except Exception:
                 file_info[0]["info"]["read_status"] = "Read Error"
-                return file_info
-
-            else:
-                file_info[0]["info"]["read_status"] = "Successful"
-                return file_info + grib_phenomena
-
+                return file_info + (None,)
         else:
             return None
 

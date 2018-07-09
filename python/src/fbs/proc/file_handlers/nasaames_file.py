@@ -71,13 +71,19 @@ class NasaAmesFile(GenericFile):
             self.handler_id = "Nasaames handler level 2."
 
             phen_list = self.get_phenomena()
-            if phen_list != None:
-                file_info[0]["info"]["read_status"] = "Successful"
-                return file_info +  phen_list
-            else:
-                # get_phenomena is None, error reading file.
+            try:
+                if phen_list != None:
+                    file_info[0]["info"]["read_status"] = "Successful"
+                    return file_info +  phen_list
+                else:
+                    # get_phenomena returned None, error reading file
+                    # Todo Change this so that errors propagate back up and are caught, not hidden with a None response
+
+                    file_info[0]["info"]["read_status"] = "Read Error"
+                    return file_info + (None,)
+            except Exception:
                 file_info[0]["info"]["read_status"] = "Read Error"
-                return file_info
+                return file_info + (None,)
 
         else:
             return None

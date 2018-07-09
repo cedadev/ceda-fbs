@@ -128,7 +128,7 @@ class PpFile(GenericFile):
                     return file_info + phen_list
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
-                    return file_info
+                    return file_info + (None,)
 
             except Exception:
                 file_info[0]["info"]["read_status"] = "Read Error"
