@@ -15,6 +15,8 @@ import logging
 import re
 import io
 import datetime
+from dateutil import parser
+import hashlib
 
 log_levels = {"debug": logging.DEBUG,
               "info": logging.INFO,
@@ -710,3 +712,16 @@ def build_phenomena(data):
 
 
     return (phenom_list,)
+
+def date2iso(date):
+    date = parser.parse(date)
+    iso_date = date.isoformat()
+
+    return iso_date
+
+def calculate_md5(filename):
+    hash_md5 = hashlib.md5()
+    with open(filename, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()

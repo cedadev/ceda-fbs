@@ -7,6 +7,7 @@ from proc.file_handlers.generic_file import GenericFile
 import proc.common_util.util as util
 import csv
 import re
+from dateutil import parser
 
 class BadcCsvFile(GenericFile):
 
@@ -112,7 +113,10 @@ class BadcCsvFile(GenericFile):
 
             # Read Successful
             if meta[1] is not None:
-                file_info[0]["info"]["temporal"] = {"start_time": meta[1], "end_time": meta[1]}
+                # Constrain date output to isoformat
+                iso_date = util.date2iso(meta[1])
+
+                file_info[0]["info"]["temporal"] = {"start_time": iso_date, "end_time": iso_date}
 
             if meta[2] is not None:
                 if meta[2] == 'global':

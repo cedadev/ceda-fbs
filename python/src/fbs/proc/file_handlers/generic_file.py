@@ -5,6 +5,7 @@ import json
 from pwd import getpwuid
 from grp import getgrgid
 import datetime
+import proc.common_util.util as util
 
 class  GenericFile(object):
     """
@@ -68,7 +69,7 @@ class  GenericFile(object):
 
         info["type"] = file_type
 
-        info["md5"] = ""
+        info["md5"] = util.calculate_md5(self.file_path)
 
         file_info["info"] = info
         return (file_info, )

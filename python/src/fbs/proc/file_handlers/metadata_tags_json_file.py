@@ -99,8 +99,8 @@ class MetadataTagsJsonFile(GenericFile):
         spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]]}}
 
         # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
-        start_time = metadata["time"][0]
-        end_time   = metadata["time"][1]
+        start_time = util.date2iso(metadata["time"][0])
+        end_time   = util.date2iso(metadata["time"][1])
         file_info[0]["info"]["temporal"] = {'start_time': start_time, 'end_time': end_time }
 
         file_info[0]["info"]["read_status"] = "Successful"
