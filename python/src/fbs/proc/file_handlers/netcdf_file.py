@@ -1,10 +1,10 @@
 import netCDF4
-
 from proc.file_handlers.generic_file import GenericFile
 import proc.common_util.util as util
 import proc.common_util.geojson as geojson
 
-class   NetCdfFile(GenericFile):
+
+class NetCdfFile(GenericFile):
     """
     Simple class for returning basic information about the content
     of an NetCDF file.
@@ -31,7 +31,6 @@ class   NetCdfFile(GenericFile):
         except ValueError:
             return False
 
-
     def geospatial(self, ncdf, lat_name, lon_name):
         """
         Return a dict containing lat/lons from NetCDF file.
@@ -52,7 +51,6 @@ class   NetCdfFile(GenericFile):
             "lat": lats,
             "lon": lons
         }
-
 
     def find_var_by_standard_name(self, ncdf, fpath, standard_name):
         """
@@ -95,7 +93,7 @@ class   NetCdfFile(GenericFile):
 
     def get_temporal(self, ncdf):
         time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
-        return self.temporal(ncdf, time_name) 
+        return self.temporal(ncdf, time_name)
 
     def get_phenomena(self, netcdf):
         """
@@ -104,21 +102,21 @@ class   NetCdfFile(GenericFile):
         """
         phen_list = []
 
-        #for all phenomena list.
+        # for all phenomena list.
         for v_name, v_data in netcdf.variables.iteritems():
             new_phenomenon = {}
             phen_attr_list = []
 
-            #for all attributtes in phenomenon.
+            # for all attributtes in phenomenon.
             for key, value in v_data.__dict__.iteritems():
 
-                if not util.is_valid_phenomena(key,value):
+                if not util.is_valid_phenomena(key, value):
                     continue
 
                 phen_attr = {}
 
                 phen_attr["name"] = str(key.strip())
-                phen_attr["value"] = str(unicode(value).strip())
+                phen_attr["value"] = (value.strip()).encode('utf-8')
 
                 phen_attr_list.append(phen_attr)
 
@@ -145,7 +143,7 @@ class   NetCdfFile(GenericFile):
                 with netCDF4.Dataset(self.file_path) as netcdf_object:
                     netcdf_phenomena = self.get_phenomena(netcdf_object)
                     file_info[0]["info"]["read_status"] = "Successful"
-                return file_info +  netcdf_phenomena
+                return file_info + netcdf_phenomena
             except Exception:
                 file_info[0]["info"]["read_status"] = "Read Error"
 
@@ -159,7 +157,7 @@ class   NetCdfFile(GenericFile):
         Wrapper for method phenomena().
         :returns:  A dict containing information compatible with current es index level 2.
         """
-        #level 1
+        # level 1
         file_info = self.get_metadata_level1()
         spatial = None
         netcdf_phenomena = None
@@ -169,21 +167,21 @@ class   NetCdfFile(GenericFile):
             try:
                 with netCDF4.Dataset(self.file_path) as netcdf:
 
-                    #level 2
+                    # level 2
                     netcdf_phenomena = self.get_phenomena(netcdf)
 
                     self.handler_id = "Netcdf handler level 3."
 
-                    #try to add level 3 info. 
+                    # try to add level 3 info.
                     try:
                         geo_info = self.get_geospatial(netcdf)
 
-                        loc_dict= {}
+                        loc_dict = {}
 
                         gj = geojson.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
                         spatial = gj.get_elasticsearch_geojson()
 
-                        loc_dict["coordinates"]= spatial["geometries"]["search"]#["coordinates"]
+                        loc_dict["coordinates"] = spatial["geometries"]["search"]  # ["coordinates"]
                         spatial = loc_dict
                     except AttributeError:
                         pass
@@ -196,12 +194,12 @@ class   NetCdfFile(GenericFile):
 
                     file_info[0]["info"]["read_status"] = "Successful"
 
-                    return file_info  + netcdf_phenomena + (spatial, )
+                    return file_info + netcdf_phenomena + (spatial,)
             except Exception as ex:
                 if netcdf_phenomena is not None:
 
                     file_info[0]["info"]["read_status"] = "Successful"
-                    return file_info + (netcdf_phenomena, )
+                    return file_info + (netcdf_phenomena,)
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
@@ -240,10 +238,10 @@ if __name__ == "__main__":
 
     file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
     # file= '/badc/ccmval/data/CCMVal-2/Observations_SPARCCCMValReport/Chapter6/smr_clono2.nc'
+    file = '/badc/mst/data/nerc-mstrf-radar-mst/v4-0/st-mode/cardinal/2015/09/nerc-mstrf-radar-mst_capel-dewi_20150901_st300_cardinal_33min-smoothing_v4-0.nc'
 
-    ncf = NetCdfFile(file,level)
+    ncf = NetCdfFile(file, level)
     start = datetime.datetime.today()
     print ncf.get_metadata()
     end = datetime.datetime.today()
-    print end-start
-
+    print end - start
