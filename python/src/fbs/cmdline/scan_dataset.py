@@ -11,6 +11,7 @@ Usage:
   scan_dataset.py (-f <filename> | --filename <filename>)
                   (-d <dataset_id> | --dataset <dataset_id>)
                   (-m <location> | --make-list <location>)
+                  [--followlinks]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
   scan_dataset.py (-f <filename> | --filename <filename>)
                   [-n <n_files> | --num-files <n_files>]
@@ -21,22 +22,33 @@ Usage:
 
 Options:
   -h --help                           Show this screen.
+
   --version                           Show version.
+
   -d --dataset=<dataset_id>           Dataset id.
+
   -f --filename=<filename>            File from where the dataset will
                                       be read [default: datasets.ini].
+
   -l --level=<level>                  Level of search:
                                       Level 1: File names and sizes
                                       Level 2: File names, sizes and
                                       phenomena (e.g. "air temperature")
                                       Level 3: File names, sizes, phenomena
                                       and geospatial metadata.
+
   -m --make-list=<location>           Stores the list of filenames to a file.
+
   -c --config=<path_to_config_dir>    Specify the main configuration directory.
+
   -n --num-files=<n_files>            Number of files to scan.
+
   -s --start=<start_number>           Starting point within the cache file
                                       containing filenames.
+
   -i --index=<index>                  The index to update
+
+  --followlinks                       Follow symbolic links
  """
 
 import os
@@ -112,6 +124,7 @@ def store_dataset_to_file(conf, status):
     Reads files from a specific directory in filesystem
     and stores their filenames and path to a file.
     """
+
     extract = ExtractSeq(conf)
     extract.store_dataset_to_file()
 

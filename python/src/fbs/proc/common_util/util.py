@@ -189,13 +189,14 @@ def get_settings(conf_path, args):
     return defaults
 
 
-def build_file_list(path):
+def build_file_list(path, followlinks=False):
     """
     :param path : A file path
-    :return: List of files contained withint he specified directory.
+    :param followlinks : Bool. Sets whether os.walk should follow symbolic links.
+    :return: List of files contained within the specified directory.
     """
     file_list = []
-    for root, _, files in os.walk(path, followlinks=False):
+    for root, _, files in os.walk(path, followlinks):
         for each_file in files:
             if each_file[0] == ".": continue
             file_list.append(os.path.join(root, each_file))

@@ -5,8 +5,6 @@
 import datetime
 import logging
 import os
-import sys
-import re
 import hashlib
 import socket
 import proc.common_util.util as util
@@ -77,11 +75,12 @@ class ExtractSeq(object):
 
         datasets_file = self.conf("filename")
         self.dataset_id = self.conf("dataset")
-        #derectory where the files to be searched are.
+        followlinks = self.conf("followlinks")
+        #directory where the files to be searched are.
         self.dataset_dir = util.find_dataset(datasets_file, self.dataset_id)
         if self.dataset_dir is not None:
             self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
-            return util.build_file_list(self.dataset_dir)
+            return util.build_file_list(self.dataset_dir, followlinks=followlinks)
         else:
             return None
 
@@ -353,8 +352,10 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***")
         self.file_list = self.read_dataset()
 
+
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
+            print file_to_store_paths
             try :
                 files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:

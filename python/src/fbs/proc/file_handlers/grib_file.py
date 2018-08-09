@@ -1,8 +1,6 @@
 import gribapi as gapi
 import proc.common_util.util as util
-
 from proc.file_handlers.generic_file import GenericFile
-import datetime
 
 class GribFile(GenericFile):
     """

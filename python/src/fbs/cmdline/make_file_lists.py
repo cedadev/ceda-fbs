@@ -6,27 +6,35 @@ Usage:
   make_file_lists.py --version
   make_file_lists.py (-f <filename> | --filename <filename>)
                      (-m <location> | --make-list <location>)
-                     [-p <number_of_processes> | --num-processes <number_of_processes>]
                      (--host <hostname>)
+                     [-p <number_of_processes> | --num-processes <number_of_processes>]
+                     [--followlinks]
 
 Options:
   -h --help                                  Show this screen.
+
   --version                                  Show version.
+
   -f --filename=<filename>                   File from where the dataset
                                              will be read
                                              [default: datasets.ini].
+
   -m --make-list=<location>                  Stores the list of filenames
                                              to a file.
+
   -p --num-processes=<number_of_processes>   Number of processes to use.
+
   --host=<hostname>                          The name of the host where
                                              the script will run.
+
+  --followlinks                              Follow symlinks in the os walk
  """
 
 import os
 
 from docopt import docopt
 import src.fbs.proc.common_util.util as util
-from cmdline import __version__   # Grab version from package __init__.py
+from cmdline import __version__  # Grab version from package __init__.py
 import datetime
 import subprocess
 import proc.constants.constants as constants
@@ -35,7 +43,6 @@ SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
 
 
 def get_stat_and_defs(com_args):
-
     """
     Sets variables that determine the operations to be performed.
     """
@@ -47,8 +54,8 @@ def get_stat_and_defs(com_args):
         conf_path = os.path.join(direc, "../../../config/ceda_fbs.ini")
         com_args["config"] = conf_path
 
-    #Creates a dictionary with default settings some of
-    #them where loaded from th edefaults file.
+    # Creates a dictionary with default settings some of
+    # them where loaded from the defaults file.
     config = util.get_settings(com_args["config"], com_args)
 
     if "num-processes" not in config or not config["num-processes"]:
@@ -61,94 +68,78 @@ def get_stat_and_defs(com_args):
     else:
         status_and_defaults.append(constants.Script_status.RUN_SCRIPT_IN_LOTUS)
 
-
     return status_and_defaults
 
-def store_datasets_to_files_in_lotus(status, config):
 
+def store_datasets_to_files(status, config, host):
     """
     Finds and stores all files belonging to each dataset.
     """
 
-    #Get file.
+    # Get file.
     filename = config["filename"]
-    #Extract datasets ids and paths.
+    # Extract datasets ids and paths.
     datasets = util.find_dataset(filename, "all")
     datasets_ids = datasets.keys()
     num_datasets = len(datasets_ids)
     scan_commands = []
     directory_to_save_files = config["make-list"]
 
-    #Create the commands that will create the
-    #files containing the paths to data files.
-    for i in range(0, num_datasets):
+    # Create the commands that will create the
+    # files containing the paths to data files.
+    for i in xrange(num_datasets):
 
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s.txt" \
-                  % (SCRIPT_DIR, filename, datasets_ids[i], directory_to_save_files, datasets_ids[i])
+        command = "python {}/scan_dataset.py -f {} -d  {} --make-list {}.txt".format(
+            SCRIPT_DIR, filename, datasets_ids[i], os.path.join(directory_to_save_files, datasets_ids[i])
+        )
 
-        scan_commands.append(command)
+        # Add followlinks flag if follow links flag is used
+        if config['followlinks']:
+            command += ' --followlinks'
 
-    lotus_max_processes = config["num-processes"]
+        if host == 'localhost':
+        # If using localhost, execute script immediately
 
-    #Run each command in lotus.
-    util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),\
-                             user_wait_time=30)
+            print "Executing: {}".format(command)
+            subprocess.call(command, shell=True)
 
-def store_datasets_to_files_in_localhost(status, config):
+        else:
+        # Otherwise append to list
+            scan_commands.append(command)
 
-    """
-    Finds and stores all files belonging to each dataset.
-    """
+    # Execute commands on lotus
+    if host == 'lotus':
+        lotus_max_processes = config["num-processes"]
 
-    #Get file.
-    filename = config["filename"]
-    #Extract datasets ids and paths.
-    datasets = util.find_dataset(filename, "all")
-    datasets_ids = datasets.keys()
-    num_datasets = len(datasets_ids)
-    scan_commands = []
-    directory_to_save_files = config["make-list"]
+        # Run each command in lotus.
+        util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),
+                                user_wait_time=30)
 
-    #Create the commands that will create the
-    #files containing the paths to data files.
-    for i in range(0, num_datasets):
-
-        command = "python %s/scan_dataset.py -f %s -d  %s --make-list %s/%s.txt" \
-                  % (SCRIPT_DIR, filename, datasets_ids[i], directory_to_save_files, datasets_ids[i])
-
-        print "Executing: %s" % command
-
-        subprocess.call(command, shell=True)
 
 def main():
-
     """
     Relevant ticket : http://team.ceda.ac.uk/trac/ceda/ticket/23217
     """
 
-    #Get command line arguments.
+    # Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
 
-    #Insert defaults
+    # Insert defaults
     status_and_defaults = get_stat_and_defs(com_args)
 
-
-
     start = datetime.datetime.now()
-    print "Script started at: %s" %(str(start))
+    print "Script started at: %s" % (str(start))
 
     status = status_and_defaults[1]
     config = status_and_defaults[0]
 
-
     if status == constants.Script_status.RUN_SCRIPT_IN_LOCALHOST:
-        store_datasets_to_files_in_localhost(status, config)
+        store_datasets_to_files(status, config, 'localhost')
     else:
-        store_datasets_to_files_in_lotus(status, config)
-
+        store_datasets_to_files(status, config, 'lotus')
 
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+    print "Script ended at : %s it ran for : %s" % (str(end), str(end - start))
 
 
 if __name__ == '__main__':
