@@ -192,15 +192,23 @@ class ExtractSeq(object):
             start = datetime.datetime.now()
             doc = self.process_file_seq(filename, level)
 
-            # Get spot information
-            spot = self.spots.get_spot(filename)
 
             if doc is not None:
+                # Get spot information
+                spot = self.spots.get_spot(filename)
+
+
                 es_id = hashlib.sha1(filename).hexdigest()
 
                 # Add spot to level1 info
                 if spot is not None:
                     doc[0]['info']['spot_name'] = spot
+
+                # Add link status to level1 info
+                if self.spots.is_archive_path:
+                    doc[0]['info']['archive_path'] = True
+                else:
+                    doc[0]['info']['archive_path'] = False
 
                 action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
                 body = self.create_body(doc) + "\n"

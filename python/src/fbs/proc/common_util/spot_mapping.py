@@ -32,7 +32,6 @@ class SpotMapping(object):
 
             for line in log_mapping:
                 if not line.strip(): continue
-                print line.strip().split()
                 spot, path = line.strip().split()
                 if spot in ("spot-2502-backup-test",): continue
                 self.spot2pathmapping[spot] = path
@@ -70,3 +69,45 @@ class SpotMapping(object):
             return None
 
         return self.path2spotmapping[key]
+
+    def get_spot_from_storage_path(self, path):
+        """
+        Extract the spot name from the storage path
+
+        :param path: Path to test
+        :return: spot name and path suffix
+        """
+        storage_suffix = path.split('archive/')[1]
+        spot = storage_suffix.split('/')[0]
+        suffix = storage_suffix.split(spot+'/')[1]
+
+        return spot, suffix
+
+    def is_archive_path(self, path):
+        """
+        Archive path refers to the location in the archive where the file exists.
+        In the archive there are 3 path types:
+            - storage path: the actual location of the file eg. /datacentre/archvol3/pan125/archive/namblex/data/...
+            - archive path: the path with the spot mapping replacing the storage prefix eg. /badc/namblex/data/aber-radar-1290mhz/20020831/
+            - symlink path: an alternative route to the file as displayed using pydap eg. badc/ncas-observations/data/man-radar-1290mhz/previous-versions/2002/08/31/
+
+        This function takes the input path, gets the storage path, replaces the storage prefix with spot mapping to get the archive
+        path and compares it to the input path. Returns True if input path is archive path.
+
+        :param path: file path to test
+        :return: Bool
+        """
+
+        storage_path = os.path.realpath(path)
+
+        spot, suffix = self.get_spot_from_storage_path(storage_path)
+
+        spot_path = self.get_archive_root(spot)
+
+        archive_path = os.path.join(spot_path,suffix)
+
+        return path == archive_path
+
+
+
+
