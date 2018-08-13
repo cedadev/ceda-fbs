@@ -13,7 +13,7 @@ from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
 import simplejson as json
-from proc.common_util.spot_mapping import SpotMapping
+from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 
 class ExtractSeq(object):
 
@@ -205,7 +205,7 @@ class ExtractSeq(object):
                     doc[0]['info']['spot_name'] = spot
 
                 # Add link status to level1 info
-                if self.spots.is_archive_path:
+                if self.spots.is_archive_path(filename):
                     doc[0]['info']['archive_path'] = True
                 else:
                     doc[0]['info']['archive_path'] = False

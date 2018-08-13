@@ -16,6 +16,7 @@ docopt
 docutils==0.12
 git+https://github.com/SciTools/iris.git#egg=Iris
 git+https://github.com/cedadev/nappy.git
+git+https://github.com/cedadev/ceda-elasticsearch-tools.git
 elasticsearch
 filemagic
 flake8==2.3.0
