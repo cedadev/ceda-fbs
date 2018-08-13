@@ -397,7 +397,7 @@ def is_date_valid(date_text):
         return False
 
 
-def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
+def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, queue='par-single', logger=None):
     """
     :param task_list : list of commands to run.
     :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
@@ -468,7 +468,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
             task = task_list[0]
             task_list.remove(task)
 
-            command = _make_bsub_command(task, i, logger=logger)
+            command = _make_bsub_command(task, i, queue=queue, logger=logger)
             subprocess.call(command, shell=True)
 
         info_msg = "Number of tasks waiting to be submitted : %s." % len(task_list)
@@ -497,7 +497,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         print "==============================="
 
 
-def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, logger=None):
+def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, queue='par-single', logger=None):
     """
     :param task_file : file of commands to run.
     :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
@@ -571,7 +571,7 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
             task = task_list[0]
             task_list.remove(task)
 
-            command = _make_bsub_command(task, i, logger=logger)
+            command = _make_bsub_command(task, i, queue=queue, logger=logger)
             subprocess.call(command, shell=True)
 
             # save list to file.
@@ -603,9 +603,15 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
         print "==============================="
 
 
-def _make_bsub_command(task, count, logger=None):
+def _make_bsub_command(task, count, queue, logger=None):
+
+    if queue == 'short-serial':
+        wall_time = '24:00'
+    else:
+        wall_time = '48:00'
+
     "Construct bsub command for task and return it."
-    command = "bsub -q par-single -W 48:00 {command}".format(command=task)
+    command = "bsub -q {queue} -W {wall_time} {command}".format(queue=queue, wall_time=wall_time, command=task)
     info_msg = "%s. Executing : %s" % ((count + 1), command)
     if logger is not None: logger.INFO(info_msg)
     print info_msg

@@ -113,7 +113,7 @@ def store_datasets_to_files(status, config, host):
 
         # Run each command in lotus.
         util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),
-                                user_wait_time=30)
+                                user_wait_time=30, queue='short-serial')
 
 
 def main():
