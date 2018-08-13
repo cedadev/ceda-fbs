@@ -83,6 +83,17 @@ class SpotMapping(object):
 
         return spot, suffix
 
+    def get_archive_path(self, path):
+        storage_path = os.path.realpath(path)
+
+        spot, suffix = self.get_spot_from_storage_path(storage_path)
+
+        spot_path = self.get_archive_root(spot)
+
+        archive_path = os.path.join(spot_path,suffix)
+
+        return archive_path
+
     def is_archive_path(self, path):
         """
         Archive path refers to the location in the archive where the file exists.
@@ -98,15 +109,8 @@ class SpotMapping(object):
         :return: Bool
         """
 
-        storage_path = os.path.realpath(path)
+        return path == self.get_archive_path(path)
 
-        spot, suffix = self.get_spot_from_storage_path(storage_path)
-
-        spot_path = self.get_archive_root(spot)
-
-        archive_path = os.path.join(spot_path,suffix)
-
-        return path == archive_path
 
 
 
