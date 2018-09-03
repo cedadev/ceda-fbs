@@ -21,68 +21,69 @@ class MetadataTagsJsonFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
+    # @util.simple_phenomena
     def get_phenomena(self, json_file):
 
         phenomena = json_file["phenomena"]
 
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-         "name" : "",
-         "value": ""
-        }
-
-        phenomena_list = []
+        phen_list = []
         for item in phenomena:
+            new_phenomenon = {}
             attr_list = []
             for key in item:
+                phen_attr = {}
                 phen_attr["name"]  = key
                 phen_attr["value"] = item[key]
 
-                attr_list.append(phen_attr.copy())
+                attr_list.append(phen_attr)
 
-            new_phenomenon = phenomenon.copy()
             new_phenomenon["attributes"] = attr_list
-            new_phenomenon["attribute_count"] = len(attr_list)
 
-            phenomena_list.append(new_phenomenon)
+            phen_list.append(new_phenomenon)
 
-        return phenomena_list
+        file_phenomena = util.build_phenomena(phen_list)
+        return file_phenomena
 
 
-    def get_metadata_tags_json_level2(self):
+    def get_metadata_level2(self):
 
         #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
 
             self.handler_id = "Metadata tags json handler level 2."
-            metadata = json.loads(open(self.file_path).read())
+            try:
+                metadata = json.loads(open(self.file_path).read())
+                file_info[0]["info"]["read_status"] = "Successful"
+                phen_list = self.get_phenomena(metadata)
 
-            phen_list = self.get_phenomena(metadata)
+            except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
+                phen_list = None
 
         else:
             return None
 
         return file_info + (phen_list, )
 
-    def get_metadata_tags_json_level3(self):
+    def get_metadata_level3(self):
         #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
         spatial = None
         phen_list = None
 
         if file_info is not None:
 
-            self.handler_id = "Metadata tags json handler level 2."
-            metadata = json.loads(open(self.file_path).read())
+            self.handler_id = "Metadata tags json handler level 3."
+
+            try:
+                metadata = json.loads(open(self.file_path).read())
+
+            except Exception:
+                # Error reading the file
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info
 
             phen_list = self.get_phenomena(metadata)
 
@@ -98,20 +99,22 @@ class MetadataTagsJsonFile(GenericFile):
         spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]]}}
 
         # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
-        start_time = metadata["time"][0]
-        end_time   = metadata["time"][1]
+        start_time = util.date2iso(metadata["time"][0])
+        end_time   = util.date2iso(metadata["time"][1])
         file_info[0]["info"]["temporal"] = {'start_time': start_time, 'end_time': end_time }
 
-        return file_info + (phen_list, spatial, )
+        file_info[0]["info"]["read_status"] = "Successful"
+
+        return file_info + phen_list + (spatial, )
 
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_tags_json_level2()
+            res = self.get_metadata_level2()
         elif self.level == "3":
-            res = self.get_metadata_tags_json_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -122,3 +125,21 @@ class MetadataTagsJsonFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/badc/ukcip02/data/50km_resolution/metadata_tags.json'
+    mdf = MetadataTagsJsonFile(file,level)
+    start = datetime.datetime.today()
+    print mdf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

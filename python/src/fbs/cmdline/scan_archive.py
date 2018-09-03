@@ -47,6 +47,7 @@ from cmdline import __version__  # Grab version from package __init__.py
 import datetime
 import subprocess
 import src.fbs.proc.constants.constants as constants
+from tqdm import tqdm
 
 SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
 
@@ -170,7 +171,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
     commands = []
     step = int(num_files)
 
-    for filename in list_of_cache_files:
+    for filename in tqdm(list_of_cache_files):
         num_of_lines = util.find_num_lines_in_file(filename)
 
         if num_of_lines == 0:
@@ -182,8 +183,8 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
         start = 0
         for i in range(0, number_of_jobs):
+            _add_scan_cmd_to_list(filename, step, start, level, commands)
             start += step
-            _add_scan_cmd_to_list(filename, remainder, start, level, commands)
 
         # Include remaining files
         if remainder > 0:
@@ -196,7 +197,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
     cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s"
     command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
-    print "Created command: %s" % command 
+    # print "Created command: %s" % command
     commands_list.append(command)
 
 

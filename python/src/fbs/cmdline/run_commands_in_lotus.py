@@ -34,7 +34,7 @@ def main():
     commands_file = com_args["filename"]
     num_processes = com_args["num-processes"]
 
-    util.run_tasks_file_in_lotus(commands_file, int(num_processes), user_wait_time=None, logger=None)
+    util.run_tasks_file_in_lotus(commands_file, int(num_processes), queue='short-serial')
 
     end = datetime.datetime.now()
     print "Script ended at: %s, it ran for: %s." % (end, (end - start))

@@ -1,97 +1,134 @@
 {
-   "mappings": {
-      "phenomenon": {
-         "properties": {
-            "id": {
-               "type": "text"
+  "mappings": {
+    "file": {
+      "properties": {
+        "info": {
+          "properties": {
+            "directory": {
+              "type": "keyword",
+              "fields": {
+                "analyzed": {
+                  "type": "text"
+                }
+              }
             },
-            "attribute_count": {
-               "type": "short"
+            "format": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
             },
-            "attributes": {
-               "type": "nested",
-               "properties": {
-                  "name": {
-                     "type": "text"
-                  },
-                  "value": {
-                     "type": "text"
+            "md5": {
+              "type": "keyword"
+            },
+            "user": {
+              "type": "keyword"
+            },
+            "group": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword",
+              "fields": {
+                "analyzed": {
+                  "type": "text"
+                }
+              }
+            },
+            "name_auto": {
+              "type": "completion",
+              "search_analyzer": "simple",
+              "analyzer": "simple"
+            },
+            "last_modified":{
+              "type": "date"
+            },
+            "phenomena": {
+              "properties": {
+                "names": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
                   }
-               }
-            }
-         }
-      },
-      "locations": {
-         "properties": {
-            "id": {
-               "type": "text"
-            },
-            "coordinates": {
-               "type": "geo_shape",
-               "tree": "quadtree",
-               "precision": "5km"
-            }
-         }
-      },
-      "file": {
-         "properties": {
-            "info": {
-               "properties": {
-                  "directory": {
-                     "type": "keyword",
-                     "fields": {
-                        "analyzed": {
-                           "type": "text"
-                        }
-                     }
-
-                  },
-                  "format": {
-                     "type": "text"
-                  },
-                  "md5": {
-                     "type": "keyword"
-                  },
-                  "name": {
-                     "type": "keyword",
-                     "fields": {
-                        "analyzed": {
-                           "type": "text"
-                        }
-                     }
-                  },
-                  "name_auto": {
-                     "type": "completion",
-                     "search_analyzer": "simple",
-                     "analyzer": "simple"
-                  },
-                  "phenomena": {
-                     "type": "text"
-                  },
-                  "location": {
-                     "type": "text"
-                  },
-                  "size": {
-                     "type": "long"
-                  },
-                  "type": {
-                     "type": "text"
-                  },
-                  "temporal": {
-                     "properties": {
-                        "end_time": {
-                           "type": "date",
-                           "format": "dateOptionalTime"
-                        },
-                        "start_time": {
-                           "type": "date",
-                           "format": "dateOptionalTime"
-                        }
-                     }
+                },
+                "units": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
                   }
-               }
+                },
+                "standard_name": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "var_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "agg_string": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "location": {
+              "type": "keyword"
+            },
+            "size": {
+              "type": "long"
+            },
+            "type": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "temporal": {
+              "properties": {
+                "end_time": {
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                },
+                "start_time": {
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                }
+              }
+            },
+            "spatial": {
+              "properties": {
+                "coordinates": {
+                  "properties": {
+                    "coordinates":{
+                      "type": "geo_point"
+                    }
+                  }
+                }
+              }
             }
-         }
+          }
+        }
       }
-   }
+    }
+  }
 }

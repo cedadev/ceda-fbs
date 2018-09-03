@@ -151,22 +151,28 @@ class EsaSafeFile(GenericFile):
         :returns: List containing temporal metadata
         """
         ap = self.sections["acquisition_period"]
-        return {"start_time": ap["Start Time"],
-                "end_time": ap["Stop Time"]}
+        iso_start_date = util.date2iso(ap["Start Time"])
+        iso_end_date = util.date2iso(ap["Stop Time"])
 
+        return {"start_time": iso_start_date,
+                "end_time": iso_end_date }
 
-    def get_metadata_esasafe_level3(self):
-        self.handler_id = "MAnifest handler level 3."
-        spatial = None
+    def get_metadata_level3(self):
+        self.handler_id = "Manifest handler level 3."
 
-        res = self.get_metadata_generic_level1()
+        res = self.get_metadata_level1()
 
-        self._open_file()
+        try:
+            self._open_file()
+
+        except Exception:
+            # Error reading file
+            res[0]["info"]["read_status"] = "Read Error"
+            return res
+
+        # File read successful
         geospatial = self.get_geospatial()
         temporal = self.get_temporal()
-
-        #{'lat': [-56.301735, -54.830536, -58.449139, -60.058411], 'type': 'swath', 'lon': [-37.49408, -31.223965, -28.045124, -34.86174]}
-        #{'start_time': '2015-07-04T21:33:30.724498', 'end_time': '2015-07-04T21:34:36.080966'}
 
         lat_u =  max(geospatial["lat"])
         lat_l =  min(geospatial["lat"])
@@ -174,9 +180,9 @@ class EsaSafeFile(GenericFile):
         lon_u = max(geospatial["lon"])
         lon_l =  min(geospatial["lon"])
 
-
         spatial = {"coordinates": {"type": "envelope", "coordinates": [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]] } }
         res[0]["info"]["temporal"] = {"start_time": temporal["start_time"], "end_time": temporal["end_time"] }
+        res[0]["info"]["read_status"] = "Successful"
 
         phenomena = None
 
@@ -185,11 +191,11 @@ class EsaSafeFile(GenericFile):
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "3":
-            res = self.get_metadata_esasafe_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -200,3 +206,23 @@ class EsaSafeFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = '/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2017/10/31/S1A_IW_GRDH_1SDV_20171031T061411_20171031T061436_019053_020395_DCCA.manifest'
+    esf = EsaSafeFile(file,level)
+    start = datetime.datetime.today()
+    print esf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start

@@ -4,7 +4,7 @@
 
 ```
 $ ssh ${USER}@jasmin-sci2.ceda.ac.uk
-$ cd /group_workspaces/jasmin/cedaproc/${USER}/
+$ cd /group_workspaces/jasmin4/cedaproc/${USER}/
 $ mkdir fbs
 $ export BASEDIR=$PWD
 $ cd fbs/
@@ -28,7 +28,7 @@ ceda-fbs  install-ceda-fbs.sh  venv-ceda-fbs
 
 ```
 $ cat setup_env.sh
-export BASEDIR=/group_workspaces/jasmin/cedaproc/$USER/fbs
+export BASEDIR=/group_workspaces/jasmin4/cedaproc/$USER/fbs
 export PYTHONPATH=$BASEDIR/ceda-fbs/python:$BASEDIR/ceda-fbs/python/src/fbs:$PYTHONPATH
 export PATH=$PATH:$BASEDIR/ceda-fbs/python/src/fbs/cmdline
 . venv-ceda-fbs/bin/activate

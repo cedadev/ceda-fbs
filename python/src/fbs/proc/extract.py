@@ -5,17 +5,15 @@
 import datetime
 import logging
 import os
-import sys
-import re
 import hashlib
 import socket
-import pdb
 import proc.common_util.util as util
 import proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
-
+import simplejson as json
+from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 
 class ExtractSeq(object):
 
@@ -35,7 +33,11 @@ class ExtractSeq(object):
         self.dataset_id = None
         self.dataset_dir = None
 
+        # Spot data
+        self.spots = SpotMapping(spot_file='ceda_all_datasets.ini')
+
         # Define constants
+        self.blocksize = 800
         self.FILE_PROPERTIES_ERROR = "0"
         self.FILE_INDEX_ERROR = "-1"
         self.FILE_INDEXED = "1"
@@ -73,27 +75,16 @@ class ExtractSeq(object):
 
         datasets_file = self.conf("filename")
         self.dataset_id = self.conf("dataset")
-        #derectory where the files to be searched are.
+        followlinks = self.conf("followlinks")
+        #directory where the files to be searched are.
         self.dataset_dir = util.find_dataset(datasets_file, self.dataset_id)
         if self.dataset_dir is not None:
             self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
-            return util.build_file_list(self.dataset_dir)
+            return util.build_file_list(self.dataset_dir, followlinks=followlinks)
         else:
             return None
 
-    def index_attributes_seq(self, body, es_id):
-
-        """
-        Indexes metadata in Elasticsearch.
-        """
-        self.es.index(index=self.conf("es-configuration")["es-index"],\
-                      doc_type=self.conf("es-configuration")["es-mapping"],\
-                      body=body,\
-                      id=es_id,\
-                      request_timeout=60\
-                     )
-
-    def process_file_seq(self, filename, level, es):
+    def process_file_seq(self, filename, level):
         """
         Returns metadata from the given file.
         """
@@ -151,66 +142,129 @@ class ExtractSeq(object):
 
         return lid
 
-
-    def index_metadata(self, metadata, fid):
-
+    def create_body(self, fdata):
         """
-        Implements the following scenario:
-        1. Metadata are extracted for a file (file info and phenomena).
-        2. If phenomena do not exist in database then they are created.
-        3. Phenomena ids are stored in the json representing file info.
-        4. File info is stored in database.
-        5. This is done for all files in the list. Current size is 700.
+        Takes the information returned by the file handlers and builds the JSON to send to elasticsearch.
+
+        :param fdata: Tuple containing file metatadata, parameters and temporal data.
+        :return: JSON to index  into elasticsearch
         """
-        fmeta = metadata[0]
+        if len(fdata) ==  1:
+            doc = fdata[0]
 
-        if len(metadata) == 1:
-            index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
-            return
+        if len(fdata) > 1:
+            doc = fdata[0]
 
-        try :
-            phen_list = metadata[1]
-            if phen_list != None :
+            if fdata[1] is not None:
+                doc["info"]["phenomena"] = fdata[1]
 
-                phen_ids = []
-                #Test if phenomenon exist in database.
-                #if not create it.
-                for item in phen_list:
+            if len(fdata) == 3:
+                if fdata[2] is not None:
+                    doc["info"]["spatial"] = fdata[2]
 
-                    query = index.create_query(item)
-                    self.logger.debug("Query created: " + str(query))
-                    #print "Query created: " + str(query)
-                    res = index.search_database(self.es, self.es_index, self.es_type_phen, query)
-                    #print "Query result: " + str(res)
-                    self.logger.debug("Query result: " + str(res))
+        return json.dumps(doc)
 
-                    phen_id = self.is_valid_result(res)
-                    if phen_id is not None:
-                        phen_ids.append(phen_id)
-                        #print "phenomenon found!"
-                        self.logger.debug("phenomenon found!")
-                    else:
-                        #print "phenomenon needs to be inserted in the database."
-                        phen_id = index.index_phenomenon(self.es, self.es_index, self.es_type_phen, item, 800)
-                        phen_ids.append(str(phen_id))
-                        #print "Phen created : " + str(phen_id)
-                        self.logger.debug("Phen created : " + str(phen_id))
 
-                    index.index_phenomenon(self.es, self.es_index, self.es_type_phen)
+    def create_bulk_index_json(self, file_list, level, blocksize):
+        """
+        Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
+        the index JSON. This is to get around any problems caused by files with properties errors which produces None
+        when self.process_file_seq is called.
 
-                fmeta["info"]["phenomena"] = phen_ids
+        :param file_list: List of files to create actions from
+        :param level: Level of detail to get from file
+        :param blocksize: Size of chunks to send to Elasticsearch.
 
-            if len(metadata) == 3:
+        :return: bulk_list - list of JSON strings to send to ES,
+                 files_to_index - list of lists with each inner list containing the matching files to the query.
+        """
+        bulk_json = ""
+        bulk_list = []
+        files_to_index = []
+        file_array = []
 
-                if metadata[2] != None:
-                    lid = self.index_location(metadata[2])
-                    fmeta["info"]["location"] = lid
+        self.logger.debug("Creating bulk json with block of %d" % blocksize)
 
-        # if something fails at least index the basic information.
-        except Exception as ex:
-            pass
+        doc_type = self.es_type_file
 
-        index.index_file(self.es, self.es_index, self.es_type_file, fid, fmeta)
+        for i, filename in enumerate(file_list,1):
+
+            start = datetime.datetime.now()
+            doc = self.process_file_seq(filename, level)
+
+
+            if doc is not None:
+                # Get spot information
+                spot = self.spots.get_spot(filename)
+
+
+                es_id = hashlib.sha1(filename).hexdigest()
+
+                # Add spot to level1 info
+                if spot is not None:
+                    doc[0]['info']['spot_name'] = spot
+
+
+                action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
+                body = self.create_body(doc) + "\n"
+                self.logger.debug("JSON to index: {}".format(body))
+
+                bulk_json += action + body
+                file_array.append(filename)
+
+            else:
+                end = datetime.datetime.now()
+                self.logger.error("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename),self.FILE_PROPERTIES_ERROR, str(end - start)))
+                self.files_properties_errors = self.files_properties_errors + 1
+
+            if i % blocksize == 0:
+                json_len =  bulk_json.count("\n")/2
+                self.logger.debug("Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (i,json_len,(blocksize-json_len),blocksize))
+                bulk_list.append(bulk_json)
+                files_to_index.append(file_array)
+
+                # Reset building blocks
+                bulk_json = ""
+                file_array = []
+
+        if bulk_json:
+            # Add any remaining files
+            bulk_list.append(bulk_json)
+            files_to_index.append(file_array)
+
+
+        return bulk_list, files_to_index
+
+
+    def bulk_index(self, file_list, level, blocksize):
+        """
+        Creates the JSON and performs a bulk index operation
+        """
+        action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
+        # print action_list
+
+        for action, files in zip(action_list, files_to_index):
+            r = self.es.bulk(body=action,request_timeout=60)
+            self.process_response_for_errors(r, files)
+
+    def process_response_for_errors(self, response, files):
+        if response['errors']:
+            for i, item in enumerate(response['items']):
+                if item['index']['status'] not in [200,201]:
+                    filename = files[i]
+                    error = item['index']['error']
+                    ex = ": ".join([error['type'],error['reason']])
+                    self.logger.error("Indexing error: %s" % ex)
+                    self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR,' ')))
+                    self.database_errors += 1
+
+                else:
+                    self.files_indexed += 1
+        else:
+            batch_count = len(files)
+            self.files_indexed += batch_count
+            self.logger.debug("Added %i files to index" % batch_count)
+
 
 
     def scan_files(self):
@@ -241,40 +295,7 @@ class ExtractSeq(object):
         self.logger.debug("File list contains {} files.".format(len(self.file_list)))
         if len(self.file_list) > 0:
 
-            for filename in self.file_list:
-
-                start = datetime.datetime.now()
-
-                self.logger.debug("Scanning file {} at level {}.".format(filename, level))
-                doc = self.process_file_seq(filename, level, self.es)
-
-                if doc is not None:
-
-                    es_id = hashlib.sha1(filename).hexdigest()
-                    self.logger.debug("Json for file {}: {} has id {}.".format(filename, doc, es_id))
-
-                    try:
-                        self.index_metadata(doc, es_id)
-
-                    except Exception as ex:
-                        end = datetime.datetime.now()
-                        self.logger.error(("Indexing error: %s" %ex))
-                        self.logger.error(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                              self.FILE_INDEX_ERROR, str(end - start))))
-                        self.database_errors = self.database_errors + 1
-
-                    else:
-                        end = datetime.datetime.now()
-                        self.logger.debug(("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                             self.FILE_INDEXED, str(end - start))))
-                        self.files_indexed = self.files_indexed + 1
-
-                else:
-                    end = datetime.datetime.now()
-                    self.logger.error("%s|%s|%s|%s ms" %(os.path.basename(filename), os.path.dirname(filename), \
-                                                         self.FILE_PROPERTIES_ERROR, str(end - start)))
-                    self.files_properties_errors = self.files_properties_errors + 1
-
+            self.bulk_index(self.file_list, level, self.blocksize)
 
             # At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
@@ -334,8 +355,10 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***")
         self.file_list = self.read_dataset()
 
+
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
+            print file_to_store_paths
             try :
                 files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:

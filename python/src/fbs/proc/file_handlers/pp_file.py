@@ -1,7 +1,5 @@
 import cdms2 as cdms
-import os
 import proc.common_util.util as util
-import datetime
 
 
 from proc.file_handlers.generic_file import GenericFile
@@ -72,77 +70,70 @@ class PpFile(GenericFile):
 
         return (start_time, end_time, time_units)
 
-    def get_phenomena(self):
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-          "name" : "",
-          "value": ""
-        }
+    def get_phenomena(self, pp_file_content):
 
         try:
             self.handler_id = "pp handler level 2."
-            pp_file_content=cdms.open(self.file_path)
+            # pp_file_content=cdms.open(self.file_path)
             var_ids = pp_file_content.listvariables()
 
             # Filter long values and overwrite duplicates.
             phen_list = []
             for var_id in var_ids:
+                new_phenomenon = {}
                 metadata_dict = pp_file_content[var_id].attributes
                 phen_attr_list = []
-                attr_count = 0
                 for key in metadata_dict.keys():
-
                     value = str(metadata_dict[key])
 
-                    if len(key) < util.MAX_ATTR_LENGTH \
-                        and len(value) < util.MAX_ATTR_LENGTH \
-                        and util.is_valid_phen_attr(value):
-                        phen_attr["name"] = str(key.strip())
-                        phen_attr["value"] = str(unicode(value).strip())
+                    if not util.is_valid_phenomena(key,value):
+                        continue
 
-                        phen_attr_list.append(phen_attr.copy())
-                        attr_count = attr_count + 1
+                    phen_attr = {}
+
+                    phen_attr["name"] = str(key.strip())
+                    phen_attr["value"] = str(unicode(value).strip())
+
+                    phen_attr_list.append(phen_attr)
 
                 # Dict of phenomenon attributes.
                 if len(phen_attr_list) > 0:
-
-                    # phenomenon 		is a dictionary type
-                    # phen_attr_list	is a list
-                    # attr_count		is an INT
-                    new_phenomenon = phenomenon.copy() 
                     new_phenomenon["attributes"] = phen_attr_list
-                    new_phenomenon["attribute_count"] = attr_count
 
-                    # JAR 11-Oct-2016
                     # Append to list if new_phenomenon is NOT already in the phen_list
                     if new_phenomenon not in phen_list:
                         phen_list.append(new_phenomenon)
 
-            pp_file_content.close()
+            # pp_file_content.close()
 
-            return (phen_list, )
+            file_phenomena = util.build_phenomena(phen_list)
+
+            return file_phenomena
         except Exception as ex:
             return None
 
-    def get_metadata_pp_level2(self):
+    def get_metadata_level2(self):
 
         # Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
-            phen_list = self.get_phenomena()
-            if phen_list is not None:
-                return file_info + phen_list
-            else:
-                print "No phenom found!!!"
+            try:
+                pp_file_content = cdms.open(self.file_path)
+                phen_list = self.get_phenomena(pp_file_content)
+                pp_file_content.close()
+
+                if phen_list is not None:
+                    file_info[0]["info"]["read_status"] = "Successful"
+                    return file_info + phen_list
+                else:
+                    file_info[0]["info"]["read_status"] = "Read Error"
+                    return file_info + (None,)
+
+            except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
+
         else:
             return None
 
@@ -159,24 +150,11 @@ class PpFile(GenericFile):
 
         return coord
 
-    def get_metadata_pp_level3(self):
-
-        phenomenon =\
-        {
-         "id" : "",
-         "attribute_count" : "",
-         "attributes" :[]
-        }
-
-        phen_attr =\
-        {
-          "name" : "",
-          "value": ""
-        }
+    def get_metadata_level3(self):
 
         spatial = None
         #Get basic file info.
-        file_info = self.get_metadata_generic_level1()
+        file_info = self.get_metadata_level1()
 
         if file_info is not None:
             try:
@@ -191,76 +169,54 @@ class PpFile(GenericFile):
                 pp_file_content=cdms.open(self.file_path)
                 var_ids = pp_file_content.listvariables()
 
-                phen_list = []
                 for var_id in var_ids:
-                    metadata_dict = pp_file_content[var_id].attributes
-                    phen_attr_list = []
-
-                    attr_count = 0
-                    for key in metadata_dict.keys():
-
-                        value = str(metadata_dict[key])
-
-                        if      len(key) < util.MAX_ATTR_LENGTH \
-                            and len(value) < util.MAX_ATTR_LENGTH \
-                            and util.is_valid_phen_attr(value):
-
-                            phen_attr["name"] = str(key.strip())
-                            phen_attr["value"] = str(unicode(value).strip())
-
-                            phen_attr_list.append(phen_attr.copy())
-                            attr_count = attr_count + 1
-
-                    #Dict of phenomenon attributes.
-                    if len(phen_attr_list) > 0:
-                        new_phenomenon = phenomenon.copy() 
-                        new_phenomenon["attributes"] = phen_attr_list
-                        new_phenomenon["attribute_count"] = attr_count
-                        phen_list.append(new_phenomenon)
-
-                    try :
+                    try:
                         spatial  = self.getBoundingBox(var_id, pp_file_content)
                         temporal = self.getTemporalDomain(var_id, pp_file_content)
 
-                        #geospatial data.
+                        # Geospatial data
                         lon_l.append(spatial[0])
                         lat_l.append(spatial[1])
                         lon_u.append(spatial[2])
                         lat_u.append(spatial[3])
 
-                        #temporal
+                        # Temporal data
                         start_time_l.append(temporal[0])
                         end_time_l.append(temporal[1])
 
                     except Exception as ex:
                         continue
 
-
-                if     len(lat_l) > 0  \
-                   and len(lon_l) > 0  \
-                   and len(lat_u) > 0  \
-                   and len(lon_u) > 0:
+                # Make sure that there are values in all the lists
+                if all(v for v in [lat_l,lon_l,lat_u,lon_u]):
 
                     min_lon_l = self.normalize_lon(min(lon_l))
                     min_lat_l = self.normalize_lat(min(lat_l))
                     max_lon_u = self.normalize_lon(max(lon_u))
                     max_lat_u = self.normalize_lat(max(lat_u))
 
-                    spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
+                    spatial = {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon_l, 3), round(min_lat_l, 3)], [round(max_lon_u, 3), round(max_lat_u, 3)]]}}
 
-                #kltsa 22/07/2016 change for issue 23341: validation of dates added.
-                if     len(start_time_l) > 0 \
-                   and len(end_time_l) > 0:
+                if start_time_l and end_time_l:
                     min_time = min(start_time_l)
                     max_time = max(end_time_l)
+
                     if util.is_date_valid(min_time.split("T")[0])\
                        and util.is_date_valid(max_time.split("T")[0]):
                         file_info[0]["info"]["temporal"] = {'start_time': min_time, 'end_time': max_time }
 
+                phen_list = self.get_phenomena(pp_file_content)
+
                 pp_file_content.close()
 
-                return file_info + (phen_list, spatial, )
+
+                file_info[0]["info"]["read_status"] = "Successful"
+
+                return file_info + phen_list + (spatial, )
+
             except Exception as ex:
+                # There was an error reading the file
+                file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
         else:
             return None
@@ -268,11 +224,11 @@ class PpFile(GenericFile):
     def get_metadata(self):
 
         if self.level == "1":
-            res = self.get_metadata_generic_level1()
+            res = self.get_metadata_level1()
         elif self.level == "2":
-            res = self.get_metadata_pp_level2()
+            res = self.get_metadata_level2()
         elif self.level == "3":
-            res = self.get_metadata_pp_level3()
+            res = self.get_metadata_level3()
 
         res[0]["info"]["format"] = self.FILE_FORMAT
 
@@ -283,3 +239,21 @@ class PpFile(GenericFile):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+    except IndexError:
+        level = '1'
+
+    file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
+    ppf = PpFile(file,level)
+    start = datetime.datetime.today()
+    print ppf.get_metadata()
+    end = datetime.datetime.today()
+    print end-start
