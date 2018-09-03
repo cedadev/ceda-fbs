@@ -34,7 +34,7 @@ class ExtractSeq(object):
         self.dataset_dir = None
 
         # Spot data
-        self.spots = SpotMapping(from_file=True, spot_file='ceda_all_datasets.ini')
+        self.spots = SpotMapping(spot_file='ceda_all_datasets.ini')
 
         # Define constants
         self.blocksize = 800
@@ -204,11 +204,6 @@ class ExtractSeq(object):
                 if spot is not None:
                     doc[0]['info']['spot_name'] = spot
 
-                # Add link status to level1 info
-                if self.spots.is_archive_path(filename):
-                    doc[0]['info']['archive_path'] = True
-                else:
-                    doc[0]['info']['archive_path'] = False
 
                 action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
                 body = self.create_body(doc) + "\n"
