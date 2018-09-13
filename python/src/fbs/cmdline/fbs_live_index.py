@@ -34,19 +34,6 @@ import hashlib
 import json
 from elasticsearch import Elasticsearch
 
-# import argparse
-# parser = argparse.ArgumentParser(description="Script to be run as a cron job to update the FBS indices as files are added to the archive"
-#                                              "This is achieved by reading the deposit logs and scanning for DEPOSIT and REMOVE tags")
-#
-# parser.add_argument("-d", help="Directory to put file lists for scanning", dest="list_dir")
-# parser.add_argument("-l", help="FBS detail level", dest="level")
-# parser.add_argument("-i", help="Elasticsearch index to post data to", dest="index")
-# parser.add_argument("--logdir", help="Log directory", dest="log_dir")
-
-
-
-
-
 def setup_logging(config):
     if not config['LOGDIR']:
         config['LOGDIR'] = 'deposit_cron_log'
@@ -105,12 +92,13 @@ def main():
             logger.info("Deposit log {} has already been processed.".format(log))
 
         else:
+            python_executable = "/home/badc/software/fbs/venv-ceda-fbs/bin/python"
+            python_script_path="{} ceda-fbs/python/src/fbs/cmdline/scan_dataset.py".format(python_executable)
+
             if dl.deposit_list:
                 file_list_path = os.path.join(config['DIR'], deposit_output_file)
                 dl.write_filelist(file_list_path)
 
-                python_executable = "/home/badc/software/fbs/venv-ceda-fbs/bin/python"
-                python_script_path="{} ceda-fbs/python/src/fbs/cmdline/scan_dataset.py".format(python_executable)
 
                 command = "{python_script} -f {dataset} -n {num_files} -s 0 -l {level} -i {index}".format(
                     python_script=python_script_path,
@@ -119,6 +107,8 @@ def main():
                     level=config["LEVEL"],
                     index=config["INDEX"]
                 )
+
+                print (command)
 
                 logger.debug("Running command: {}".format(command))
                 try:
