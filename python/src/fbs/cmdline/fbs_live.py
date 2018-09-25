@@ -166,12 +166,7 @@ class FbsLiveIndex():
         # Process the list
         return_state = self.ceda_fbi_updater.delete_files(deletion_list)
 
-        if return_state["failed"] == 0:
-            self.delete_status = start_index
-
-        else:
-            self.delete_status = start_index
-            raise Exception("Delete incomplete. Failed: {} Successful: {}".format(return_state["failed"], return_state["success"]))
+        self.delete_status = len(file_list)
 
     def _process_log(self, log_dict):
         """

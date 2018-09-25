@@ -221,8 +221,11 @@ class ExtractSeq(object):
             if i % blocksize == 0:
                 json_len =  bulk_json.count("\n")/2
                 self.logger.debug("Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (i,json_len,(blocksize-json_len),blocksize))
-                bulk_list.append(bulk_json)
-                files_to_index.append(file_array)
+
+                # Only attempt to add if there is data there. Will break the scan if it appends an empty action.
+                if json_len > 0:
+                    bulk_list.append(bulk_json)
+                    files_to_index.append(file_array)
 
                 # Reset building blocks
                 bulk_json = ""
