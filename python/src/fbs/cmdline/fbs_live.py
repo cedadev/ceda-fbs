@@ -121,7 +121,7 @@ class FbsLiveIndex():
             return
 
         # Write list of files to disk
-        file_to_scan = os.path.join(self.DIR, "deposit_list.txt")
+        file_to_scan = os.path.join(self.DIR, "deposit_list_{}.txt".format(self.STREAM))
 
         self._write_filelist(file_to_scan, file_list)
 
