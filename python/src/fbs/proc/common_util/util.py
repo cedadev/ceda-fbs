@@ -189,7 +189,7 @@ def get_settings(conf_path, args):
     return defaults
 
 
-def build_file_list(path, followlinks=False):
+def build_file_list(path):
     """
     :param path : A file path
     :param followlinks : Bool. Sets whether os.walk should follow symbolic links.
@@ -197,7 +197,7 @@ def build_file_list(path, followlinks=False):
     """
     
     file_list = []
-    for root, _, files in os.walk(path, followlinks=followlinks):
+    for root, _, files in os.walk(path):
         for each_file in files:
             if each_file[0] == ".": continue
             file_list.append(os.path.join(root, each_file))

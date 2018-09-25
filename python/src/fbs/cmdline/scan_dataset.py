@@ -11,7 +11,6 @@ Usage:
   scan_dataset.py (-f <filename> | --filename <filename>)
                   (-d <dataset_id> | --dataset <dataset_id>)
                   (-m <location> | --make-list <location>)
-                  [--followlinks]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
   scan_dataset.py (-f <filename> | --filename <filename>)
                   [-n <n_files> | --num-files <n_files>]
@@ -19,6 +18,7 @@ Usage:
                   (-l <level> | --level <level>)
                   [-i <index> | --index <index>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
+                  [--calculate_md5 ]
 
 Options:
   -h --help                           Show this screen.
@@ -48,7 +48,7 @@ Options:
 
   -i --index=<index>                  The index to update
 
-  --followlinks                       Follow symbolic links
+  --calculate-md5                     Calculate md5 checksums on scan
  """
 
 import os

@@ -10,8 +10,8 @@ class PpFile(GenericFile):
     of an PP file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
-        GenericFile.__init__(self, file_path, level)
+    def __init__(self, file_path, level, additional_param=None, **kwargs):
+        GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "PP"
         self.handler_id = ""
 

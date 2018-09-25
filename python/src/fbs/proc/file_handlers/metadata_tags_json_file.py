@@ -14,8 +14,8 @@ class MetadataTagsJsonFile(GenericFile):
     of an meta_data_tags.Json file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
-        GenericFile.__init__(self, file_path, level)
+    def __init__(self, file_path, level, additional_param=None, **kwargs):
+        GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "Metadata tags json"
 
     def get_handler_id(self):
