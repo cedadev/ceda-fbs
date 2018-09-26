@@ -85,7 +85,8 @@ class FbsLiveIndex():
             self.previous_logfile["delete"] = -1
             return
 
-        if log == self.previous_logfile:
+        if log == self.previous_logfile["log"]:
+
             # The penultimate log is listed in the state file which means that it is possible
             # this file has not completed scanning. Return the progress in this file and
             # set the progress to the latest log at the start of the file.
