@@ -192,7 +192,6 @@ def get_settings(conf_path, args):
 def build_file_list(path):
     """
     :param path : A file path
-    :param followlinks : Bool. Sets whether os.walk should follow symbolic links.
     :return: List of files contained within the specified directory.
     """
     
@@ -200,6 +199,8 @@ def build_file_list(path):
     for root, _, files in os.walk(path):
         for each_file in files:
             if each_file[0] == ".": continue
+            if os.path.islink(each_file): continue
+
             file_list.append(os.path.join(root, each_file))
 
     return file_list
@@ -611,7 +612,7 @@ def _make_bsub_command(task, count, queue, logger=None):
         wall_time = '48:00'
 
     "Construct bsub command for task and return it."
-    command = "bsub -q {queue} -W {wall_time} {command}".format(queue=queue, wall_time=wall_time, command=task)
+    command = "bsub -q {queue} -W {wall_time} -e lotus_errors/%J.err {command}".format(queue=queue, wall_time=wall_time, command=task)
     info_msg = "%s. Executing : %s" % ((count + 1), command)
     if logger is not None: logger.INFO(info_msg)
     print info_msg

@@ -8,7 +8,7 @@ This is achieved by reading the deposit logs and scanning for DEPOSIT and REMOVE
 Usage:
     fbs_live_index.py --help
     fbs_live_index.py --version
-    fbs_live_index.py (-d DIR | --dir DIR )(-l LEVEL | --level LEVEL)(-i INDEX | --index INDEX)(-s STREAM | --stream STREAM)
+    fbs_live_index.py (-d DIR | --dir DIR )(-l LEVEL | --level LEVEL)(-i INDEX | --index INDEX)(-s STREAM | --stream STREAM)[ --md5 ]
 
 Options:
     --help              Display help.
@@ -17,10 +17,6 @@ Options:
     -l --level          FBS detail level (1|2|3)
     -i --index          Index to modify
     -s --stream         Deposit stream to follow
-
-
-
-
 
 
 """
@@ -33,6 +29,7 @@ from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi
 import os
 import subprocess
 import hashlib
+
 
 class FbsLiveIndex():
 
@@ -62,6 +59,11 @@ class FbsLiveIndex():
         self.ceda_fbi_updater = CedaFbi(index=self.INDEX, host="jasmin-es1.ceda.ac.uk", port=9200)
 
     def _process_args(self, args):
+        """
+        Turn the docopt arguments into object properties
+        :param args: Docopt arguments
+        """
+
         for arg, value in args.iteritems():
             if not arg.startswith("-"):
                 setattr(self, arg, value)
@@ -102,6 +104,10 @@ class FbsLiveIndex():
             self.current_logfile["delete"] = int(delete)
 
     def _update_status_file(self):
+        """
+        Update the status file with the current stopping point
+
+        """
 
         status_line = "{deposit} {delete} {log}".format(deposit=self.deposit_status, delete=self.delete_status,
                                                         log=self.current_logfile["log"])
@@ -117,7 +123,14 @@ class FbsLiveIndex():
             writer.writelines(map(lambda x: x + "\n", list))
 
     def _process_deposits(self, start_index, file_list):
-        """"""
+        """
+        Process deposits from deposit logs
+
+        :param start_index: File to start the scan from
+        :param file_list:   List of files to process
+
+        """
+
         if not file_list:
             return
 
@@ -134,7 +147,7 @@ class FbsLiveIndex():
         command = "{python_script} -f {dataset} -n {num_files} -s {start} -l {level} -i {index}".format(
             python_script=python_script_path,
             dataset=file_to_scan,
-            num_files=len(file_list),
+            num_files=len(file_list)-start_index,
             start=start_index,
             level=self.LEVEL,
             index=self.INDEX
@@ -155,6 +168,12 @@ class FbsLiveIndex():
                 "Deposit incomplete. Check fbs logs for details")
 
     def _process_deletions(self, start_index, file_list):
+        """
+        Process deletions contained in the deposit logs
+
+        :param start_index: File to start the deletions from
+        :param file_list:   List of files to process
+        """
 
         deletion_list = []
 
@@ -171,9 +190,9 @@ class FbsLiveIndex():
 
     def _process_log(self, log_dict):
         """
+        Process the given log
 
-        :param filename:
-        :return:
+        :param log_dict: Dict containing data about the log. filename, status from the status file.
         """
 
         print ("Filename: {}".format(log_dict["log"]))
@@ -190,6 +209,12 @@ class FbsLiveIndex():
             len(dl.readme00_list)
         ))
 
+        # Print current state in status file
+        print ("Status file - Deposit: {} Delete: {}".format(log_dict["deposit"], log_dict["delete"]))
+        print ("Number of files to scan/delete: {}/{}".format(len(dl.deposit_list) - log_dict["deposit"],
+                                                              len(dl.deletion_list) - log_dict["delete"])
+               )
+
         if len(dl.deposit_list) > log_dict["deposit"]:
             self._process_deposits(log_dict["deposit"], dl.deposit_list)
         else:
@@ -204,8 +229,8 @@ class FbsLiveIndex():
 
     def _check_deposits(self):
         """
-
-        :return:
+        Check the current working state from the status file. Decides whether need to process the previous log or just
+        the most recent log.
         """
 
         # The log in the state file is the latest and the previous log has been processed
@@ -218,6 +243,9 @@ class FbsLiveIndex():
             self._process_log(self.current_logfile)
 
     def process_logs(self):
+        """
+        Main entry point to class to run the processing chain
+        """
 
         self._read_status_file()
 

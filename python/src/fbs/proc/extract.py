@@ -16,6 +16,9 @@ import simplejson as json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 from tqdm import tqdm
 
+# Suppress requests logging messages
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 class ExtractSeq(object):
 
     """
@@ -35,7 +38,7 @@ class ExtractSeq(object):
         self.dataset_dir = None
 
         # Spot data
-        self.spots = SpotMapping()
+        self.spots = SpotMapping(spot_file='ceda_all_datasets.ini')
 
         # Define constants
         self.blocksize = 800
