@@ -86,8 +86,8 @@ class EsaSafeFile(GenericFile):
     of an manifest file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
-        GenericFile.__init__(self, file_path, level)
+    def __init__(self, file_path, level, additional_param=None, **kwargs):
+        GenericFile.__init__(self, file_path, level, **kwargs)
         self.handler_id = "Manifest handler level 3."
         self.FILE_FORMAT = "Manifest"
 

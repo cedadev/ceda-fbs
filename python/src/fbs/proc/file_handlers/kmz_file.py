@@ -44,8 +44,8 @@ class KmzFile(GenericFile):
     of an nasaames file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
-        GenericFile.__init__(self, file_path, level)
+    def __init__(self, file_path, level, additional_param=None, **kwargs):
+        GenericFile.__init__(self, file_path, level, **kwargs)
         self.handler_id = "kmz file handler."
         self.FILE_FORMAT = "KMZ"
 

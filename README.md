@@ -287,3 +287,18 @@ http://team.ceda.ac.uk/trac/ceda/wiki/ElasticSearch/BasicQueries
 
 http://team.ceda.ac.uk/trac/ceda/ticket/23247
 
+## Command Line Scripts
+
+|           Script name            |                  Description               |
+| -------------------------------- | ------------------------------------------ |
+| check_incompete_spots.py         |                                            |
+| create_datasets_ini_from_spot.sh |                                            |
+| display_es_stats.py              |                                            |
+| fbs_api.py                       |                                            |
+| fbs_live.py                      |                                            |
+| get_es_stats.py                  |                                            |
+| make_file_lists.py               |                                            |
+| run_commands_in_lotus.py         |                                            |
+| scan_archive.py                  |                                            |
+| scan_dataset.py                  |                                            |
+| scan_logfiles.py                 |                                            |

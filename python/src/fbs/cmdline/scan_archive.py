@@ -195,7 +195,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
 
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
-    cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s"
+    cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s --calculate_md5"
     command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
     # print "Created command: %s" % command
     commands_list.append(command)

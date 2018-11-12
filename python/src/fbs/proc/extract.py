@@ -14,6 +14,10 @@ from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
 import simplejson as json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
+from tqdm import tqdm
+
+# Suppress requests logging messages
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 class ExtractSeq(object):
 
@@ -34,7 +38,7 @@ class ExtractSeq(object):
         self.dataset_dir = None
 
         # Spot data
-        self.spots = SpotMapping()
+        self.spots = SpotMapping(spot_file='ceda_all_datasets.ini')
 
         # Define constants
         self.blocksize = 800
@@ -75,12 +79,11 @@ class ExtractSeq(object):
 
         datasets_file = self.conf("filename")
         self.dataset_id = self.conf("dataset")
-        followlinks = self.conf("followlinks")
         #directory where the files to be searched are.
         self.dataset_dir = util.find_dataset(datasets_file, self.dataset_id)
         if self.dataset_dir is not None:
             self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
-            return util.build_file_list(self.dataset_dir, followlinks=followlinks)
+            return util.build_file_list(self.dataset_dir)
         else:
             return None
 
@@ -88,11 +91,13 @@ class ExtractSeq(object):
         """
         Returns metadata from the given file.
         """
+        calculate_md5 = self.conf("calculate_md5")
+
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
 
             if handler is not None:
-                handler_inst = handler(filename, level) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level, calculate_md5=calculate_md5) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
                 return metadata
@@ -192,7 +197,6 @@ class ExtractSeq(object):
             start = datetime.datetime.now()
             doc = self.process_file_seq(filename, level)
 
-
             if doc is not None:
                 # Get spot information
                 spot = self.spots.get_spot(filename)
@@ -220,8 +224,11 @@ class ExtractSeq(object):
             if i % blocksize == 0:
                 json_len =  bulk_json.count("\n")/2
                 self.logger.debug("Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (i,json_len,(blocksize-json_len),blocksize))
-                bulk_list.append(bulk_json)
-                files_to_index.append(file_array)
+
+                # Only attempt to add if there is data there. Will break the scan if it appends an empty action.
+                if json_len > 0:
+                    bulk_list.append(bulk_json)
+                    files_to_index.append(file_array)
 
                 # Reset building blocks
                 bulk_json = ""

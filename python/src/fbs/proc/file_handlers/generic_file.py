@@ -9,10 +9,11 @@ class  GenericFile(object):
     Class for returning basic information about a file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
+    def __init__(self, file_path, level, calculate_md5=False):
         self.file_path = file_path
         self.level = level
         self.handler_id = None
+        self.calculate_md5 = calculate_md5
 
 
     def get_handler_id(self):
@@ -66,7 +67,10 @@ class  GenericFile(object):
 
         info["type"] = file_type
 
-        info["md5"] = util.calculate_md5(self.file_path)
+        if self.calculate_md5:
+            info["md5"] = util.calculate_md5(self.file_path)
+        else:
+            info["md5"] = ""
 
         file_info["info"] = info
         return (file_info, )

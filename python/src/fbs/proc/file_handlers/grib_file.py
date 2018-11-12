@@ -8,8 +8,8 @@ class GribFile(GenericFile):
     of an Grib file.
     """
 
-    def __init__(self, file_path, level, additional_param=None):
-        GenericFile.__init__(self, file_path, level)
+    def __init__(self, file_path, level, additional_param=None, **kwargs):
+        GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "GRIB"
 
     def get_handler_id(self):
@@ -282,8 +282,11 @@ if __name__ == "__main__":
     except IndexError:
         level = '1'
 
-    # file = '/badc/ecmwf-for/adient/data_leeds/2008/03/13/ggas20080313600.37.grb'
-    file = '/badc/ecmwf-for/slimcat/data/2012/11/spam2012110318u.grb'
+    try:
+        file = sys.argv[2]
+    except IndexError:
+        file = '/badc/ecmwf-for/slimcat/data/2012/11/spam2012110318u.grb'
+
     grf = GribFile(file, level)
     start = datetime.datetime.today()
     print grf.get_metadata()
