@@ -1,10 +1,8 @@
-import re
-import sys
 
-import simplejson as json
 from random import randint
 
 from elasticsearch import Elasticsearch, ConnectionError
+
 
 class ElasticsearchClientFactory(object):
 
@@ -16,10 +14,18 @@ class ElasticsearchClientFactory(object):
         :returns: A configured Elasticsearch instance
         """
         hosts = config_args["es-configuration"]["es-host"]
-        #Do some load balancing...
+
+        # Do some load balancing...
         host_list = hosts.split(",")
         number_of_hosts = len(host_list)
-        host_to_use = randint(0, (number_of_hosts-1))
+        host_to_use = randint(0, (number_of_hosts - 1))
+
+        # Set params
         host = host_list[host_to_use]
         port = config_args["es-configuration"]["es-port"]
-        return Elasticsearch(hosts=[{"host": host, "port": port}], timeout=60)
+        username = config_args["es-configuration"]["es-username"]
+        password = config_args["es-configuration"]["es-password"]
+
+        return Elasticsearch(hosts=["{}:{}".format(host, port)],
+                             http_auth=(username, password),
+                             timeout=60)
