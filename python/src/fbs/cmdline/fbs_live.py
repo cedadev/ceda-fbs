@@ -154,8 +154,7 @@ class FbsLiveIndex():
         self._write_filelist(file_to_scan, file_list)
 
         # Create command
-        # python_executable = "/home/badc/software/fbs/venv-ceda-fbs/bin/python"
-        python_executable = "/group_workspaces/jasmin4/cedaproc/rsmith013/fbs-dev/venv-ceda-fbs/bin/python"
+        python_executable = self.conf["core"]["python-executable"]
         python_script_path = "{} ceda-fbs/python/src/fbs/cmdline/scan_dataset.py".format(python_executable)
 
         command = "{python_script} -f {dataset} -n {num_files} -s {start} -l {level} -i {index}".format(
