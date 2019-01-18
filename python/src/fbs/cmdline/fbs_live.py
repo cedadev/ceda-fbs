@@ -8,15 +8,13 @@ This is achieved by reading the deposit logs and scanning for DEPOSIT and REMOVE
 Usage:
     fbs_live_index.py --help
     fbs_live_index.py --version
-    fbs_live_index.py (-d DIR | --dir DIR )(-l LEVEL | --level LEVEL)(-i INDEX | --index INDEX)(-s STREAM | --stream STREAM)[ --md5 ]
+    fbs_live_index.py (-s STREAM | --stream STREAM) (--config CONFIG)
 
 Options:
     --help              Display help.
     --version           Show Version.
-    -d --dir            Directory to put the file lists for scanning.
-    -l --level          FBS detail level (1|2|3)
-    -i --index          Index to modify
     -s --stream         Deposit stream to follow
+    --config            File containing configuration options
 
 
 """
@@ -29,13 +27,13 @@ from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi
 import os
 import subprocess
 import hashlib
+import src.fbs.proc.common_util.util as util
 
 
 class FbsLiveIndex():
 
     def __init__(self, args):
         self._process_args(args)
-        self.log_path = "/badc/ARCHIVE_INFO/deposit_logs"
 
         # Log status
         self.previous_logfile = {
@@ -55,12 +53,20 @@ class FbsLiveIndex():
         self.deposit_status = 0
         self.delete_status = 0
 
+        kwargs = {
+            "http_auth": (
+                self.conf["es-configuration"]["es-username"],
+                self.conf["es-configuration"]["es-password"]
+            )
+        }
+
         # Index update object
-        self.ceda_fbi_updater = CedaFbi(index=self.INDEX, host="jasmin-es1.ceda.ac.uk", port=9200)
+        self.ceda_fbi_updater = CedaFbi(index=self.INDEX, host_url=self.conf["es-configuration"]["es-url"], **kwargs)
 
     def _process_args(self, args):
         """
         Turn the docopt arguments into object properties
+        and read config file
         :param args: Docopt arguments
         """
 
@@ -68,6 +74,14 @@ class FbsLiveIndex():
             if not arg.startswith("-"):
                 setattr(self, arg, value)
         self.args = args
+
+        self.conf = util.cfg_read(self.CONFIG)
+
+        self.log_path = self.conf["core"]["source-log-directory"]
+        self.DIR = self.conf["core"]["status-file-directory"]
+        self.INDEX = self.conf["es-configuration"]["es-index"]
+        self.LEVEL = self.conf["core"]["scan-level"]
+
 
     def _read_status_file(self):
         """
