@@ -27,7 +27,7 @@ from ceda_elasticsearch_tools.index_tools.index_updaters import CedaFbi
 import os
 import subprocess
 import hashlib
-import src.fbs.proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 
 class FbsLiveIndex():

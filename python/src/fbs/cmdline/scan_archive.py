@@ -41,12 +41,12 @@ import os
 
 from docopt import docopt
 
-import src.fbs.proc.common_util.util as util
+import fbs.proc.common_util.util as util
 from cmdline import __version__  # Grab version from package __init__.py
 
 import datetime
 import subprocess
-import src.fbs.proc.constants.constants as constants
+import fbs.proc.constants.constants as constants
 from tqdm import tqdm
 
 SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
