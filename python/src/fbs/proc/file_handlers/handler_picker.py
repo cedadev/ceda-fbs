@@ -1,7 +1,7 @@
 import os
 import re
 
-from proc.common_util.util import FileFormatError
+from fbs.proc.common_util.util import FileFormatError
 import generic_file
 import netcdf_file
 import nasaames_file
@@ -14,7 +14,7 @@ import badc_csv_file
 import metadata_tags_json_file
 
 import magic as magic_number_reader
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 
 class  HandlerPicker(object):

@@ -1,6 +1,6 @@
-from proc.file_handlers.generic_file import GenericFile
+from fbs.proc.file_handlers.generic_file import GenericFile
 import nappy
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 
 class NasaAmesFile(GenericFile):

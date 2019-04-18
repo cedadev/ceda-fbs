@@ -7,8 +7,8 @@ import logging
 import os
 import hashlib
 import socket
-import proc.common_util.util as util
-import proc.file_handlers.handler_picker as handler_picker
+import fbs.proc.common_util.util as util
+import fbs.proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index

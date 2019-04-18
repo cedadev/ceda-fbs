@@ -3,7 +3,7 @@ Created on 3 Jun 2016
 
 @author: kleanthis
 '''
-from proc.file_handlers.generic_file import GenericFile
+from fbs.proc.file_handlers.generic_file import GenericFile
 
 from pyhdf.HDF import HDF
 

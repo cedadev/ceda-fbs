@@ -1,7 +1,7 @@
 import netCDF4
-from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
-import proc.common_util.geojson as geojson
+from fbs.proc.file_handlers.generic_file import GenericFile
+import fbs.proc.common_util.util as util
+import fbs.proc.common_util.geojson as geojson
 
 
 class NetCdfFile(GenericFile):

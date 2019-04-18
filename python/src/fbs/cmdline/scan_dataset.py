@@ -57,7 +57,7 @@ from docopt import docopt
 
 import src.fbs.proc.common_util.util as util
 from cmdline import __version__  # Grab version from package __init__.py
-from proc.extract import ExtractSeq
+from fbs.proc.extract import ExtractSeq
 import datetime
 import src.fbs.proc.constants.constants as constants
 import signal, getpass, pwd

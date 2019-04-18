@@ -2,7 +2,7 @@ import os
 from pwd import getpwuid
 from grp import getgrgid
 import datetime
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 class  GenericFile(object):
     """

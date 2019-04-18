@@ -1,8 +1,8 @@
 import cdms2 as cdms
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 
-from proc.file_handlers.generic_file import GenericFile
+from fbs.proc.file_handlers.generic_file import GenericFile
 
 class PpFile(GenericFile):
     """

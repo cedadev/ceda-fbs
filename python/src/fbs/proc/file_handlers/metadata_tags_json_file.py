@@ -3,8 +3,8 @@ Created on 17 May 2016
 
 @author: kleanthis
 '''
-from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
+from fbs.proc.file_handlers.generic_file import GenericFile
+import fbs.proc.common_util.util as util
 import json
 
 

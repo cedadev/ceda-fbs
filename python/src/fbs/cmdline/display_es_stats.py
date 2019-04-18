@@ -11,7 +11,7 @@ import sys
 import time
 from elasticsearch import Elasticsearch
 import datetime
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 import os
 
 def read_cfg():
