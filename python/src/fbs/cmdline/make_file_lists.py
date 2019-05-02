@@ -100,7 +100,7 @@ def store_datasets_to_files(status, config, host):
         if host == 'localhost':
         # If using localhost, execute script immediately
 
-            print "Executing: {}".format(command)
+            print( "Executing: {}".format(command))
             subprocess.call(command, shell=True)
 
         else:
@@ -128,7 +128,7 @@ def main():
     status_and_defaults = get_stat_and_defs(com_args)
 
     start = datetime.datetime.now()
-    print "Script started at: %s" % (str(start))
+    print( "Script started at: %s" % (str(start)))
 
     status = status_and_defaults[1]
     config = status_and_defaults[0]
@@ -139,7 +139,7 @@ def main():
         store_datasets_to_files(status, config, 'lotus')
 
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" % (str(end), str(end - start))
+    print( "Script ended at : %s it ran for : %s" % (str(end), str(end - start)))
 
 
 if __name__ == '__main__':

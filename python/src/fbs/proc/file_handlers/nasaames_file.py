@@ -126,6 +126,6 @@ if __name__ == "__main__":
     file = '/neodc/arsf/2008/VOC_05/VOC_05-2008_307_Chile/aimms/arsf-aimms20_arsf-dornier_20081102_r0_307_voc-05.na'
     naf = NasaAmesFile(file,level)
     start = datetime.datetime.today()
-    print naf.get_metadata()
+    print( naf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

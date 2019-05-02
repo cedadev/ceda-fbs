@@ -242,6 +242,6 @@ if __name__ == "__main__":
 
     ncf = NetCdfFile(file, level)
     start = datetime.datetime.today()
-    print ncf.get_metadata()
+    print(ncf.get_metadata())
     end = datetime.datetime.today()
-    print end - start
+    print(end - start)

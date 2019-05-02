@@ -254,6 +254,6 @@ if __name__ == "__main__":
     file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
     ppf = PpFile(file,level)
     start = datetime.datetime.today()
-    print ppf.get_metadata()
+    print( ppf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

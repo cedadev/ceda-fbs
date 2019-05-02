@@ -164,6 +164,6 @@ if __name__ == "__main__":
     file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
     baf = BadcCsvFile(file,level)
     start = datetime.datetime.today()
-    print baf.get_metadata()
+    print( baf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

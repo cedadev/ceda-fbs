@@ -73,7 +73,7 @@ def sig_handler(signum, frame):
 
     script_user = getpass.getuser()
     tmp_dir_files = util.build_file_list("/tmp")
-    print "Signal {} received deleting tmp files:".format(signum)
+    print( "Signal {} received deleting tmp files:".format(signum))
     for filename in tmp_dir_files:
 
         try:
@@ -82,7 +82,7 @@ def sig_handler(signum, frame):
             file_owner = pwd.getpwuid(uid)[0]
 
             if script_user == file_owner:
-                print filename
+                print( filename)
                 os.remove(filename)
         except:
             pass
@@ -201,11 +201,11 @@ def main():
     try:
         ckeck_com_args_validity(config, status)
     except ValueError as err:
-        print err
+        print( err)
         return
 
     start = datetime.datetime.now()
-    print "Script started at: %s" %(str(start))
+    print( "Script started at: %s" %(str(start)))
 
     # Manage the options given.
     if status == constants.Script_status.STORE_DATASET_TO_FILE:
@@ -218,7 +218,7 @@ def main():
         read_dataset_from_file_and_scan(config, status)
 
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+    print( "Script ended at : %s it ran for : %s" %(str(end), str(end - start)))
 
 
 if __name__ == '__main__':

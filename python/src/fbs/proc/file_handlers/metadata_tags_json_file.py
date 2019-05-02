@@ -140,6 +140,6 @@ if __name__ == "__main__":
     file = '/badc/ukcip02/data/50km_resolution/metadata_tags.json'
     mdf = MetadataTagsJsonFile(file,level)
     start = datetime.datetime.today()
-    print mdf.get_metadata()
+    print( mdf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

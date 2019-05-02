@@ -2,16 +2,16 @@ import os
 import re
 
 from fbs.proc.common_util.util import FileFormatError
-import generic_file
-import netcdf_file
-import nasaames_file
-import pp_file
-import grib_file
-import esasafe_file
-import kmz_file
-import hdf_file
-import badc_csv_file
-import metadata_tags_json_file
+from fbs.proc.file_handlers import generic_file
+from fbs.proc.file_handlers import netcdf_file
+from fbs.proc.file_handlers import nasaames_file
+from fbs.proc.file_handlers import pp_file
+from fbs.proc.file_handlers import grib_file
+from fbs.proc.file_handlers import esasafe_file
+from fbs.proc.file_handlers import kmz_file
+from fbs.proc.file_handlers import hdf_file
+from fbs.proc.file_handlers import badc_csv_file
+from fbs.proc.file_handlers import metadata_tags_json_file
 
 import magic as magic_number_reader
 import fbs.proc.common_util.util as util

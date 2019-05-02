@@ -79,7 +79,7 @@ class KmzFile(GenericFile):
 
         :return: Tuple containing dicts for the spatial and temporal information
         """
-        print "doc.kml not <os.path.basename>.kml"
+        print( "doc.kml not <os.path.basename>.kml")
 
         xml_dict = xmltodict.parse(xml_doc)
 
@@ -112,7 +112,7 @@ class KmzFile(GenericFile):
         """
 
 
-        print "kml_document"
+        print( "kml_document")
 
         lats = []
         lons = []
@@ -171,7 +171,7 @@ class KmzFile(GenericFile):
 
         :return: Tuple containing dicts for the spatial and temporal information
         """
-        print "kml_folder"
+        print( "kml_folder")
 
         # Date and time regex patterns
         date_regex = re.compile(r'([\d]{8})')
@@ -326,6 +326,6 @@ if __name__ == "__main__":
 
     kmf = KmzFile(file, level)
     start = datetime.datetime.today()
-    print kmf.get_metadata()
+    print( kmf.get_metadata())
     end = datetime.datetime.today()
-    print end - start
+    print( end - start)

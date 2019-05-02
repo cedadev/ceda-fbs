@@ -117,7 +117,7 @@ class EsaSafeFile(GenericFile):
 
                     self.sections[section_id][item_name] = value
                 except:
-                    print "FAILED: %s  -->  %s" % (section_id, xml_path)
+                    print( "FAILED: %s  -->  %s" % (section_id, xml_path))
 
 
     def _package_coordinates(self, coords_string):
@@ -223,6 +223,6 @@ if __name__ == "__main__":
     file = '/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2017/10/31/S1A_IW_GRDH_1SDV_20171031T061411_20171031T061436_019053_020395_DCCA.manifest'
     esf = EsaSafeFile(file,level)
     start = datetime.datetime.today()
-    print esf.get_metadata()
+    print( esf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

@@ -12,7 +12,7 @@ import fbs.proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
-import simplejson as json
+import json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 from tqdm import tqdm
 
@@ -248,7 +248,7 @@ class ExtractSeq(object):
         Creates the JSON and performs a bulk index operation
         """
         action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
-        # print action_list
+        # print( action_list)
 
         for action, files in zip(action_list, files_to_index):
             r = self.es.bulk(body=action,request_timeout=60)
@@ -365,7 +365,7 @@ class ExtractSeq(object):
 
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
-            print file_to_store_paths
+            print( file_to_store_paths)
             try :
                 files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:

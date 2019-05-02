@@ -26,8 +26,8 @@ import datetime
 def main():
 
     start = datetime.datetime.now()
-    print "==============================="
-    print "Script started at: %s." % start
+    print( "===============================")
+    print( "Script started at: %s." % start)
 
     # Gets command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
@@ -37,8 +37,8 @@ def main():
     util.run_tasks_file_in_lotus(commands_file, int(num_processes), queue='short-serial')
 
     end = datetime.datetime.now()
-    print "Script ended at: %s, it ran for: %s." % (end, (end - start))
-    print "==============================="
+    print( "Script ended at: %s, it ran for: %s." % (end, (end - start)))
+    print( "===============================")
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ Module for holding and exporting file metadata as JSON documents.
 
 from __future__ import division
 import hashlib
-import simplejson as json
+import json
 import logging
 import math
 import numpy.ma as ma

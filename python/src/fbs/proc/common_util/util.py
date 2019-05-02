@@ -6,17 +6,21 @@ import os
 import errno
 import sys
 import subprocess
-
-import simplejson as json
+import json
 import time
 from enum import Enum
-import ConfigParser
 import logging
 import re
 import io
 import datetime
 from dateutil import parser
 import hashlib
+
+# Python 2/3 compatibility
+if sys.version_info.major > 2:
+    from configparser import ConfigParser
+else:
+    from ConfigParser import ConfigParser
 
 log_levels = {"debug": logging.DEBUG,
               "info": logging.INFO,

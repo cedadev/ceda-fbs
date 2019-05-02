@@ -289,6 +289,6 @@ if __name__ == "__main__":
 
     grf = GribFile(file, level)
     start = datetime.datetime.today()
-    print grf.get_metadata()
+    print( grf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

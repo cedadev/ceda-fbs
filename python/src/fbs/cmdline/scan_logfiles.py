@@ -93,38 +93,38 @@ def validate_results(dict_data):
 
 def print_dict(dict_data):
 
-    print "{a:<40} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10}".format(a="Dataset",
+    print( "{a:<40} {b:<20} {c:<20} {d:<20} {e:<20} {g:<10}".format(a="Dataset",
            b="Indexed", c="Total files", d="Properties errors", e="Database errors",
-           g="Status")
+           g="Status"))
 
-    print ("-------------------------------------------------------------------------"
+    print("-------------------------------------------------------------------------"
            "--------------------------------------------------------------------------")
 
     for item in sorted(dict_data.keys()):
         if item != "Totals":
-            print ("{a:<40} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}" 
-                " {p[database_errors]:<20} {p[status]:<10}").format(a=item, p=dict_data[item])
+            print ("{a:<40} {p[indexed]:<20} {p[total_files]:<20} {p[properties_errors]:<20}"
+                   " {p[database_errors]:<20} {p[status]:<10}".format(a=item, p=dict_data[item]))
 
     print ("-------------------------------------------------------------------------"
            "--------------------------------------------------------------------------")
 
     #At the end print the totals:
     print ("{a:<40} {p[files_indexed_in_datasets]:<20} {p[total_files_in_datasets]:<20}"
-           " {p[errors_in_datasets]:<20}").format(a="Totals:", p=dict_data["Totals"])
+           " {p[errors_in_datasets]:<20}".format(a="Totals:", p=dict_data["Totals"]))
 
 
 def main():
     #Get command line arguments.
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
     start = datetime.datetime.now()
-    print "Script started at: {}".format(str(start))
+    print( "Script started at: {}".format(str(start)))
 
     res = parse_logs(com_args)
     validate_results(res)
     print_dict(res)
 
     end = datetime.datetime.now()
-    print "\nScript ended at : {} it ran for : {}".format(str(end), str(end - start))
+    print( "\nScript ended at : {} it ran for : {}".format(str(end), str(end - start)))
 
 
 if __name__ == '__main__':

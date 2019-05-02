@@ -33,14 +33,14 @@ OUTPUT_FILE = sys.argv[1]
 
 # Download the spot mappings from the cedaarchiveapp
 url = "http://cedaarchiveapp.ceda.ac.uk/cedaarchiveapp/fileset/download_conf/"
-print "Downloading spotlist from %s" % url
+print( "Downloading spotlist from %s" % url)
 response = requests.get(url)
 log_mapping = response.text.split('\n')
 
 # Create output list as a set to make sure each entry is unique
 output_list = set()
 
-print "Creating output list"
+print( "Creating output list")
 for line in log_mapping:
     if not line.strip(): continue
     spot, directory = line.strip().split()
@@ -51,7 +51,7 @@ for line in log_mapping:
         path = directory
         output_list.add('{}={}'.format(spot,path))
 
-print "Writing to file"
+print( "Writing to file")
 # Write all spot mappings to file
 with open(OUTPUT_FILE,'w') as output:
     outputlist = map(lambda x: x+"\n", sorted(output_list))

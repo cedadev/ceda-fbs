@@ -269,6 +269,6 @@ if __name__ == "__main__":
     file = '/neodc/arsf/2006/GB05_01/GB05_01-2006_208_Inveresk/L1b/c208031b.hdf'
     hdf = HdfFile(file,level)
     start = datetime.datetime.today()
-    print hdf.get_metadata()
+    print( hdf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)
