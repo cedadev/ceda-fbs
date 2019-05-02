@@ -178,7 +178,7 @@ def get_settings(conf_path, args):
     # conf_file = read_conf(conf_path)
     conf_file = cfg_read(conf_path)
 
-    # print conf_file
+    # print( conf_file )
 
     # Apply updates to CONFIG dictionary in priority order
     # Configuration priority: CONFIG < CONF_FILE < ARGS
@@ -426,8 +426,8 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         logger.INFO(info_msg)
         logger.INFO("===============================")
 
-    print info_msg
-    print "==============================="
+    print( info_msg )
+    print( "===============================" )
 
     while len(task_list) > 0:
 
@@ -445,19 +445,19 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         info_msg = "Number of jobs running  : %s." % (str(num_of_running_tasks))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         info_msg = "Number of jobs to submit in this step : %s." % (str(num_of_tasks_to_submit))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         # Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
@@ -476,14 +476,14 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         # Wait in case some process terminates.
         info_msg = "Waiting for : %s secs." % (str(wait_time))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
         time.sleep(wait_time)
 
         # If nothing can be submitted wait again.
@@ -495,7 +495,7 @@ def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=
         if logger is not None:
             logger.INFO("===============================")
 
-        print "==============================="
+        print( "===============================" )
 
 
 def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, queue='par-single', logger=None):
@@ -528,8 +528,8 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
         logger.INFO(info_msg)
         logger.INFO("===============================")
 
-    print info_msg
-    print "==============================="
+    print( info_msg )
+    print( "===============================" )
 
     while len(task_list) > 0:
 
@@ -548,19 +548,19 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         info_msg = "Number of jobs running: %s." % (str(num_of_running_tasks))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         info_msg = "Number of jobs to submit in this step: %s." % (str(num_of_tasks_to_submit))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         # Submit jobs according to availability.
         for i in range(0, num_of_tasks_to_submit):
@@ -582,14 +582,14 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
 
         # Wait in case some process terminates.
         info_msg = "Waiting for : %s secs." % (str(wait_time))
         if logger is not None:
             logger.INFO(info_msg)
 
-        print info_msg
+        print( info_msg )
         time.sleep(wait_time)
 
         # If nothing can be submitted wait again.
@@ -601,7 +601,7 @@ def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_
         if logger is not None:
             logger.INFO("===============================")
 
-        print "==============================="
+        print( "===============================" )
 
 
 def _make_bsub_command(task, count, queue, logger=None):
@@ -615,7 +615,7 @@ def _make_bsub_command(task, count, queue, logger=None):
     command = "bsub -q {queue} -W {wall_time} -e lotus_errors/%J.err {command}".format(queue=queue, wall_time=wall_time, command=task)
     info_msg = "%s. Executing : %s" % ((count + 1), command)
     if logger is not None: logger.INFO(info_msg)
-    print info_msg
+    print( info_msg )
     return command
 
 def get_best_name(phenomena):
