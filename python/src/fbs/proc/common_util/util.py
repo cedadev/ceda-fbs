@@ -364,13 +364,16 @@ def is_valid_phenomena(key, value):
     Wrapper to hide test in main function
     """
 
+    if value == 'None':
+        return False
+
     if not is_valid_parameter(key, value):
         return False
 
     if not is_valid_phen_attr(value):
         return False
 
-    # Returns true if both the tests above pass as true
+    # Returns true if the tests above pass as true
     return True
 
 
