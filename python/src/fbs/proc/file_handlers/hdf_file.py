@@ -6,10 +6,10 @@ Created on 3 Jun 2016
 from fbs.proc.file_handlers.generic_file import GenericFile
 
 from pyhdf.HDF import HDF
-
 from pyhdf.error import HDF4Error
-
 from pyhdf.SD import SD, SDC
+import six
+import datetime
 
 # Need to explicitly import these packages even though they are not directly used as per the note in HDF.py.
 # This allows the vstart and vgstart methods to work.
@@ -40,7 +40,7 @@ class HdfFile(GenericFile):
         }
 
         coords = {}
-        for k, v in mappings.iteritems():
+        for k, v in six.iteritems(mappings):
             ref = vs.find(k)
             vd = vs.attach(ref)
 
@@ -70,7 +70,7 @@ class HdfFile(GenericFile):
         }
 
         timestamps = {}
-        for k, v in mappings.iteritems():
+        for k, v in six.iteritems(mappings):
             ref = vs.find(k)
             vd = vs.attach(ref)
 

@@ -127,7 +127,7 @@ def cfg_read(filename):
     :returns: Dict containing parsed ini conf.
     """
     # Read the config file
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser()
     config.read(filename)
 
     # get sections

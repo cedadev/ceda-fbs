@@ -1,6 +1,9 @@
-import gribapi as gapi
+# import gribapi as gapi
 import fbs.proc.common_util.util as util
 from fbs.proc.file_handlers.generic_file import GenericFile
+import xarray as xr
+import numpy as np
+
 
 class GribFile(GenericFile):
     """
@@ -15,193 +18,116 @@ class GribFile(GenericFile):
     def get_handler_id(self):
         return self.handler_id
 
-    def get_phenomena(self):
+    @staticmethod
+    def get_phenomena(dataset):
 
         phen_list = []
         phen_keys = [
-            "paramId",
-            "cfNameECMF",
-            "cfName",
-            "cfVarName",
+            "long_name",
             "units",
-            "nameECMF",
-            "name"
+            "standard_name",
+            "GRIB_name",
         ]
 
         try:
-            with open(self.file_path) as fd:
-                while True:
-                    gid = gapi.grib_new_from_file(fd)
-                    if gid is None: break
 
-                    phen_attr_list = []
-                    new_phenomenon = {}
-                    for key in phen_keys:
-                        phen_attr = {}
+            # Loop variables
+            for variable in dataset.data_vars:
 
-                        if not gapi.grib_is_defined(gid, key):
-                            continue
-
-                        value = str(gapi.grib_get(gid, key))
-                        if util.is_valid_phenomena(key,value):
-
-                            phen_attr["name"] = str(key.strip())
-                            phen_attr["value"] = str(unicode(value).strip())
-
-                            if phen_attr not in phen_attr_list:
-                                phen_attr_list.append(phen_attr)
-
-                    if len(phen_attr_list) > 0:
-                        new_phenomenon["attributes"] = phen_attr_list
-
-                        if new_phenomenon not in phen_list:
-                            phen_list.append(new_phenomenon)
-
-                    gapi.grib_release(gid)
-
-            file_phenomena = util.build_phenomena(phen_list)
-
-            return file_phenomena
-
-        except Exception:
-            return None
-
-
-    def get_geospatial(self):
-
-
-        lat_f_l = []
-        lon_f_l = []
-        lat_l_l = []
-        lon_l_l = []
-
-        phen_keys = [
-            "latitudeOfFirstGridPointInDegrees",
-            "longitudeOfFirstGridPointInDegrees",
-            "latitudeOfLastGridPointInDegrees",
-            "longitudeOfLastGridPointInDegrees",
-        ]
-        with open(self.file_path) as fd:
-            while True:
-
-                gid = gapi.grib_new_from_file(fd)
-                if gid is None: break
+                # Variable is a string, get the actual reference
+                variable = dataset.data_vars[variable]
+                phen_attr_list = []
 
                 for key in phen_keys:
 
-                    # move on if key not found
-                    if not gapi.grib_is_defined(gid, key):
+                    value = variable.attrs.get(key)
+
+                    # Move on if key not present
+                    if value is None:
                         continue
 
-                    value = str(gapi.grib_get(gid, key))
+                    key = key.replace("GRIB_", "")
 
-                    # So the file contains many records but all report the
-                    # same spatial and temporal information. Only complete distinct records
-                    # will be stored i.e the one that contain the full list of parameter
-                    # and are unique. If every record has got different spatial and temporal
-                    # then th eindex must change because currently there is only on geo_shape_field.
-                    if key == "latitudeOfFirstGridPointInDegrees":
-                        lat_f_l.append(value)
-                    elif key == "longitudeOfFirstGridPointInDegrees":
-                        lon_f_l.append(value)
-                    elif key == "latitudeOfLastGridPointInDegrees":
-                        lat_l_l.append(value)
-                    elif key == "longitudeOfLastGridPointInDegrees":
-                        lon_l_l.append(value)
+                    if util.is_valid_phenomena(key, value):
 
-                gapi.grib_release(gid)
+                        phen_attr = {
+                            "name": key.strip(),
+                            "value": value.strip()
+                        }
 
-        if len(lat_f_l) > 0 \
-                and len(lon_f_l) > 0 \
-                and len(lat_l_l) > 0 \
-                and len(lon_l_l) > 0:
+                        if phen_attr not in phen_attr_list:
+                            phen_attr_list.append(phen_attr)
 
-            geospatial_dict = {}
-            geospatial_dict["type"] = "envelope"
+                if phen_attr_list:
+                    new_phenomenon = {
+                        "attributes": phen_attr_list
+                    }
 
-            lat_f = min(lat_f_l)
-            lon_f = min(lon_f_l)
-            lat_l = max(lat_l_l)
-            lon_l = max(lon_l_l)
+                    if new_phenomenon not in phen_list:
+                        phen_list.append(new_phenomenon)
 
+            return util.build_phenomena(phen_list)
 
-            if float(lon_l) > 180:
-                lon_l = (float(lon_l) - 180) - 180
+        except Exception:
+            return
 
-            geospatial_dict["coordinates"] = [[round(float(lon_f), 3), round(float(lat_f), 3)],
-                                              [round(float(lon_l), 3), round(float(lat_l), 3)]]
-
-            loc_dict = {"coordinates": geospatial_dict}
-
-            return (loc_dict,)
-
-        else:
-            return (None,)
-
-    def get_temporal(self):
-
-        date_d_l = []
-        date_t_l = []
-
-        phen_keys = [
-            "dataDate",
-            "dataTime"
-        ]
-
-        temporal_dict = {}
+    @staticmethod
+    def get_geospatial(dataset):
+        """
+        :param dataset: xarray dataset
+        :return:
+        """
         try:
-            with open(self.file_path) as fd:
-                while True:
-                    gid = gapi.grib_new_from_file(fd)
-                    if gid is None: break
+            lat_min = dataset.latitude.data.min()
+            lat_max = dataset.latitude.data.max()
+            lon_min = dataset.longitude.data.min()
+            lon_max = dataset.longitude.data.max()
 
-                    for key in phen_keys:
+            step = (lon_max - lon_min) / (dataset.longitude.data.shape[0] - 1)
 
-                        if not gapi.grib_is_defined(gid, key):
-                            continue
+            # Handle global grids
+            if lon_max + step == 360 and lon_min == 0:
+                lon_min = -180
+                lon_max = 180
 
-                        value = str(gapi.grib_get(gid, key))
+            # If we cannot assume that it is a 0 - 360 grid and the max is > 180
+            # then it is ambiguous and so return None
+            if lon_max > 180:
+                return
 
-                        # So the file contains many records but all report the
-                        # same spatial and temporal information. Only complete distinct records
-                        # will be stored i.e the one that contain the full list of parameter
-                        # and are unique. If every record has got different spatial and temporal
-                        # then the index must change because currently there is only on geo_shape_field.
-                        if key == "dataDate":
-                            date_d_l.append(value)
-                        elif key == "dataTime":
-                            date_t_l.append(value)
+            # Coordinates upper left (lon, lat) lower right (lon, lat)
+            return {
+                "coordinates":{
+                    "coordinates": [
+                        [lon_min, lat_max],
+                        [lon_max, lat_min]
+                    ]
+                }
+            }
 
-                    gapi.grib_release(gid)
+        # An error occurred
+        except Exception:
 
-            if len(date_d_l) > 0 \
-                    and len(date_t_l):
+            return
 
-                date_d = min(date_d_l)
-                date_t = min(date_t_l)
+    @staticmethod
+    def get_temporal(dataset):
+        """
 
-                date_dm = max(date_d_l)
-                date_tm = max(date_t_l)
+        :param dataset: xarray dataset
+        :return: Isodate range
+        """
+        try:
+            ds_start = dataset.time.data.min()
+            ds_end = dataset.time.data.max()
 
-                if len(date_t) != 4:
-                    dt_min = datetime.datetime.strptime(date_d, '%Y%m%d').isoformat()
-                else:
-                    dt_min = datetime.datetime.strptime(date_d + date_t, '%Y%m%d%H%M').isoformat()
+            return {
+                "start_time": np.datetime_as_string(ds_start),
+                "end_time": np.datetime_as_string(ds_end)
+            }
 
-                if len(date_tm) != 4:
-                    dt_max = datetime.datetime.strptime(date_dm, '%Y%m%d').isoformat()
-                else:
-                    dt_max = datetime.datetime.strptime(date_dm + date_tm, '%Y%m%d%H%M').isoformat()
-
-                temporal_dict["start_time"] = dt_min
-                temporal_dict["end_time"] = dt_max
-
-                return temporal_dict
-            else:
-                return None
-
-        except Exception as ex:
-            return None
+        except Exception:
+            return
 
     def get_metadata_level2(self):
 
@@ -209,8 +135,9 @@ class GribFile(GenericFile):
 
         if file_info is not None:
 
-            # level 2.
-            grib_phenomena = self.get_phenomena()
+            dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+
+            grib_phenomena = self.get_phenomena(dataset)
 
             self.handler_id = "grib handler level 2."
             try:
@@ -219,7 +146,7 @@ class GribFile(GenericFile):
                     return file_info + (None,)
 
                 else:
-                    # todo Change this so that errors proagate back up and are caugh, not just hidden by a None response.
+                    # todo Change this so that errors proagate back up and are caught, not just hidden by a None response.
                     file_info[0]["info"]["read_status"] = "Successful"
                     return file_info + grib_phenomena
             except Exception:
@@ -234,9 +161,12 @@ class GribFile(GenericFile):
         """
         file_info = self.get_metadata_level1()
 
-        geospatial = self.get_geospatial()
-        phenomena = self.get_phenomena()
-        temporal = self.get_temporal()
+        if file_info is not None:
+            dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+
+            geospatial = self.get_geospatial(dataset)
+            phenomena = self.get_phenomena(dataset)
+            temporal = self.get_temporal(dataset)
 
         if file_info is not None:
             self.handler_id = "grib handler level 3."
@@ -245,7 +175,7 @@ class GribFile(GenericFile):
             if temporal is not None:
                 file_info[0]["info"]["temporal"] = temporal
 
-            return file_info + phenomena + geospatial
+            return file_info + phenomena + (geospatial,)
 
         else:
             return None
@@ -259,7 +189,7 @@ class GribFile(GenericFile):
         elif self.level == "3":
             res = self.get_metadata_level3()
 
-        # Sice file format is decided it can be added.
+        # Since file format is decided it can be added.
         res[0]["info"]["format"] = self.FILE_FORMAT
 
         return res
@@ -286,9 +216,10 @@ if __name__ == "__main__":
         file = sys.argv[2]
     except IndexError:
         file = '/badc/ecmwf-for/slimcat/data/2012/11/spam2012110318u.grb'
+        file = '../../../test/files/FC.w.2008033012.120.grib'
 
     grf = GribFile(file, level)
     start = datetime.datetime.today()
-    print( grf.get_metadata())
+    print(grf.get_metadata())
     end = datetime.datetime.today()
-    print( end-start)
+    print(end - start)
