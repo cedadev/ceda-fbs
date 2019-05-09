@@ -135,23 +135,24 @@ class GribFile(GenericFile):
 
         if file_info is not None:
 
-            dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+            try:
+                dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+            except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info + (None,)
 
             grib_phenomena = self.get_phenomena(dataset)
 
             self.handler_id = "grib handler level 2."
-            try:
-                if grib_phenomena is None:
-                    file_info[0]["info"]["read_status"] = "Read Error"
-                    return file_info + (None,)
-
-                else:
-                    # todo Change this so that errors proagate back up and are caught, not just hidden by a None response.
-                    file_info[0]["info"]["read_status"] = "Successful"
-                    return file_info + grib_phenomena
-            except Exception:
+            if grib_phenomena is None:
                 file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info + (None,)
+
+            else:
+                # todo Change this so that errors proagate back up and are caught, not just hidden by a None response.
+                file_info[0]["info"]["read_status"] = "Successful"
+                return file_info + grib_phenomena
+
         else:
             return None
 
@@ -162,13 +163,16 @@ class GribFile(GenericFile):
         file_info = self.get_metadata_level1()
 
         if file_info is not None:
-            dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+            try:
+                dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
+            except Exception:
+                file_info[0]["info"]["read_status"] = "Read Error"
+                return file_info + (None,)
 
             geospatial = self.get_geospatial(dataset)
             phenomena = self.get_phenomena(dataset)
             temporal = self.get_temporal(dataset)
 
-        if file_info is not None:
             self.handler_id = "grib handler level 3."
             file_info[0]["info"]["read_status"] = "Successful"
 
@@ -216,6 +220,7 @@ if __name__ == "__main__":
         file = sys.argv[2]
     except IndexError:
         file = '/badc/ecmwf-for/slimcat/data/2012/11/spam2012110318u.grb'
+        file = '../../../test/files/spam2012110318u.grb'
         file = '../../../test/files/FC.w.2008033012.120.grib'
 
     grf = GribFile(file, level)
