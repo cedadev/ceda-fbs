@@ -36,7 +36,6 @@ setup(
     },
     install_requires=[
         'elasticsearch<7.0.0',
-        'netCDF4'
     ],
 
     # This qualifier can be used to selectively exclude Python versions -
