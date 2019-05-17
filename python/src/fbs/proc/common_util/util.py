@@ -8,7 +8,7 @@ import sys
 import subprocess
 import json
 import time
-from enum import Enum
+import six
 import logging
 import re
 import io
@@ -18,7 +18,7 @@ import hashlib
 
 # Python 2/3 compatibility
 if sys.version_info.major > 2:
-    from configparser import ConfigParser
+    from configparser import RawConfigParser as ConfigParser
 else:
     from ConfigParser import ConfigParser
 
@@ -46,9 +46,13 @@ class Parameter(object):
 
         # Other arbitrary arguments
         if other_params:
-            for key, value in other_params.iteritems():
+            for key, value in six.iteritems(other_params):
                 self.items.append(
-                    self.make_param_item(key.strip(), unicode(value).strip()))
+                    self.make_param_item(
+                        key.strip(),
+                        value.strip()
+                    )
+                )
 
     @staticmethod
     def make_param_item(name, value):
@@ -94,7 +98,7 @@ def sanitise_args(config):
     :returns: Config dictionary with all keys stripped of '<' '>' and '--'
     """
     sane_conf = {}
-    for key, value in config.iteritems():
+    for key, value in six.iteritems(config):
         if value is not None:
             key = key.lstrip("-><").rstrip("><")
             sane_conf[key] = value

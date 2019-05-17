@@ -1,6 +1,7 @@
 from fbs.proc.file_handlers.generic_file import GenericFile
 import nappy
 import fbs.proc.common_util.util as util
+import six
 
 
 class NasaAmesFile(GenericFile):
@@ -31,7 +32,7 @@ class NasaAmesFile(GenericFile):
                         }
                     })
 
-            variables = [util.Parameter(k, other_params=var) for (k, var) in variables.iteritems()]
+            variables = [util.Parameter(k, other_params=var) for (k, var) in six.iteritems(variables)]
             return variables
         except Exception:
             return None

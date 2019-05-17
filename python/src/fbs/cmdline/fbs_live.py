@@ -28,6 +28,7 @@ import os
 import subprocess
 import hashlib
 import fbs.proc.common_util.util as util
+import six
 
 
 class FbsLiveIndex():
@@ -70,7 +71,7 @@ class FbsLiveIndex():
         :param args: Docopt arguments
         """
 
-        for arg, value in args.iteritems():
+        for arg, value in six.iteritems(args):
             if not arg.startswith("-"):
                 setattr(self, arg, value)
         self.args = args

@@ -38,7 +38,7 @@ Options:
  """
 
 import os
-
+import six
 from docopt import docopt
 
 import fbs.proc.common_util.util as util
@@ -292,7 +292,7 @@ def scan_datasets_in_localhost(config, scan_status):
     elif scan_status == constants.Script_status.READ_AND_SCAN_DATASETS:
         dataset_ids = util.find_dataset(file_paths_dir, "all")
 
-        for key, value in dataset_ids.iteritems():
+        for key, value in six.iteritems(dataset_ids):
             dataset_id = key
             command = "python %s/scan_dataset.py -f %s -d  %s -l %s"\
                         % (SCRIPT_DIR, filename, dataset_id, level)

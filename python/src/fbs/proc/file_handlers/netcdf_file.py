@@ -2,6 +2,7 @@ import netCDF4
 from fbs.proc.file_handlers.generic_file import GenericFile
 import fbs.proc.common_util.util as util
 import fbs.proc.common_util.geojson as geojson
+import six
 
 
 class NetCdfFile(GenericFile):
@@ -59,7 +60,7 @@ class NetCdfFile(GenericFile):
         :param Dataset ncdf: Reference to an opened netCDF4.Dataset object
         :param str standard_name: The CF standard name to search for
         """
-        for key, value in ncdf.variables.iteritems():
+        for key, value in six.iteritems(ncdf.variables):
             try:
                 if value.standard_name.lower() == standard_name.lower():
                     return key
@@ -103,12 +104,12 @@ class NetCdfFile(GenericFile):
         phen_list = []
 
         # for all phenomena list.
-        for v_name, v_data in netcdf.variables.iteritems():
+        for v_name, v_data in six.iteritems(netcdf.variables):
             new_phenomenon = {}
             phen_attr_list = []
 
             # for all attributtes in phenomenon.
-            for key, value in v_data.__dict__.iteritems():
+            for key, value in six.iteritems(v_data.__dict__):
 
                 if not util.is_valid_phenomena(key, value):
                     continue
