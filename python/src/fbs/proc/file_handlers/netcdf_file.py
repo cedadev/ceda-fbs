@@ -117,7 +117,7 @@ class NetCdfFile(GenericFile):
                 phen_attr = {}
 
                 phen_attr["name"] = str(key.strip())
-                phen_attr["value"] = (value.strip()).encode('utf-8')
+                phen_attr["value"] = (value.strip()).encode('utf-8', 'ignore').decode()
 
                 phen_attr_list.append(phen_attr)
 
