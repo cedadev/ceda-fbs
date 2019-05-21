@@ -368,7 +368,7 @@ def is_valid_phenomena(key, value):
     Wrapper to hide test in main function
     """
 
-    if value == 'None':
+    if value is None:
         return False
 
     if not is_valid_parameter(key, value):
