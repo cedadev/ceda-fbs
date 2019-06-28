@@ -174,8 +174,8 @@ class PpFile(GenericFile):
                         "coordinates": {
                             "type": "envelope",
                             "coordinates": [
-                                [round(min_lon, 3), round(min_lat, 3)],
-                                [round(max_lon, 3), round(max_lat, 3)]
+                                [round(float(min_lon), 3), round(float(min_lat), 3)],
+                                [round(float(max_lon), 3), round(float(max_lat), 3)]
                             ]
                         }
                     }

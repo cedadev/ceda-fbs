@@ -99,7 +99,7 @@ class ExtractSeq(object):
             if handler is not None:
                 handler_inst = handler(filename, level, calculate_md5=calculate_md5) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
-                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
+                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.handler_id))
                 return metadata
 
             else:

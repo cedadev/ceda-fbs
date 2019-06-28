@@ -3,12 +3,10 @@ Module for holding and exporting file metadata as JSON documents.
 """
 
 from __future__ import division
-import hashlib
-import json
-import logging
 import math
 import numpy.ma as ma
 import numpy as np
+from six.moves import xrange
 
 
 class GeoJSONGenerator(object):
@@ -144,8 +142,8 @@ class GeoJSONGenerator(object):
         """
         geojson = {
             "type": "Point",
-            "coordinates": [self.longitudes[0], self.latitudes[0]]
-        }
+            "coordinates": [float(self.longitudes[0]), float(self.latitudes[0])]
+         }
 
         return geojson
 
@@ -161,7 +159,7 @@ class GeoJSONGenerator(object):
         }
 
         track = self._gen_track(num_polygons + 1)["coordinates"]
-        for i in xrange(0, len(track) - 1):
+        for i in xrange(len(track) - 1):
             lo = track[i]
             hi = track[i + 1]
 
@@ -184,12 +182,12 @@ class GeoJSONGenerator(object):
 
         point_count = self._num_points(self.longitudes, self.latitudes)
         if point_count <= num_points:
-            track_lons = self.longitudes
-            track_lats = self.latitudes
+            track_lons = map(float, self.longitudes)
+            track_lats = map(float, self.latitudes)
         else:
             step = int(math.ceil(point_count / num_points))
-            track_lons = self.longitudes[::step]
-            track_lats = self.latitudes[::step]
+            track_lons = map(float,self.longitudes[::step])
+            track_lats = map(float,self.latitudes[::step])
 
         track["coordinates"] = zip(track_lons, track_lats)
 
@@ -247,11 +245,11 @@ class GeoJSONGenerator(object):
         """
         corners = [
             [
-                [lon_r, lat_t],
-                [lon_l, lat_t],
-                [lon_l, lat_b],
-                [lon_r, lat_b],
-                [lon_r, lat_t]
+                map(float,[lon_r, lat_t]),
+                map(float,[lon_l, lat_t]),
+                map(float,[lon_l, lat_b]),
+                map(float,[lon_r, lat_b]),
+                map(float,[lon_r, lat_t])
             ]
         ]
 

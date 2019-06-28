@@ -14,28 +14,25 @@ class NasaAmesFile(GenericFile):
         GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "NASA Ames"
 
-    def get_handler_id(self):
-        return self.handler_id
-
     def phenomena(self):
 
         try:
-            na_fhandle = nappy.openNAFile(self.file_path)
+            with nappy.openNAFile(self.file_path) as na_fhandle:
 
-            variables = {}
-            for var in na_fhandle.getVariables():
-                if util.is_valid_phen_attr(var[1]):
-                    variables.update({
-                        var[0]: {
-                            "name": var[0],
-                            "units": var[1]
-                        }
-                    })
+                variables = {}
+                for var in na_fhandle.getVariables():
+                    if util.is_valid_phen_attr(var[1]):
+                        variables.update({
+                            var[0]: {
+                                "name": var[0],
+                                "units": var[1]
+                            }
+                        })
 
-            variables = [util.Parameter(k, other_params=var) for (k, var) in six.iteritems(variables)]
-            return variables
+                variables = [util.Parameter(k, other_params=var) for (k, var) in six.iteritems(variables)]
+                return variables
         except Exception:
-            return None
+            return
 
     def get_phenomena(self):
 
@@ -92,7 +89,7 @@ class NasaAmesFile(GenericFile):
     def get_metadata_level3(self):
         res = self.get_metadata_level2()
         self.handler_id = "Nasaames handler level 3."
-        return res
+        return res + (None,)
 
     def get_metadata(self):
 
@@ -121,10 +118,11 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '1'
+        file = '/neodc/arsf/2008/VOC_05/VOC_05-2008_307_Chile/aimms/arsf-aimms20_arsf-dornier_20081102_r0_307_voc-05.na'
 
-    file = '/neodc/arsf/2008/VOC_05/VOC_05-2008_307_Chile/aimms/arsf-aimms20_arsf-dornier_20081102_r0_307_voc-05.na'
     naf = NasaAmesFile(file,level)
     start = datetime.datetime.today()
     print( naf.get_metadata())

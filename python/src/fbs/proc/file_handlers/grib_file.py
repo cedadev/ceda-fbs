@@ -15,9 +15,6 @@ class GribFile(GenericFile):
         GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "GRIB"
 
-    def get_handler_id(self):
-        return self.handler_id
-
     @staticmethod
     def get_phenomena(dataset):
 
@@ -122,8 +119,8 @@ class GribFile(GenericFile):
             ds_end = dataset.time.data.max()
 
             return {
-                "start_time": np.datetime_as_string(ds_start),
-                "end_time": np.datetime_as_string(ds_end)
+                "start_time": np.datetime_as_string(ds_start, unit='s'),
+                "end_time": np.datetime_as_string(ds_end, unit='s')
             }
 
         except Exception:
@@ -208,20 +205,14 @@ class GribFile(GenericFile):
 if __name__ == "__main__":
     import datetime
     import sys
-    import timeit
 
     # run test
     try:
         level = str(sys.argv[1])
-    except IndexError:
-        level = '1'
-
-    try:
         file = sys.argv[2]
     except IndexError:
+        level = '1'
         file = '/badc/ecmwf-for/slimcat/data/2012/11/spam2012110318u.grb'
-        file = '../../../test/files/spam2012110318u.grb'
-        file = '../../../test/files/FC.w.2008033012.120.grib'
 
     grf = GribFile(file, level)
     start = datetime.datetime.today()

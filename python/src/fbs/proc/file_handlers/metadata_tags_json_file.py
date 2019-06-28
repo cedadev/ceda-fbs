@@ -6,7 +6,7 @@ Created on 17 May 2016
 from fbs.proc.file_handlers.generic_file import GenericFile
 import fbs.proc.common_util.util as util
 import json
-
+import logging
 
 class MetadataTagsJsonFile(GenericFile):
     """
@@ -18,11 +18,8 @@ class MetadataTagsJsonFile(GenericFile):
         GenericFile.__init__(self, file_path, level, **kwargs)
         self.FILE_FORMAT = "Metadata tags json"
 
-    def get_handler_id(self):
-        return self.handler_id
-
-    # @util.simple_phenomena
-    def get_phenomena(self, json_file):
+    @staticmethod
+    def get_phenomena(json_file):
 
         phenomena = json_file["phenomena"]
 
@@ -44,6 +41,27 @@ class MetadataTagsJsonFile(GenericFile):
         file_phenomena = util.build_phenomena(phen_list)
         return file_phenomena
 
+    @staticmethod
+    def get_temporal(json_content):
+        start_time = util.date2iso(json_content["time"][0])
+        end_time   = util.date2iso(json_content["time"][1])
+
+        return {'start_time': start_time, 'end_time': end_time}
+
+    @staticmethod
+    def get_geospatial(json_conent):
+        try:
+            # "geospatial": [-180.0, 90, 180, -90],
+            lon_l = json_conent["geospatial"][0]
+            lat_l = json_conent["geospatial"][1]
+            lon_u = json_conent["geospatial"][2]
+            lat_u = json_conent["geospatial"][3]
+
+            return {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l, 3), round(lat_l, 3)],
+                                                                       [round(lon_u, 3), round(lat_u, 3)]]}}
+        except Exception as e:
+            logging.error(e)
+            return None
 
     def get_metadata_level2(self):
 
@@ -54,7 +72,9 @@ class MetadataTagsJsonFile(GenericFile):
 
             self.handler_id = "Metadata tags json handler level 2."
             try:
-                metadata = json.loads(open(self.file_path).read())
+                with open(self.file_path) as reader:
+                    metadata = json.load(reader)
+
                 file_info[0]["info"]["read_status"] = "Successful"
                 phen_list = self.get_phenomena(metadata)
 
@@ -70,15 +90,14 @@ class MetadataTagsJsonFile(GenericFile):
     def get_metadata_level3(self):
         #Get basic file info.
         file_info = self.get_metadata_level1()
-        spatial = None
-        phen_list = None
 
         if file_info is not None:
 
             self.handler_id = "Metadata tags json handler level 3."
 
             try:
-                metadata = json.loads(open(self.file_path).read())
+                with open(self.file_path) as reader:
+                    metadata = json.load(reader)
 
             except Exception:
                 # Error reading the file
@@ -90,18 +109,11 @@ class MetadataTagsJsonFile(GenericFile):
         else:
             return None
 
-        #"geospatial": [-180.0, 90, 180, -90],
-        lon_l  = metadata["geospatial"][0]
-        lat_l = metadata["geospatial"][1]
-        lon_u  = metadata["geospatial"][2]
-        lat_u = metadata["geospatial"][3]
+        spatial = self.get_geospatial(metadata)
+        temporal = self.get_temporal(metadata)
 
-        spatial =  {'coordinates': {'type': 'envelope', 'coordinates': [[round(lon_l, 3), round(lat_l, 3)], [round(lon_u, 3), round(lat_u, 3)]]}}
-
-        # "time": ["1859-01-01T00:00:00", "2016-03-04T23:59:59"]
-        start_time = util.date2iso(metadata["time"][0])
-        end_time   = util.date2iso(metadata["time"][1])
-        file_info[0]["info"]["temporal"] = {'start_time': start_time, 'end_time': end_time }
+        if temporal:
+            file_info[0]["info"]["temporal"] = temporal
 
         file_info[0]["info"]["read_status"] = "Successful"
 
@@ -134,10 +146,11 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '1'
+        file = '/badc/ukcip02/data/50km_resolution/metadata_tags.json'
 
-    file = '/badc/ukcip02/data/50km_resolution/metadata_tags.json'
     mdf = MetadataTagsJsonFile(file,level)
     start = datetime.datetime.today()
     print( mdf.get_metadata())

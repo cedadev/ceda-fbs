@@ -11,13 +11,9 @@ class  GenericFile(object):
 
     def __init__(self, file_path, level, calculate_md5=False):
         self.file_path = file_path
-        self.level = level
+        self.level = str(level)
         self.handler_id = None
         self.calculate_md5 = calculate_md5
-
-
-    def get_handler_id(self):
-        return self.handler_id
 
     def _get_file_ownership(self):
         return (
