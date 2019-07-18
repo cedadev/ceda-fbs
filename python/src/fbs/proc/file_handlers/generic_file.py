@@ -53,6 +53,8 @@ class  GenericFile(object):
         info["user"] = uid
         info["group"] = gid
 
+        info["is_link"] = os.path.islink(self.file_path)
+
         info["last_modified"] = datetime.datetime.fromtimestamp(file_stats.st_mtime).isoformat()
 
         info["size"] = os.path.getsize(self.file_path)
