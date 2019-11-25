@@ -116,7 +116,9 @@ class BadcCsvFile(GenericFile):
                     "time_range": {
                         "gte": iso_date,
                         "lte": iso_date
-                    }
+                    },
+                    "start_time": iso_date,
+                    "end_time": iso_date
                 }
             if meta[2] is not None:
                 if meta[2] == 'global':

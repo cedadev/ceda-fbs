@@ -46,7 +46,14 @@ class MetadataTagsJsonFile(GenericFile):
         start_time = util.date2iso(json_content["time"][0])
         end_time   = util.date2iso(json_content["time"][1])
 
-        return {'time_range': {'gte': start_time, 'lte': end_time}}
+        return {
+            'time_range': {
+                'gte': start_time,
+                'lte': end_time
+            },
+            'start_time': start_time,
+            'end_time': end_time
+        }
 
     @staticmethod
     def get_geospatial(json_conent):

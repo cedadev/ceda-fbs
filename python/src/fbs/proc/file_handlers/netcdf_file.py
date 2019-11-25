@@ -78,7 +78,9 @@ class NetCdfFile(GenericFile):
             "time_range": {
                 "gte": times[0].isoformat(),
                 "lte": times[-1].isoformat()
-            }
+            },
+            "start_time": times[0].isoformat(),
+            "end_time": times[-1].isoformat()
         }
 
     def get_phenomena(self, netcdf):

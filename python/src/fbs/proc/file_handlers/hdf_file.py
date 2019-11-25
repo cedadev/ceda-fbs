@@ -115,7 +115,9 @@ class HdfFile(GenericFile):
                 "time_range": {
                     "gte": start_time.isoformat(),
                     "lte": end_time.isoformat()
-                }
+                },
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat()
             }
 
         return temporal

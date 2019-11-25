@@ -107,7 +107,15 @@
               "properties": {
                 "time_range": {
                   "type": "date_range"
-                }
+                },
+                "end_time": {
++                  "type": "date",
++                  "format": "dateOptionalTime"
++                },
++                "start_time": {
++                  "type": "date",
++                  "format": "dateOptionalTime"
+
               }
             },
             "spatial": {

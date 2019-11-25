@@ -103,7 +103,9 @@ class KmzFile(GenericFile):
             'time_range': {
                 'gte': datestring,
                 'lte': datestring
-            }
+            },
+            "start_time": datestring,
+            "end_time": datestring
         }
 
         return bbox, temporal

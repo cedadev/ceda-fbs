@@ -122,7 +122,9 @@ class GribFile(GenericFile):
                 "time_range": {
                     "gte": np.datetime_as_string(ds_start, unit='s'),
                     "lte": np.datetime_as_string(ds_end, unit='s')
-                }
+                },
+                "start_time": np.datetime_as_string(ds_start, unit='s'),
+                "end_time": np.datetime_as_string(ds_end, unit='s')
             }
 
         except Exception:

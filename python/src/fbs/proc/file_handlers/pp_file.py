@@ -188,7 +188,9 @@ class PpFile(GenericFile):
                         "time_range": {
                             "gte": min_time,
                             "lte": max_time
-                        }
+                        },
+                        "start_time": min_time,
+                        "end_time": max_time
                     }
 
                 phen_list = self.get_phenomena(pp_cubes)

@@ -155,7 +155,9 @@ class EsaSafeFile(GenericFile):
             "time_range": {
                 "gte": iso_start_date,
                 "lte": iso_end_date
-            }
+            },
+            "start_time": iso_start_date,
+            "end_time": iso_end_date
         }
 
     def get_metadata_level3(self):
