@@ -109,13 +109,13 @@
                   "type": "date_range"
                 },
                 "end_time": {
-+                  "type": "date",
-+                  "format": "dateOptionalTime"
-+                },
-+                "start_time": {
-+                  "type": "date",
-+                  "format": "dateOptionalTime"
-
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                },
+                "start_time": {
+                  "type": "date",
+                  "format": "dateOptionalTime"
+                }
               }
             },
             "spatial": {
