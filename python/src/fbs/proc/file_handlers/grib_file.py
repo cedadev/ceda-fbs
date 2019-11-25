@@ -119,8 +119,10 @@ class GribFile(GenericFile):
             ds_end = dataset.time.data.max()
 
             return {
-                "start_time": np.datetime_as_string(ds_start, unit='s'),
-                "end_time": np.datetime_as_string(ds_end, unit='s')
+                "time_range": {
+                    "gte": np.datetime_as_string(ds_start, unit='s'),
+                    "lte": np.datetime_as_string(ds_end, unit='s')
+                }
             }
 
         except Exception:

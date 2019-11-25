@@ -151,8 +151,12 @@ class EsaSafeFile(GenericFile):
         iso_start_date = util.date2iso(ap["Start Time"])
         iso_end_date = util.date2iso(ap["Stop Time"])
 
-        return {"start_time": iso_start_date,
-                "end_time": iso_end_date }
+        return {
+            "time_range": {
+                "gte": iso_start_date,
+                "lte": iso_end_date
+            }
+        }
 
     def get_metadata_level3(self):
         self.handler_id = "Manifest handler level 3."

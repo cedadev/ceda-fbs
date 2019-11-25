@@ -112,8 +112,12 @@ class BadcCsvFile(GenericFile):
                 # Constrain date output to isoformat
                 iso_date = util.date2iso(meta[1])
 
-                file_info[0]["info"]["temporal"] = {"start_time": iso_date, "end_time": iso_date}
-
+                file_info[0]["info"]["temporal"] = {
+                    "time_range": {
+                        "gte": iso_date,
+                        "lte": iso_date
+                    }
+                }
             if meta[2] is not None:
                 if meta[2] == 'global':
                     loc = ({'coordinates': {'type': 'envelope', 'coordinates': [[-180.0,90.0], [180.0, -90.0]]}},)

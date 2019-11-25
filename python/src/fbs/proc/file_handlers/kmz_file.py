@@ -99,7 +99,12 @@ class KmzFile(GenericFile):
 
         bbox = {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon, 3), round(min_lat, 3)],
                                                                     [round(max_lon, 3), round(max_lat, 3)]]}}
-        temporal = {'start_time': datestring, 'end_time': datestring}
+        temporal = {
+            'time_range': {
+                'gte': datestring,
+                'lte': datestring
+            }
+        }
 
         return bbox, temporal
 

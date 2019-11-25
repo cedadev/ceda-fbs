@@ -100,6 +100,8 @@ class HdfFile(GenericFile):
         st_base = ("%s %s" % (tm_dict["date"], tm_dict["start_time"][0]))
         et_base = ("%s %s" % (tm_dict["date"], tm_dict["end_time"][0]))
 
+        temporal = {}
+
         for t_format in ["%d/%m/%y %H%M%S", "%d/%m/%Y %H%M%S"]:
             try:
                 start_time = datetime.datetime.strptime(st_base, t_format)
@@ -109,8 +111,15 @@ class HdfFile(GenericFile):
                 # the actual timestamp - so just try the next strptime format
                 continue
 
-        return {"start_time": start_time.isoformat(),
-                "end_time": end_time.isoformat()}
+            temporal = {
+                "time_range": {
+                    "gte": start_time.isoformat(),
+                    "lte": end_time.isoformat()
+                }
+            }
+
+        return temporal
+
 
     def _get_geolocation(self):
         # Open file.
