@@ -1,8 +1,8 @@
-import iris
 import fbs.proc.common_util.util as util
 from fbs.proc.file_handlers.generic_file import GenericFile
 import six
 import numpy as np
+import cf
 
 
 class PpFile(GenericFile):
@@ -62,14 +62,14 @@ class PpFile(GenericFile):
 
         return coord
 
-    def get_phenomena(self, pp_cubes):
+    def get_phenomena(self, pp_files):
 
         try:
             self.handler_id = "pp handler level 2."
 
             phen_list = []
-            for cube in pp_cubes:
-                metadata = cube.metadata._asdict()
+            for file in pp_files:
+                metadata = file.__dict__
 
                 phen_attr_list = []
                 for key, value in six.iteritems(metadata):
@@ -109,8 +109,8 @@ class PpFile(GenericFile):
 
         if file_info is not None:
             try:
-                pp_cubes = iris.load(self.file_path)
-                phen_list = self.get_phenomena(pp_cubes)
+                pp_files = cf.read(self.file_path)
+                phen_list = self.get_phenomena(pp_files)
 
                 if phen_list is not None:
                     file_info[0]["info"]["read_status"] = "Successful"
@@ -144,11 +144,11 @@ class PpFile(GenericFile):
                 start_time_list = []
                 end_time_list = []
 
-                pp_cubes = iris.load(self.file_path)
-                for cube in pp_cubes:
+                pp_files = cf.read(self.file_path)
+                for file in pp_files:
                     try:
-                        n, s, e, w = self.getBoundingBox(cube)
-                        start, end = self.getTemporalDomain(cube)
+                        n, s, e, w = self.getBoundingBox(file)
+                        start, end = self.getTemporalDomain(file)
 
                         # Geospatial data
                         north.append(n)
@@ -193,7 +193,7 @@ class PpFile(GenericFile):
                         "end_time": max_time
                     }
 
-                phen_list = self.get_phenomena(pp_cubes)
+                phen_list = self.get_phenomena(pp_files)
 
                 file_info[0]["info"]["read_status"] = "Successful"
 
@@ -234,10 +234,10 @@ if __name__ == "__main__":
     try:
         level = str(sys.argv[1])
     except IndexError:
-        level = '1'
+        level = '3'
 
     # file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
-    file ="/Users/vdn73631/Documents/dev/ceda-fbs/python/src/test/files/affp2006070218_05201_33.pp"
+    file = "/Users/qsp95418/ceda-fbs-change/ceda-fbs/affp2006070218_05201_33.pp"
     ppf = PpFile(file, level)
     start = datetime.datetime.today()
     print(ppf.get_metadata())
