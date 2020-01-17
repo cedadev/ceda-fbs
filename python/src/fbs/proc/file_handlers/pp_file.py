@@ -24,31 +24,6 @@ class PpFile(GenericFile):
         """
         Returns the horizontal domain as (north, south, east, west)
         """
-
-        # north = file.collapse('max', axes='Y')
-        # south = file.collapse('min', axes='Y')
-        #
-        # east = file.collapse('max', axes='X')
-        # west = file.collapse('min', axes='X')
-
-        # lat = file.constructs('grid_latitude').value()
-        # lat_bounds = lat.bounds()
-        #
-        # north = np.max(lat_bounds.array)
-        # south = np.min(lat_bounds.array)
-        #
-        # lon = file.constructs('grid_longitude').value()
-        # lon_bounds = lon.bounds()
-        #
-        # east = np.max(lon_bounds.array)
-        # west = np.min(lon_bounds.array)
-
-        # north = np.max(file.collapse('lat:max').coord('lat').bounds.array)
-        # south = np.max(file.collapse('lat:min').data)
-        #
-        # east = np.max(file.collapse('lon:max').data)
-        # west = np.max(file.collapse('lon:min').data)
-
         lats = file.coord('latitude').data
         north = lats.max()
         south = lats.min()
@@ -57,12 +32,17 @@ class PpFile(GenericFile):
         east = lons.max()
         west = lons.min()
 
-        north = re.findall("\d+\.\d+", str(north))[0]
-        south = re.findall("\d+\.\d+", str(south))[0]
-        east = re.findall("\d+\.\d+", str(east))[0]
-        west = re.findall("\d+\.\d+", str(west))[0]
+        north = float(re.findall("[+-]?\d+(?:\.\d+)?", str(north))[0])
+        south = float(re.findall("[+-]?\d+(?:\.\d+)?", str(south))[0])
+        east = float(re.findall("[+-]?\d+(?:\.\d+)?", str(east))[0])
+        west = float(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
+
+        # convert from degrees east to degrees west
+        east = east + 360
+        west = west + 360
 
         print(north, south, east, west)
+        print(type(north))
         return north, south, east, west
 
 
