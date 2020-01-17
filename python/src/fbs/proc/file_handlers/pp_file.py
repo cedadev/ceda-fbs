@@ -3,7 +3,7 @@ from fbs.proc.file_handlers.generic_file import GenericFile
 import six
 import numpy as np
 import cf
-import xarray as xr
+import re
 
 class PpFile(GenericFile):
     """
@@ -49,8 +49,20 @@ class PpFile(GenericFile):
         # east = np.max(file.collapse('lon:max').data)
         # west = np.max(file.collapse('lon:min').data)
 
-        north = np.max(file.coord('latitude').points)
+        lats = file.coord('latitude').data
+        north = lats.max()
+        south = lats.min()
 
+        lons = file.coord('longitude').data
+        east = lons.max()
+        west = lons.min()
+
+        north = re.findall("\d+\.\d+", str(north))[0]
+        south = re.findall("\d+\.\d+", str(south))[0]
+        east = re.findall("\d+\.\d+", str(east))[0]
+        west = re.findall("\d+\.\d+", str(west))[0]
+
+        print(north, south, east, west)
         return north, south, east, west
 
 
