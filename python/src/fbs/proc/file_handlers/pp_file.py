@@ -32,17 +32,16 @@ class PpFile(GenericFile):
         east = lons.max()
         west = lons.min()
 
-        north = float(re.findall("[+-]?\d+(?:\.\d+)?", str(north))[0])
-        south = float(re.findall("[+-]?\d+(?:\.\d+)?", str(south))[0])
-        east = float(re.findall("[+-]?\d+(?:\.\d+)?", str(east))[0])
-        west = float(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
+        # remove units and convert to float32
+        north = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(north))[0])
+        south = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(south))[0])
+        east = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(east))[0])
+        west = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
 
         # convert from degrees east to degrees west
-        east = east + 360
-        west = west + 360
+        east = np.float32(east + 360.0)
+        west = np.float32(west + 360.0)
 
-        print(north, south, east, west)
-        print(type(north))
         return north, south, east, west
 
 
@@ -53,8 +52,7 @@ class PpFile(GenericFile):
         """
 
         # time = file.collapse('max', axes='T')
-        time = file.collapse('T: max')
-        time = time.data
+        time = file.coord('time').data
         dates = time.units.num2date(np.sort(time.points))
 
         start_time = dates[0].isoformat()
@@ -254,7 +252,9 @@ if __name__ == "__main__":
     # file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
     file = "/Users/qsp95418/ceda-fbs-change/ceda-fbs/affp2006070218_05201_33.pp"
     ppf = PpFile(file, level)
+    bb = PpFile.getBoundingBox(cf.read(file)[0])
     start = datetime.datetime.today()
+    print(bb)
     print(ppf.get_metadata())
     end = datetime.datetime.today()
     print(end - start)
