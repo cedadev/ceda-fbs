@@ -39,10 +39,10 @@ class PpFile(GenericFile):
         west = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
 
         # convert from degrees east to degrees west
-        east = np.float32(east + 360.0)
-        west = np.float32(west + 360.0)
-
-        return north, south, east, west
+        # east = np.float32(east + 360.0)
+        # west = np.float32(west + 360.0)
+        #
+        # return north, south, east, west
 
 
     @staticmethod
@@ -255,6 +255,7 @@ if __name__ == "__main__":
     bb = PpFile.getBoundingBox(cf.read(file)[0])
     start = datetime.datetime.today()
     print(bb)
+    print(type(bb))
     print(ppf.get_metadata())
     end = datetime.datetime.today()
     print(end - start)
