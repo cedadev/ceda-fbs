@@ -3,7 +3,7 @@ from fbs.proc.file_handlers.generic_file import GenericFile
 import six
 import numpy as np
 import cf
-
+import xarray as xr
 
 class PpFile(GenericFile):
     """
@@ -20,25 +20,49 @@ class PpFile(GenericFile):
         return self.handler_id
 
     @staticmethod
-    def getBoundingBox(cube):
+    def getBoundingBox(file):
         """
         Returns the horizontal domain as (north, south, east, west)
         """
 
-        north = np.max(cube.coord('latitude').points)
-        south = np.min(cube.coord('latitude').points)
+        # north = file.collapse('max', axes='Y')
+        # south = file.collapse('min', axes='Y')
+        #
+        # east = file.collapse('max', axes='X')
+        # west = file.collapse('min', axes='X')
 
-        east = np.max(cube.coord('longitude').points)
-        west = np.min(cube.coord('longitude').points)
+        # lat = file.constructs('grid_latitude').value()
+        # lat_bounds = lat.bounds()
+        #
+        # north = np.max(lat_bounds.array)
+        # south = np.min(lat_bounds.array)
+        #
+        # lon = file.constructs('grid_longitude').value()
+        # lon_bounds = lon.bounds()
+        #
+        # east = np.max(lon_bounds.array)
+        # west = np.min(lon_bounds.array)
+
+        # north = np.max(file.collapse('lat:max').coord('lat').bounds.array)
+        # south = np.max(file.collapse('lat:min').data)
+        #
+        # east = np.max(file.collapse('lon:max').data)
+        # west = np.max(file.collapse('lon:min').data)
+
+        north = np.max(file.coord('latitude').points)
 
         return north, south, east, west
 
+
     @staticmethod
-    def getTemporalDomain(cube):
+    def getTemporalDomain(file):
         """
         Returns the temporal domain as a tuple of start_time, end_time.
         """
-        time = cube.coord('time')
+
+        # time = file.collapse('max', axes='T')
+        time = file.collapse('T: max')
+        time = time.data
         dates = time.units.num2date(np.sort(time.points))
 
         start_time = dates[0].isoformat()
@@ -69,8 +93,7 @@ class PpFile(GenericFile):
 
             phen_list = []
             for file in pp_files:
-                metadata = file.__dict__
-
+                metadata = file.properties()
                 phen_attr_list = []
                 for key, value in six.iteritems(metadata):
                     value = str(value)
