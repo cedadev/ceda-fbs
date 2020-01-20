@@ -38,11 +38,7 @@ class PpFile(GenericFile):
         east = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(east))[0])
         west = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
 
-        # convert from degrees east to degrees west
-        # east = np.float32(east + 360.0)
-        # west = np.float32(west + 360.0)
-        #
-        # return north, south, east, west
+        return north, south, east, west
 
 
     @staticmethod
@@ -51,12 +47,11 @@ class PpFile(GenericFile):
         Returns the temporal domain as a tuple of start_time, end_time.
         """
 
-        # time = file.collapse('max', axes='T')
-        time = file.coord('time').data
-        dates = time.units.num2date(np.sort(time.points))
+        time = file.dimension_coordinate('T')
+        dates = np.sort(time.dtarray)
 
-        start_time = dates[0].isoformat()
-        end_time = dates[-1].isoformat()
+        start_time = dates[0]
+        end_time = dates[-1]
 
         return start_time, end_time
 
@@ -250,12 +245,10 @@ if __name__ == "__main__":
         level = '3'
 
     # file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
-    file = "/Users/qsp95418/ceda-fbs-change/ceda-fbs/affp2006070218_05201_33.pp"
+    file = "/Users/qsp95418/ceda-fbs-change/ceda-fbs/4206_bnlevs.pp"
     ppf = PpFile(file, level)
-    bb = PpFile.getBoundingBox(cf.read(file)[0])
     start = datetime.datetime.today()
-    print(bb)
-    print(type(bb))
     print(ppf.get_metadata())
     end = datetime.datetime.today()
     print(end - start)
+
