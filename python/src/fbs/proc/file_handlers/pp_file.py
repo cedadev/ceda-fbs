@@ -33,12 +33,11 @@ class PpFile(GenericFile):
         west = lons.min()
 
         # remove units and convert to float32
-        north = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(north))[0])
-        south = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(south))[0])
-        east = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(east))[0])
-        west = np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(west))[0])
+        directions = []
+        for direction in north, south, east, west:
+            directions.append(np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(direction))[0]))
 
-        return north, south, east, west
+        return directions
 
 
     @staticmethod
