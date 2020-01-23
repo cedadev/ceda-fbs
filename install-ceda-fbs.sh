@@ -33,6 +33,7 @@ install_ceda_fbs()
   pip install elasticsearch
   pip install exifread
   pip install xmltodict
+  pip install $code_dir
 
   echo  "***********************"
   echo  "**Installation ended.**"

@@ -1,4 +1,4 @@
-import simplejson as json
+import json
 import time
 from elasticsearch import Elasticsearch
 from elasticsearch import ElasticsearchException

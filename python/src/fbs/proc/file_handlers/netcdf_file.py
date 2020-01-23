@@ -1,8 +1,8 @@
 import netCDF4
-from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
-import proc.common_util.geojson as geojson
-
+from fbs.proc.file_handlers.generic_file import GenericFile
+import fbs.proc.common_util.util as util
+import fbs.proc.common_util.geojson as geojson
+import six
 
 class NetCdfFile(GenericFile):
     """
@@ -15,10 +15,8 @@ class NetCdfFile(GenericFile):
         self.FILE_FORMAT = "NetCDF"
         self.es = additional_param
 
-    def get_handler_id(self):
-        return self.handler_id
-
-    def clean_coordinate(self, coord):
+    @staticmethod
+    def clean_coordinate(coord):
         """Return True if coordinate is valid."""
         try:
             # This filters out misconfigured "_FillValue" elements
@@ -41,59 +39,49 @@ class NetCdfFile(GenericFile):
         :returns: Geospatial information as dict.
         """
 
-        # Filter out items that are equal to "masked"
-        lats = filter(self.clean_coordinate,
-                      ncdf.variables[lat_name][:].ravel())
-        lons = filter(self.clean_coordinate,
-                      ncdf.variables[lon_name][:].ravel())
+        lats = ncdf.variables[lat_name][:].ravel()
+        lons = ncdf.variables[lon_name][:].ravel()
         return {
             "type": "track",
             "lat": lats,
             "lon": lons
         }
 
-    def find_var_by_standard_name(self, ncdf, fpath, standard_name):
+    def find_var_by_standard_name(self, ncdf, standard_name):
         """
         Find a variable reference searching by CF standard name.
 
         :param Dataset ncdf: Reference to an opened netCDF4.Dataset object
         :param str standard_name: The CF standard name to search for
         """
-        for key, value in ncdf.variables.iteritems():
+        for key, value in six.iteritems(ncdf.variables):
             try:
                 if value.standard_name.lower() == standard_name.lower():
                     return key
             except AttributeError:
                 continue
 
-        return None
-
     def get_geospatial(self, ncdf):
-        lat_name = self.find_var_by_standard_name(ncdf, self.file_path, "latitude")
-        lon_name = self.find_var_by_standard_name(ncdf, self.file_path, "longitude")
+        lat_name = self.find_var_by_standard_name(ncdf, "latitude")
+        lon_name = self.find_var_by_standard_name(ncdf, "longitude")
 
         if lat_name and lon_name:
             return self.geospatial(ncdf, lat_name, lon_name)
-        else:
-            return None
 
-    def temporal(self, ncdf, time_name):
-        """
-        Extract time values from Dataset using the variable name provided.
+    def get_temporal(self, ncdf):
 
-        :param Dataset ncdf: Reference to an opened netcdf4.Dataset object
-        :param str time_name: Name of the time parameter
-        """
+        time_name = self.find_var_by_standard_name(ncdf, "time")
+
         times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
                                       ncdf.variables[time_name].units))
         return {
+            "time_range": {
+                "gte": times[0].isoformat(),
+                "lte": times[-1].isoformat()
+            },
             "start_time": times[0].isoformat(),
             "end_time": times[-1].isoformat()
         }
-
-    def get_temporal(self, ncdf):
-        time_name = self.find_var_by_standard_name(ncdf, self.file_path, "time")
-        return self.temporal(ncdf, time_name)
 
     def get_phenomena(self, netcdf):
         """
@@ -103,12 +91,12 @@ class NetCdfFile(GenericFile):
         phen_list = []
 
         # for all phenomena list.
-        for v_name, v_data in netcdf.variables.iteritems():
+        for v_name, v_data in six.iteritems(netcdf.variables):
             new_phenomenon = {}
             phen_attr_list = []
 
             # for all attributtes in phenomenon.
-            for key, value in v_data.__dict__.iteritems():
+            for key, value in six.iteritems(v_data.__dict__):
 
                 if not util.is_valid_phenomena(key, value):
                     continue
@@ -116,7 +104,7 @@ class NetCdfFile(GenericFile):
                 phen_attr = {}
 
                 phen_attr["name"] = str(key.strip())
-                phen_attr["value"] = (value.strip()).encode('utf-8')
+                phen_attr["value"] = (value.strip()).encode('utf-8', 'ignore').decode()
 
                 phen_attr_list.append(phen_attr)
 
@@ -148,8 +136,6 @@ class NetCdfFile(GenericFile):
                 file_info[0]["info"]["read_status"] = "Read Error"
 
                 return file_info + (None,)
-        else:
-            return None
 
     def get_metadata_level3(self):
 
@@ -203,8 +189,6 @@ class NetCdfFile(GenericFile):
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
-        else:
-            return None
 
     def get_metadata(self):
 
@@ -233,15 +217,13 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '1'
-
-    file = '/badc/accmip/data/GISS/GISS-E2-R/accrcp45/ACCMIP-monthly/r1i1p3/v1/rsutcs/rsutcs_ACCMIP-monthly_GISS-E2-R_accrcp45_r1i1p3_207101-207112.nc'
-    # file= '/badc/ccmval/data/CCMVal-2/Observations_SPARCCCMValReport/Chapter6/smr_clono2.nc'
-    file = '/badc/mst/data/nerc-mstrf-radar-mst/v4-0/st-mode/cardinal/2015/09/nerc-mstrf-radar-mst_capel-dewi_20150901_st300_cardinal_33min-smoothing_v4-0.nc'
+        file = '/badc/mst/data/nerc-mstrf-radar-mst/v4-0/st-mode/cardinal/2015/09/nerc-mstrf-radar-mst_capel-dewi_20150901_st300_cardinal_33min-smoothing_v4-0.nc'
 
     ncf = NetCdfFile(file, level)
     start = datetime.datetime.today()
-    print ncf.get_metadata()
+    print(ncf.get_metadata())
     end = datetime.datetime.today()
-    print end - start
+    print(end - start)

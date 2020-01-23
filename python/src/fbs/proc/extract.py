@@ -7,12 +7,12 @@ import logging
 import os
 import hashlib
 import socket
-import proc.common_util.util as util
-import proc.file_handlers.handler_picker as handler_picker
+import fbs.proc.common_util.util as util
+import fbs.proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
-import simplejson as json
+import json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 from tqdm import tqdm
 
@@ -99,7 +99,7 @@ class ExtractSeq(object):
             if handler is not None:
                 handler_inst = handler(filename, level, calculate_md5=calculate_md5) #Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
-                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.get_handler_id()))
+                self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.handler_id))
                 return metadata
 
             else:
@@ -248,7 +248,7 @@ class ExtractSeq(object):
         Creates the JSON and performs a bulk index operation
         """
         action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
-        # print action_list
+        # print( action_list)
 
         for action, files in zip(action_list, files_to_index):
             r = self.es.bulk(body=action,request_timeout=60)
@@ -365,7 +365,7 @@ class ExtractSeq(object):
 
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
-            print file_to_store_paths
+            print( file_to_store_paths)
             try :
                 files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:

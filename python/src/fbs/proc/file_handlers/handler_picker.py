@@ -1,20 +1,21 @@
 import os
 import re
 
-from proc.common_util.util import FileFormatError
-import generic_file
-import netcdf_file
-import nasaames_file
-import pp_file
-import grib_file
-import esasafe_file
-import kmz_file
-import hdf_file
-import badc_csv_file
-import metadata_tags_json_file
+from fbs.proc.common_util.util import FileFormatError
+from fbs.proc.file_handlers import generic_file
+from fbs.proc.file_handlers import netcdf_file
+from fbs.proc.file_handlers import nasaames_file
+from fbs.proc.file_handlers import pp_file
+from fbs.proc.file_handlers import grib_file
+from fbs.proc.file_handlers import esasafe_file
+from fbs.proc.file_handlers import kmz_file
+from fbs.proc.file_handlers import hdf_file
+from fbs.proc.file_handlers import badc_csv_file
+from fbs.proc.file_handlers import metadata_tags_json_file
 
 import magic as magic_number_reader
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
+import six
 
 
 class  HandlerPicker(object):
@@ -157,7 +158,7 @@ class  HandlerPicker(object):
 
     def get_configured_handlers(self):
 
-        for pattern, handler in self.handler_map.iteritems():
+        for pattern, handler in six.iteritems(self.handler_map):
             handler_class = handler['class']
             priority = handler['priority']
 
@@ -178,7 +179,7 @@ class  HandlerPicker(object):
         Return the class of the correct file handler (un-instantiated).
         """
         handler_candidates = []  # All handlers whose file signatures match
-        for pattern, handler in self.handlers.iteritems():
+        for pattern, handler in six.iteritems(self.handlers):
             if re.search(pattern, filename):
                 handler_candidates.append(handler)
 

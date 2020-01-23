@@ -22,3 +22,4 @@ python/src/fbs/gui/ceda_all_datasets*
 *.egg-info
 *~
 venv
+python/src/test/files

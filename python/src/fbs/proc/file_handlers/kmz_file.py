@@ -3,7 +3,7 @@ Created on 31 May 2016
 
 @author: kleanthis
 '''
-from proc.file_handlers.generic_file import GenericFile
+from fbs.proc.file_handlers.generic_file import GenericFile
 import zipfile
 import xmltodict
 import os
@@ -79,7 +79,7 @@ class KmzFile(GenericFile):
 
         :return: Tuple containing dicts for the spatial and temporal information
         """
-        print "doc.kml not <os.path.basename>.kml"
+        print( "doc.kml not <os.path.basename>.kml")
 
         xml_dict = xmltodict.parse(xml_doc)
 
@@ -99,7 +99,14 @@ class KmzFile(GenericFile):
 
         bbox = {'coordinates': {'type': 'envelope', 'coordinates': [[round(min_lon, 3), round(min_lat, 3)],
                                                                     [round(max_lon, 3), round(max_lat, 3)]]}}
-        temporal = {'start_time': datestring, 'end_time': datestring}
+        temporal = {
+            'time_range': {
+                'gte': datestring,
+                'lte': datestring
+            },
+            "start_time": datestring,
+            "end_time": datestring
+        }
 
         return bbox, temporal
 
@@ -112,7 +119,7 @@ class KmzFile(GenericFile):
         """
 
 
-        print "kml_document"
+        print( "kml_document")
 
         lats = []
         lons = []
@@ -171,7 +178,7 @@ class KmzFile(GenericFile):
 
         :return: Tuple containing dicts for the spatial and temporal information
         """
-        print "kml_folder"
+        print( "kml_folder")
 
         # Date and time regex patterns
         date_regex = re.compile(r'([\d]{8})')
@@ -326,6 +333,6 @@ if __name__ == "__main__":
 
     kmf = KmzFile(file, level)
     start = datetime.datetime.today()
-    print kmf.get_metadata()
+    print( kmf.get_metadata())
     end = datetime.datetime.today()
-    print end - start
+    print( end - start)

@@ -11,7 +11,7 @@ import sys
 import time
 from elasticsearch import Elasticsearch
 import datetime
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 import os
 
 def read_cfg():
@@ -64,12 +64,12 @@ def display_stats():
 def main():
 
     start = datetime.datetime.now()
-    print "Script started at: %s" %(str(start))
+    print( "Script started at: %s" %(str(start)))
 
     display_stats()
 
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+    print( "Script ended at : %s it ran for : %s" %(str(end), str(end - start)))
 
 if __name__ == "__main__":
     main()

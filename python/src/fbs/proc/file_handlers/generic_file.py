@@ -2,7 +2,7 @@ import os
 from pwd import getpwuid
 from grp import getgrgid
 import datetime
-import proc.common_util.util as util
+import fbs.proc.common_util.util as util
 
 class  GenericFile(object):
     """
@@ -11,13 +11,9 @@ class  GenericFile(object):
 
     def __init__(self, file_path, level, calculate_md5=False):
         self.file_path = file_path
-        self.level = level
+        self.level = str(level)
         self.handler_id = None
         self.calculate_md5 = calculate_md5
-
-
-    def get_handler_id(self):
-        return self.handler_id
 
     def _get_file_ownership(self):
         return (
@@ -56,6 +52,8 @@ class  GenericFile(object):
         uid,gid = self._get_file_ownership()
         info["user"] = uid
         info["group"] = gid
+
+        info["is_link"] = os.path.islink(self.file_path)
 
         info["last_modified"] = datetime.datetime.fromtimestamp(file_stats.st_mtime).isoformat()
 

@@ -3,11 +3,10 @@ Created on 2 Jun 2016
 
 @author: kleanthis
 '''
-from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
+from fbs.proc.file_handlers.generic_file import GenericFile
+import fbs.proc.common_util.util as util
 import csv
 import re
-from dateutil import parser
 
 class BadcCsvFile(GenericFile):
 
@@ -17,14 +16,11 @@ class BadcCsvFile(GenericFile):
         self.FILE_FORMAT = self.get_file_format()
 
     def get_file_format(self):
-        with open(self.file_path) as fp:
+        with open(self.file_path, encoding='utf-8', errors='ignore') as fp:
             if 'BADC-CSV' in fp.readline():
                 return 'BADC CSV'
             else:
                 return 'CSV'
-
-    def get_handler_id(self):
-        return self.handler_id
 
     def csv_parse(self, fp):
 
@@ -75,7 +71,7 @@ class BadcCsvFile(GenericFile):
 
         if file_info is not None:
             try:
-                with open(self.file_path) as fp:
+                with open(self.file_path, encoding='utf-8', errors='ignore') as fp:
                     phen = self.get_phenomena(fp)
 
             except Exception:
@@ -101,7 +97,7 @@ class BadcCsvFile(GenericFile):
 
         if file_info is not None:
             try:
-                with open(self.file_path) as fp:
+                with open(self.file_path, encoding='utf-8', errors='ignore') as fp:
                     meta = self.csv_parse(fp)
                     fp.seek(0)
                     phenomena = self.get_phenomena(fp)
@@ -116,8 +112,14 @@ class BadcCsvFile(GenericFile):
                 # Constrain date output to isoformat
                 iso_date = util.date2iso(meta[1])
 
-                file_info[0]["info"]["temporal"] = {"start_time": iso_date, "end_time": iso_date}
-
+                file_info[0]["info"]["temporal"] = {
+                    "time_range": {
+                        "gte": iso_date,
+                        "lte": iso_date
+                    },
+                    "start_time": iso_date,
+                    "end_time": iso_date
+                }
             if meta[2] is not None:
                 if meta[2] == 'global':
                     loc = ({'coordinates': {'type': 'envelope', 'coordinates': [[-180.0,90.0], [180.0, -90.0]]}},)
@@ -158,12 +160,13 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '1'
+        file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
 
-    file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
     baf = BadcCsvFile(file,level)
     start = datetime.datetime.today()
-    print baf.get_metadata()
+    print( baf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

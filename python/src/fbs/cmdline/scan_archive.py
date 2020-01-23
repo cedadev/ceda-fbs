@@ -38,15 +38,15 @@ Options:
  """
 
 import os
-
+import six
 from docopt import docopt
 
-import src.fbs.proc.common_util.util as util
+import fbs.proc.common_util.util as util
 from cmdline import __version__  # Grab version from package __init__.py
 
 import datetime
 import subprocess
-import src.fbs.proc.constants.constants as constants
+import fbs.proc.constants.constants as constants
 from tqdm import tqdm
 
 SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
@@ -125,7 +125,7 @@ def read_and_scan_datasets_in_lotus(config):
                    % (SCRIPT_DIR, file_paths_dir, keys[i], level))
 
 
-        print "created command :" + command
+        print( "created command :" + command)
         commands.append(command)
 
     lotus_max_processes = config["num-processes"]
@@ -141,7 +141,7 @@ def read_and_scan_datasets_sub_in_lotus(config):
         command = "bsub -q par-single -W 48:00 python %s/scan_dataset.py -f %s -d %s -l %s" \
                       % (SCRIPT_DIR, file_paths_dir, dataset_id, level)
    
-        print "Executing: %s" % command
+        print( "Executing: %s" % command)
         subprocess.call(command, shell=True)
 
 
@@ -197,7 +197,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
     cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s --calculate_md5"
     command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
-    # print "Created command: %s" % command
+    # print( "Created command: %s" % command)
     commands_list.append(command)
 
 
@@ -256,7 +256,7 @@ def read_datasets_from_files_and_scan_in_localhost(config):
     # Run each command in localhost.
     number_of_commands = len(commands)
     for i in range(0, number_of_commands):
-        print "Executing command : %s" %(commands[i])
+        print( "Executing command : %s" %(commands[i]))
         subprocess.call(commands[i], shell=True)
 
 def scan_datasets_in_localhost(config, scan_status):
@@ -279,25 +279,25 @@ def scan_datasets_in_localhost(config, scan_status):
                           % (SCRIPT_DIR, filename, dataset_id_item, level)
 
 
-                print "executng : %s" %(command)
+                print( "executng : %s" %(command))
                 subprocess.call(command, shell=True)
         else:
             command = "python %s/scan_dataset.py -f %s -d %s -l %s" \
                       % (SCRIPT_DIR, filename, dataset_id, level)
 
 
-            print "executng : %s"  %(command)
+            print( "executng : %s"  %(command))
             subprocess.call(command, shell=True)
 
     elif scan_status == constants.Script_status.READ_AND_SCAN_DATASETS:
         dataset_ids = util.find_dataset(file_paths_dir, "all")
 
-        for key, value in dataset_ids.iteritems():
+        for key, value in six.iteritems(dataset_ids):
             dataset_id = key
             command = "python %s/scan_dataset.py -f %s -d  %s -l %s"\
                         % (SCRIPT_DIR, filename, dataset_id, level)
 
-            print "executng : %s" %(command)
+            print( "executng : %s" %(command))
             subprocess.call(command, shell=True)
 
     elif scan_status == constants.Script_status.READ_DATASET_FROM_FILE_AND_SCAN:
@@ -310,8 +310,8 @@ def main():
     """
 
     start = datetime.datetime.now()
-    print "==============================="
-    print "Script started at: %s." %(str(start))
+    print( "===============================")
+    print( "Script started at: %s." %(str(start)))
 
 
     #Gets command line arguments.
@@ -329,13 +329,13 @@ def main():
         scan_datasets_in_localhost(config_file, scan_status)
 
     else:
-        print "Some options could not be recognized.\n"
+        print( "Some options could not be recognized.\n")
 
 
     end = datetime.datetime.now()
-    print "Script ended at: %s  it ran for : %s." \
-          % (str(end), str(end - start))
-    print "==============================="
+    print( "Script ended at: %s  it ran for : %s." \
+          % (str(end), str(end - start)))
+    print( "===============================")
 
 
 if __name__ == '__main__':

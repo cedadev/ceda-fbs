@@ -4,8 +4,8 @@ Created on 12 May 2016
 @author: kleanthis
 '''
 
-from proc.file_handlers.generic_file import GenericFile
-import proc.common_util.util as util
+from fbs.proc.file_handlers.generic_file import GenericFile
+import fbs.proc.common_util.util as util
 import xml.etree.cElementTree as ET
 
 # Set up name spaces for use in XML paths 
@@ -91,13 +91,9 @@ class EsaSafeFile(GenericFile):
         self.handler_id = "Manifest handler level 3."
         self.FILE_FORMAT = "Manifest"
 
-    def get_handler_id(self):
-        return self.handler_id
-
     def _open_file(self):
         self.root = ET.parse(self.file_path).getroot()
         self._parse_content()
-
 
     def _parse_content(self):
         self.sections = {}
@@ -117,10 +113,11 @@ class EsaSafeFile(GenericFile):
 
                     self.sections[section_id][item_name] = value
                 except:
-                    print "FAILED: %s  -->  %s" % (section_id, xml_path)
+                    print( "FAILED: %s  -->  %s" % (section_id, xml_path))
+                    raise
 
-
-    def _package_coordinates(self, coords_string):
+    @staticmethod
+    def _package_coordinates(coords_string):
         """
         Converts a coordinates string into a dictionary of lats and lons.
         :param string coords_string: a string of lat,lon pairs separated by commas
@@ -154,8 +151,14 @@ class EsaSafeFile(GenericFile):
         iso_start_date = util.date2iso(ap["Start Time"])
         iso_end_date = util.date2iso(ap["Stop Time"])
 
-        return {"start_time": iso_start_date,
-                "end_time": iso_end_date }
+        return {
+            "time_range": {
+                "gte": iso_start_date,
+                "lte": iso_end_date
+            },
+            "start_time": iso_start_date,
+            "end_time": iso_end_date
+        }
 
     def get_metadata_level3(self):
         self.handler_id = "Manifest handler level 3."
@@ -217,12 +220,13 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '1'
+        file = '/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2017/10/31/S1A_IW_GRDH_1SDV_20171031T061411_20171031T061436_019053_020395_DCCA.manifest'
 
-    file = '/neodc/sentinel1a/data/IW/L1_GRD/h/IPF_v2/2017/10/31/S1A_IW_GRDH_1SDV_20171031T061411_20171031T061436_019053_020395_DCCA.manifest'
     esf = EsaSafeFile(file,level)
     start = datetime.datetime.today()
-    print esf.get_metadata()
+    print( esf.get_metadata())
     end = datetime.datetime.today()
-    print end-start
+    print( end-start)

@@ -8,7 +8,7 @@ import sys
 import time
 from elasticsearch import Elasticsearch
 import datetime
-import src.fbs.proc.common_util.util as util
+import fbs.proc.common_util.util as util
 import os
 
 """
@@ -188,15 +188,15 @@ def main(directory=None):
         directory = raw_input("Please enter a directory to search for phenomena:")
 
     start = datetime.datetime.now()
-    print "Script started at: %s" %(str(start))
+    print( "Script started at: %s" %(str(start)))
 
     res = get_dir_info(directory)
     for item in res:
-        print item
-        print res[item]
+        print( item)
+        print( res[item])
 
     end = datetime.datetime.now()
-    print "Script ended at : %s it ran for : %s" %(str(end), str(end - start))
+    print( "Script ended at : %s it ran for : %s" %(str(end), str(end - start)))
 
 if __name__ == "__main__":
     dr = None
