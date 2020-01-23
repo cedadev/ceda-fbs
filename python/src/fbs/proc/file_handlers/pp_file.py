@@ -32,10 +32,9 @@ class PpFile(GenericFile):
         east = lons.max()
         west = lons.min()
 
-        # remove units and convert to float32
         directions = []
         for direction in north, south, east, west:
-            directions.append(np.float32(re.findall("[+-]?\d+(?:\.\d+)?", str(direction))[0]))
+            directions.append(direction.array[0])
 
         return directions
 
@@ -46,7 +45,7 @@ class PpFile(GenericFile):
         Returns the temporal domain as a tuple of start_time, end_time.
         """
 
-        time = file.dimension_coordinate('T')
+        time = file.dimension_coordinate('time')
         dates = np.sort(time.dtarray)
 
         start_time = dates[0]
