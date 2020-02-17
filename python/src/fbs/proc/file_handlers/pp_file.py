@@ -239,11 +239,11 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
         level = '3'
+        file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
 
-    # file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
-    file = "/Users/qsp95418/ceda-fbs-change/ceda-fbs/4206_bnlevs.pp"
     ppf = PpFile(file, level)
     start = datetime.datetime.today()
     print(ppf.get_metadata())
