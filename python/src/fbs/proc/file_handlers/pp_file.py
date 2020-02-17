@@ -48,8 +48,8 @@ class PpFile(GenericFile):
         time = file.dimension_coordinate('time')
         dates = np.sort(time.dtarray)
 
-        start_time = dates[0]
-        end_time = dates[-1]
+        start_time = dates[0].strftime('%Y-%m-%dT%H:%M:%S')
+        end_time = dates[-1].strftime('%Y-%m-%dT%H:%M:%S')
 
         return start_time, end_time
 
@@ -167,6 +167,7 @@ class PpFile(GenericFile):
                         end_time_list.append(end)
 
                     except Exception as ex:
+                        print(ex)
                         continue
 
                 # Make sure that there are values in all the lists
