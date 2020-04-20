@@ -248,7 +248,6 @@ class ExtractSeq(object):
         Creates the JSON and performs a bulk index operation
         """
         action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
-        # print( action_list)
 
         for action, files in zip(action_list, files_to_index):
             r = self.es.bulk(body=action,request_timeout=60)
