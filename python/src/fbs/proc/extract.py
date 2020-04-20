@@ -174,8 +174,7 @@ class ExtractSeq(object):
                 # Get spot information
                 spot = self.spots.get_spot(filename)
 
-
-                es_id = hashlib.sha1(filename).hexdigest()
+                es_id = hashlib.sha1(str(filename)).hexdigest()
 
                 # Add spot to level1 info
                 if spot is not None:
