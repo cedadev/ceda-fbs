@@ -1,6 +1,5 @@
 {
   "mappings": {
-    "file": {
       "properties": {
         "info": {
           "properties": {
@@ -134,4 +133,3 @@
       }
     }
   }
-}

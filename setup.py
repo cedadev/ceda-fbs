@@ -35,7 +35,7 @@ setup(
         ],
     },
     install_requires=[
-        'elasticsearch<7.0.0',
+        'elasticsearch<8.0.0',
     ],
 
     # This qualifier can be used to selectively exclude Python versions -

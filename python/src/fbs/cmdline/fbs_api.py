@@ -10,6 +10,7 @@ from elasticsearch import Elasticsearch
 import datetime
 import fbs.proc.common_util.util as util
 import os
+from ceda_elasticsearch_tools.elasticsearch import CEDAElasticsearchClient
 
 """
 INPUTS:
@@ -34,9 +35,7 @@ def read_cfg():
 
 def open_connection(cfg):
 
-    host = cfg["es-host"]
-    port = cfg["es-port"]
-    es_conn = Elasticsearch(hosts=[{"host": host, "port": port}])
+    es_conn = CEDAElasticsearchClient()
 
     return es_conn
 
@@ -64,11 +63,8 @@ def search_database_phenomena(cfg, directory):
     es_conn = open_connection(cfg)
 
     es_index = cfg["es-index"]
-    es_type = cfg["es-mapping"].split(",")[0]
-
 
     res = es_conn.search( index=es_index,
-                          doc_type=es_type,
                           body=query,
                           request_timeout=60,
                           size = 10000,
@@ -139,7 +135,6 @@ def search_database_phenomena(cfg, directory):
                                     non_valid_files += 1
                                     non_valid_files_type = file_name
 
-    es_type = cfg["es-mapping"].split(",")[1]
 
     if len(phenomena) > 0 :
 
@@ -155,7 +150,7 @@ def search_database_phenomena(cfg, directory):
             mget_query["docs"].append(id_dict.copy())
 
         #get all phenomen with ids found in the first query.
-        res = es_conn.mget(body=mget_query, index=es_index, doc_type=es_type)
+        res = es_conn.mget(body=mget_query, index=es_index)
     else:
         res = {'docs': []}
 

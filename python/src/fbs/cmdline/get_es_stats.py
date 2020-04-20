@@ -46,14 +46,9 @@ def count_database_docs(cfg):
     #open connection.
     es_conn = open_connection(cfg)
 
-
-
     es_index = cfg["es-configuration"]["es-index"]
-    es_type = cfg["es-configuration"]["es-mapping"].split(",")[0]
-
 
     res = es_conn.count( index=es_index,
-                          doc_type=es_type,
                           body=query,
                           request_timeout=60
                         )

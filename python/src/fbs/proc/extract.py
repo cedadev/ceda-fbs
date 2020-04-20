@@ -19,6 +19,7 @@ from tqdm import tqdm
 # Suppress requests logging messages
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+
 class ExtractSeq(object):
 
     """
@@ -54,12 +55,8 @@ class ExtractSeq(object):
 
         # Database connection information.
         self.es_index = self.conf("es-configuration")["es-index"]
-        self.es_types = (self.conf("es-configuration")["es-mapping"]).split(",")
-        self.es_type_file = self.es_types[0]
-        self.es_type_phen = self.es_types[1]
-        self.es_type_loc  = self.es_types[2]
 
-    #***General purpose methods.***
+    # General purpose methods
     def conf(self, conf_opt):
         """
         Return configuration option or raise exception if it doesn't exist.
@@ -72,15 +69,16 @@ class ExtractSeq(object):
                 "Mandatory configuration option not found: %s" % conf_opt)
 
     def read_dataset(self):
-
         """
         Returns the files contained within a dataset.
         """
 
         datasets_file = self.conf("filename")
         self.dataset_id = self.conf("dataset")
-        #directory where the files to be searched are.
+
+        # directory where the files to be searched are.
         self.dataset_dir = util.find_dataset(datasets_file, self.dataset_id)
+
         if self.dataset_dir is not None:
             self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
             return util.build_file_list(self.dataset_dir)
@@ -124,30 +122,8 @@ class ExtractSeq(object):
         else:
             return None
 
-
-    def create_location_json(self, lid, coordinates):
-        record = {"coordinates": coordinates["coordinates"], "id" : lid}
-        return record
-
-
-    def index_location(self, coordinates):
-
-        """
-        Indexes location only if does not exists.
-        """
-
-        lid = hashlib.sha1(str(coordinates)).hexdigest()
-        query = index.create_sp_query(lid)
-        res = index.search_database(self.es, self.es_index, self.es_type_loc, query)
-        lid_found = self.is_valid_result(res)
-
-        if lid_found is None:
-            lmeta = self.create_location_json(lid, coordinates)
-            index.index_file(self.es, self.es_index, self.es_type_loc, lid, lmeta)
-
-        return lid
-
-    def create_body(self, fdata):
+    @staticmethod
+    def create_body(fdata):
         """
         Takes the information returned by the file handlers and builds the JSON to send to elasticsearch.
 
@@ -169,7 +145,6 @@ class ExtractSeq(object):
 
         return json.dumps(doc)
 
-
     def create_bulk_index_json(self, file_list, level, blocksize):
         """
         Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
@@ -190,8 +165,6 @@ class ExtractSeq(object):
 
         self.logger.debug("Creating bulk json with block of %d" % blocksize)
 
-        doc_type = self.es_type_file
-
         for i, filename in enumerate(file_list,1):
 
             start = datetime.datetime.now()
@@ -209,7 +182,7 @@ class ExtractSeq(object):
                     doc[0]['info']['spot_name'] = spot
 
 
-                action = json.dumps({"index": {"_index": self.es_index, "_type": doc_type, "_id": es_id }}) + "\n"
+                action = json.dumps({"index": {"_index": self.es_index, "_id": es_id }}) + "\n"
                 body = self.create_body(doc) + "\n"
                 self.logger.debug("JSON to index: {}".format(body))
 
@@ -239,9 +212,7 @@ class ExtractSeq(object):
             bulk_list.append(bulk_json)
             files_to_index.append(file_array)
 
-
         return bulk_list, files_to_index
-
 
     def bulk_index(self, file_list, level, blocksize):
         """
@@ -270,8 +241,6 @@ class ExtractSeq(object):
             batch_count = len(files)
             self.files_indexed += batch_count
             self.logger.debug("Added %i files to index" % batch_count)
-
-
 
     def scan_files(self):
         """
@@ -309,7 +278,6 @@ class ExtractSeq(object):
                              " properties errors : %s, total files : %s "
                              % ( self.dataset_id, str(self.files_indexed), str(self.database_errors),
                              str(self.files_properties_errors), str(self.total_number_of_files)))
-
 
     def prepare_logging_sdf(self):
         """

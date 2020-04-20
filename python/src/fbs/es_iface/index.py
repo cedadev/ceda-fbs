@@ -33,20 +33,20 @@ def create_index(config, elasticsearch):
     elasticsearch.indices.create(index=index_name, body=index_settings)
 
 
-def search_database(es, index_l, type_l, query):
+def search_database(es, index_l, query):
     """
     Executes a DSL query and returns the result.
     A delay is used because high rate of queries cause the 
     database to return an error.
     """
-    res = es.search(index=index_l, doc_type=type_l, body=query)
+    res = es.search(index=index_l, body=query)
     time.sleep(0.1)
     return res
 
 
-def index_file(es, index_l, type_l, fid, fjson):
+def index_file(es, index_l, fid, fjson):
     "Indexes a document."
-    es.index(index=index_l, doc_type=type_l, id=fid, body=fjson, request_timeout=60)
+    es.index(index=index_l, id=fid, body=fjson, request_timeout=60)
     time.sleep(0.01)
 
 bulk_requests = []
