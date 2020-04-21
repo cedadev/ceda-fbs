@@ -258,12 +258,11 @@ class ExtractSeq(object):
         try:
             index.create_index(self.configuration, self.es)
         except TransportError as te:
-            if te[0] == 400:
+            if te.status_code == 400:
                 pass
             else:
                 raise TransportError(te)
 
-        doc = {}
         level = self.conf("level")
 
         self.logger.debug("File list contains {} files.".format(len(self.file_list)))
