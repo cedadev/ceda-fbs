@@ -21,12 +21,12 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 class ExtractSeq(object):
-
     """
     File crawler and metadata extractor class.
     Part of core functionality of FBS.
     Files are scanned sequentially (one thread).
     """
+
     def __init__(self, conf):
 
         self.configuration = conf
@@ -95,7 +95,8 @@ class ExtractSeq(object):
             handler = self.handler_factory_inst.pick_best_handler(filename)
 
             if handler is not None:
-                handler_inst = handler(filename, level, calculate_md5=calculate_md5) #Can this done within the HandlerPicker class.
+                handler_inst = handler(filename, level,
+                                       calculate_md5=calculate_md5)  # Can this done within the HandlerPicker class.
                 metadata = handler_inst.get_metadata()
                 self.logger.debug("{} was read using handler {}.".format(filename, handler_inst.handler_id))
                 return metadata
@@ -107,7 +108,6 @@ class ExtractSeq(object):
         except Exception as ex:
             self.logger.error("Could not process file: {}".format(ex))
 
-
     def is_valid_result(self, result):
 
         """
@@ -116,8 +116,8 @@ class ExtractSeq(object):
         """
 
         hits = result[u'hits'][u'hits']
-        if len(hits) > 0 :
-            phen_id =  hits[0][u"_source"][u"id"]
+        if len(hits) > 0:
+            phen_id = hits[0][u"_source"][u"id"]
             return phen_id
         else:
             return None
@@ -130,7 +130,7 @@ class ExtractSeq(object):
         :param fdata: Tuple containing file metatadata, parameters and temporal data.
         :return: JSON to index  into elasticsearch
         """
-        if len(fdata) ==  1:
+        if len(fdata) == 1:
             doc = fdata[0]
 
         if len(fdata) > 1:
@@ -165,7 +165,7 @@ class ExtractSeq(object):
 
         self.logger.debug("Creating bulk json with block of %d" % blocksize)
 
-        for i, filename in enumerate(file_list,1):
+        for i, filename in enumerate(file_list, 1):
 
             start = datetime.datetime.now()
             doc = self.process_file_seq(filename, level)
@@ -174,14 +174,13 @@ class ExtractSeq(object):
                 # Get spot information
                 spot = self.spots.get_spot(filename)
 
-                es_id = hashlib.sha1(str(filename)).hexdigest()
+                es_id = hashlib.sha1(str(filename).encode('utf-8')).hexdigest()
 
                 # Add spot to level1 info
                 if spot is not None:
                     doc[0]['info']['spot_name'] = spot
 
-
-                action = json.dumps({"index": {"_index": self.es_index, "_id": es_id }}) + "\n"
+                action = json.dumps({"index": {"_index": self.es_index, "_id": es_id}}) + "\n"
                 body = self.create_body(doc) + "\n"
                 self.logger.debug("JSON to index: {}".format(body))
 
@@ -190,12 +189,15 @@ class ExtractSeq(object):
 
             else:
                 end = datetime.datetime.now()
-                self.logger.error("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename),self.FILE_PROPERTIES_ERROR, str(end - start)))
+                self.logger.error("%s|%s|%s|%s ms" % (
+                os.path.basename(filename), os.path.dirname(filename), self.FILE_PROPERTIES_ERROR, str(end - start)))
                 self.files_properties_errors = self.files_properties_errors + 1
 
             if i % blocksize == 0:
-                json_len =  bulk_json.count("\n")/2
-                self.logger.debug("Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (i,json_len,(blocksize-json_len),blocksize))
+                json_len = bulk_json.count("\n") / 2
+                self.logger.debug(
+                    "Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (
+                    i, json_len, (blocksize - json_len), blocksize))
 
                 # Only attempt to add if there is data there. Will break the scan if it appends an empty action.
                 if json_len > 0:
@@ -220,18 +222,19 @@ class ExtractSeq(object):
         action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
 
         for action, files in zip(action_list, files_to_index):
-            r = self.es.bulk(body=action,request_timeout=60)
+            r = self.es.bulk(body=action, request_timeout=60)
             self.process_response_for_errors(r, files)
 
     def process_response_for_errors(self, response, files):
         if response['errors']:
             for i, item in enumerate(response['items']):
-                if item['index']['status'] not in [200,201]:
+                if item['index']['status'] not in [200, 201]:
                     filename = files[i]
                     error = item['index']['error']
-                    ex = ": ".join([error['type'],error['reason']])
+                    ex = ": ".join([error['type'], error['reason']])
                     self.logger.error("Indexing error: %s" % ex)
-                    self.logger.error(("%s|%s|%s|%s ms" % (os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR,' ')))
+                    self.logger.error(("%s|%s|%s|%s ms" % (
+                    os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, ' ')))
                     self.database_errors += 1
 
                 else:
@@ -267,15 +270,14 @@ class ExtractSeq(object):
 
         self.logger.debug("File list contains {} files.".format(len(self.file_list)))
         if len(self.file_list) > 0:
-
             self.bulk_index(self.file_list, level, self.blocksize)
 
             # At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
             self.logger.info("Summary information for Dataset id : %s, files indexed : %s, database errors : %s,"
                              " properties errors : %s, total files : %s "
-                             % ( self.dataset_id, str(self.files_indexed), str(self.database_errors),
-                             str(self.files_properties_errors), str(self.total_number_of_files)))
+                             % (self.dataset_id, str(self.files_indexed), str(self.database_errors),
+                                str(self.files_properties_errors), str(self.total_number_of_files)))
 
     def prepare_logging_sdf(self):
         """
@@ -287,7 +289,8 @@ class ExtractSeq(object):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        log_fname = "%s_%s_%s.log" % (self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
+        log_fname = "%s_%s_%s.log" % (
+        self.conf("es-configuration")["es-index"], self.conf("dataset"), socket.gethostname())
 
         # create the path where to create the log files.
         fpath = os.path.join(log_dir, log_fname)
@@ -303,21 +306,18 @@ class ExtractSeq(object):
         """
         logging.root.handlers = []
 
-        logging.basicConfig( filename=fpath, filemode="a+", format=log_format, level=level)
+        logging.basicConfig(filename=fpath, filemode="a+", format=log_format, level=level)
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
-        #es_log.addHandler(logging.FileHandler(fpath_es))
 
         nappy_log = logging.getLogger("nappy")
         nappy_log.setLevel(logging.ERROR)
 
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
-        #urllib3_log.addHandler(logging.FileHandler(fpath_es))
 
         self.logger = logging.getLogger(__name__)
-
 
     def store_dataset_to_file(self):
         """
@@ -327,18 +327,17 @@ class ExtractSeq(object):
         self.logger.debug("***Scanning started.***")
         self.file_list = self.read_dataset()
 
-
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
-            print( file_to_store_paths)
-            try :
+            print(file_to_store_paths)
+            try:
                 files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
             except Exception as ex:
                 self.logger.error("Could not save the python list of files to file...{}".format(ex))
             else:
                 self.logger.debug("Paths written in file: {}.".format(files_written))
-                self.logger.debug("File {}, containing paths to files in given dataset, has been created.".format(file_to_store_paths))
-
+                self.logger.debug("File {}, containing paths to files in given dataset, has been created.".format(
+                    file_to_store_paths))
 
     def prepare_logging_rdf(self):
         """
@@ -351,11 +350,11 @@ class ExtractSeq(object):
             os.makedirs(log_dir)
 
         # Set log file name
-        log_fname = "%s__%s_%s_%s_%s.log" %(self.conf("es-configuration")["es-index"], \
-                                   os.path.basename(self.conf("filename")), \
-                                   self.conf("start"), \
-                                   self.conf("num-files"), \
-                                   socket.gethostname())
+        log_fname = "%s__%s_%s_%s_%s.log" % (self.conf("es-configuration")["es-index"], \
+                                             os.path.basename(self.conf("filename")), \
+                                             self.conf("start"), \
+                                             self.conf("num-files"), \
+                                             socket.gethostname())
 
         # Create the path where to create the log files.
         fpath = os.path.join(log_dir, log_fname)
@@ -375,7 +374,7 @@ class ExtractSeq(object):
 
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
-        #urllib3_log.addHandler(logging.FileHandler(fpath_es))
+        # urllib3_log.addHandler(logging.FileHandler(fpath_es))
 
         self.logger = logging.getLogger(__name__)
 
@@ -384,18 +383,16 @@ class ExtractSeq(object):
         Reads file paths form a given file and returns a subset of them
         in a list.
         """
-        #Set up logger and handler class.
+        # Set up logger and handler class.
         self.prepare_logging_rdf()
         self.logger.debug("***Scanning started.***")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
-        self.handler_factory_inst.get_configured_handlers()
-
 
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
         num_of_files = self.conf("num-files")
 
-        self.logger.debug("Copying paths from file {} start is {} and number of lines is {}.".\
+        self.logger.debug("Copying paths from file {} start is {} and number of lines is {}.". \
                           format(file_containing_paths, start_file, num_of_files))
 
         filename = os.path.basename(file_containing_paths)
@@ -424,34 +421,31 @@ class ExtractSeq(object):
         for path in file_list:
             self.file_list.append(path.rstrip())
 
-        #at the end extract metadata.
+        # at the end extract metadata.
         self.scan_files()
 
-    #***Functionality for traversing dataset and then immediately extract metadata.***
+    # Functionality for traversing dataset and then immediately extract metadata.
     def prepare_logging_seq_rs(self):
-
         """
         initializes  logging.
         """
 
-        #Check if logging directory exists and if necessary create it.
+        # Check if logging directory exists and if necessary create it.
         log_dir = self.conf("core")["log-path"]
 
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        #kltsa 15/09/2015 changes for issue :23221.
         log_fname = "%s_%s_%s.log" \
-                    %(self.conf("es-configuration")["es-index"],\
-                    self.conf("dataset"), socket.gethostname())
+                    % (self.conf("es-configuration")["es-index"], \
+                       self.conf("dataset"), socket.gethostname())
 
-        #create the path where to create the log files.
+        # create the path where to create the log files.
         fpath = os.path.join(log_dir,
                              log_fname
-                            )
+                             )
 
         conf_log_level = self.conf("core")["log-level"]
-
 
         log_format = self.conf("core")["format"]
         level = util.log_levels.get(conf_log_level, logging.NOTSET)
@@ -462,11 +456,11 @@ class ExtractSeq(object):
         """
         logging.root.handlers = []
 
-        logging.basicConfig( filename=fpath,
-                             filemode="a+",
-                             format=log_format,
-                             level=level
-                           )
+        logging.basicConfig(filename=fpath,
+                            filemode="a+",
+                            format=log_format,
+                            level=level
+                            )
         """
         extract_logger = logging.getLogger(__name__)
 
@@ -481,16 +475,12 @@ class ExtractSeq(object):
 
         es_log = logging.getLogger("elasticsearch")
         es_log.setLevel(logging.ERROR)
-        #es_log.addHandler(logging.FileHandler(fpath_es))
-
 
         nappy_log = logging.getLogger("nappy")
         nappy_log.setLevel(logging.ERROR)
 
-
         urllib3_log = logging.getLogger("urllib3")
         urllib3_log.setLevel(logging.ERROR)
-        #urllib3_log.addHandler(logging.FileHandler(fpath_es))
 
         self.logger = logging.getLogger(__name__)
 
@@ -499,9 +489,9 @@ class ExtractSeq(object):
         self.prepare_logging_seq_rs()
         self.logger.debug("***Scanning started.***.")
         self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
-        self.handler_factory_inst.get_configured_handlers()
 
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
-        #at the end extract metadata.
+
+        # Extract metadata.
         self.scan_files()

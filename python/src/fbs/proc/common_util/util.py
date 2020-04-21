@@ -139,12 +139,8 @@ def cfg_read(filename):
 
     conf = {}
     section_options = {}
-    handlers_sections = []
 
     for section in sections:
-
-        if section in handlers_sections:
-            continue
 
         options = config.options(section)
 
@@ -153,9 +149,8 @@ def cfg_read(filename):
             try:
                 value = config.get(section, option)
                 parsed_value = value.replace("\"", "")
-                if section == "handlers":
-                    handlers_sections.append(value)
                 section_options[option] = parsed_value
+
                 if section_options[option] == -1:
                     section_options[option] = None
             except:
@@ -163,17 +158,6 @@ def cfg_read(filename):
 
         conf[section] = section_options.copy()
         section_options.clear()
-
-    regx_details = {}
-    regxs = {}
-    for handler in handlers_sections:
-        regx_pattern = config.get(handler, "regx")
-        regx_details["class"] = config.get(handler, "class")
-        regx_details["priority"] = config.get(handler, "priority")
-        regxs[regx_pattern] = regx_details.copy()
-        regx_details.clear()
-
-    conf["handlers"] = regxs.copy()
 
     return conf
 
