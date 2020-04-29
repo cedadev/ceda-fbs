@@ -24,15 +24,10 @@ install_ceda_fbs()
   echo "***************************"
   echo "**Installing environment.**"
   echo "***************************"
-  
-  virtualenv --system-site-packages $env_dir
+
+  python -m venv $env_dir --system-site-packages
   . $env_dir/bin/activate
   pip install -r  $code_dir/python/pip_requirements.txt
-  pip install docopt
-  pip install simplejson
-  pip install elasticsearch
-  pip install exifread
-  pip install xmltodict
   pip install $code_dir
 
   echo  "***********************"
