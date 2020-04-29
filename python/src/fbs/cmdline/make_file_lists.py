@@ -87,7 +87,7 @@ def store_datasets_to_files(status, config, host):
 
     # Create the commands that will create the
     # files containing the paths to data files.
-    for i in xrange(num_datasets):
+    for i in range(num_datasets):
 
         command = "python {}/scan_dataset.py -f {} -d  {} --make-list {}.txt".format(
             SCRIPT_DIR, filename, datasets_ids[i], os.path.join(directory_to_save_files, datasets_ids[i])
