@@ -29,15 +29,12 @@ class HandlerPicker(object):
         '.pp': pp_file.PpFile,
         '.grb':  grib_file.GribFile,
         '.grib': grib_file.GribFile,
-        '.GRB': grib_file.GribFile,
-        '.GRIB': grib_file.GribFile,
         '.manifest': esasafe_file.EsaSafeFile,
         '.kmz': kmz_file.KmzFile,
         '.hdf': hdf_file.HdfFile
     }
 
-    def __init__(self, conf):
-        self.conf = conf
+    def __init__(self):
         self.handlers_and_dirs = {}
         self.NETCDF_PYTHON_MAGIC_NUM_RES = "NetCDF Data Format data"
         self.ASCII_PYTHON_MAGIC_NUM_RES = "ASCII text"
@@ -50,11 +47,6 @@ class HandlerPicker(object):
         for the given file.
         """
 
-        # Sanity check.
-        # check if file still exists.
-        if not os.path.isfile(filename):
-            return None
-
         file_dir = os.path.dirname(filename)
         file_basename = os.path.basename(filename)
 
@@ -64,6 +56,7 @@ class HandlerPicker(object):
         else:
             # Try returning a handler based on file extension.
             extension = os.path.splitext(filename)[1]
+            extension = extension.lower()
 
             if extension == '.csv':
                 try:

@@ -90,6 +90,9 @@ class ExtractSeq(object):
         Returns metadata from the given file.
         """
         calculate_md5 = self.conf("calculate_md5")
+        if not os.path.isfile(filename):
+            self.logger.error("{} Is not a file.".format(filename))
+            return None
 
         try:
             handler = self.handler_factory_inst.pick_best_handler(filename)
@@ -386,7 +389,7 @@ class ExtractSeq(object):
         # Set up logger and handler class.
         self.prepare_logging_rdf()
         self.logger.debug("***Scanning started.***")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
+        self.handler_factory_inst = handler_picker.HandlerPicker()
 
         file_containing_paths = self.conf("filename")
         start_file = self.conf("start")
@@ -488,7 +491,7 @@ class ExtractSeq(object):
 
         self.prepare_logging_seq_rs()
         self.logger.debug("***Scanning started.***.")
-        self.handler_factory_inst = handler_picker.HandlerPicker(self.configuration)
+        self.handler_factory_inst = handler_picker.HandlerPicker()
 
         self.file_list = self.read_dataset()
         self.total_number_of_files = len(self.file_list)
