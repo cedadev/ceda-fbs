@@ -134,6 +134,8 @@ class ExtractSeq(object):
         :param fdata: Tuple containing file metatadata, parameters and temporal data.
         :return: JSON to index  into elasticsearch
         """
+        doc = {}
+
         if len(fdata) == 1:
             doc = fdata[0]
 
@@ -148,86 +150,6 @@ class ExtractSeq(object):
                     doc["info"]["spatial"] = fdata[2]
 
         return doc
-
-    def create_bulk_index_json(self, file_list, level, blocksize):
-        """
-        Creates the JSON required for the bulk index operation. Also produces an array of files which directly match
-        the index JSON. This is to get around any problems caused by files with properties errors which produces None
-        when self.process_file_seq is called.
-
-        :param file_list: List of files to create actions from
-        :param level: Level of detail to get from file
-        :param blocksize: Size of chunks to send to Elasticsearch.
-
-        :return: bulk_list - list of JSON strings to send to ES,
-                 files_to_index - list of lists with each inner list containing the matching files to the query.
-        """
-        bulk_json = ""
-        bulk_list = []
-        files_to_index = []
-        file_array = []
-
-        self.logger.debug("Creating bulk json with block of %d" % blocksize)
-
-        for i, filename in enumerate(file_list, 1):
-
-            start = datetime.datetime.now()
-            doc = self.process_file_seq(filename, level)
-
-            if doc is not None:
-                # Get spot information
-                spot = self.spots.get_spot(filename)
-
-                es_id = hashlib.sha1(str(filename).encode('utf-8')).hexdigest()
-
-                # Add spot to level1 info
-                if spot is not None:
-                    doc[0]['info']['spot_name'] = spot
-
-                action = json.dumps({"index": {"_index": self.es_index, "_id": es_id}}) + "\n"
-                body = self.create_body(doc) + "\n"
-                self.logger.debug("JSON to index: {}".format(body))
-
-                bulk_json += action + body
-                file_array.append(filename)
-
-            else:
-                end = datetime.datetime.now()
-                self.logger.error("%s|%s|%s|%s ms" % (
-                os.path.basename(filename), os.path.dirname(filename), self.FILE_PROPERTIES_ERROR, str(end - start)))
-                self.files_properties_errors = self.files_properties_errors + 1
-
-            if i % blocksize == 0:
-                json_len = bulk_json.count("\n") / 2
-                self.logger.debug(
-                    "Loop index(1 based index): %i Files scanned: %i Files unable to scan: %i Blocksize: %i" % (
-                    i, json_len, (blocksize - json_len), blocksize))
-
-                # Only attempt to add if there is data there. Will break the scan if it appends an empty action.
-                if json_len > 0:
-                    bulk_list.append(bulk_json)
-                    files_to_index.append(file_array)
-
-                # Reset building blocks
-                bulk_json = ""
-                file_array = []
-
-        if bulk_json:
-            # Add any remaining files
-            bulk_list.append(bulk_json)
-            files_to_index.append(file_array)
-
-        return bulk_list, files_to_index
-
-    def bulk_index(self, file_list, level, blocksize):
-        """
-        Creates the JSON and performs a bulk index operation
-        """
-        action_list, files_to_index = self.create_bulk_index_json(file_list, level, blocksize)
-
-        for action, files in zip(action_list, files_to_index):
-            r = self.es.bulk(body=action, request_timeout=60)
-            self.process_response_for_errors(r, files)
 
     def _generate_action_list(self, file_list, level):
 
@@ -265,7 +187,7 @@ class ExtractSeq(object):
                 os.path.basename(file), os.path.dirname(file), self.FILE_PROPERTIES_ERROR, str(end - start)))
                 self.files_properties_errors = self.files_properties_errors + 1
 
-    def _bulk_index(self, file_list, level):
+    def bulk_index(self, file_list, level):
         """
         Scan the files and index them
         :param file_list: File list to operate on
@@ -274,26 +196,6 @@ class ExtractSeq(object):
         """
 
         bulk(self.es, self._generate_action_list(file_list, level))
-
-
-    def process_response_for_errors(self, response, files):
-        if response['errors']:
-            for i, item in enumerate(response['items']):
-                if item['index']['status'] not in [200, 201]:
-                    filename = files[i]
-                    error = item['index']['error']
-                    ex = ": ".join([error['type'], error['reason']])
-                    self.logger.error("Indexing error: %s" % ex)
-                    self.logger.error(("%s|%s|%s|%s ms" % (
-                    os.path.basename(filename), os.path.dirname(filename), self.FILE_INDEX_ERROR, ' ')))
-                    self.database_errors += 1
-
-                else:
-                    self.files_indexed += 1
-        else:
-            batch_count = len(files)
-            self.files_indexed += batch_count
-            self.logger.debug("Added %i files to index" % batch_count)
 
     def scan_files(self):
         """
@@ -321,7 +223,7 @@ class ExtractSeq(object):
 
         self.logger.debug("File list contains {} files.".format(len(self.file_list)))
         if len(self.file_list) > 0:
-            self.bulk_index(self.file_list, level, self.blocksize)
+            self.bulk_index(self.file_list, level)
 
             # At the end print some statistical info.
             logging.getLogger().setLevel(logging.INFO)
