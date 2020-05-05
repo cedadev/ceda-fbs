@@ -67,8 +67,6 @@ class  GenericFile(object):
 
         if self.calculate_md5:
             info["md5"] = util.calculate_md5(self.file_path)
-        else:
-            info["md5"] = ""
 
         file_info["info"] = info
         return (file_info, )
@@ -108,3 +106,22 @@ class  GenericFile(object):
 
     def __exit__(self, *args):
         pass
+
+
+if __name__ == "__main__":
+    import datetime
+    import sys
+
+    # run test
+    try:
+        level = str(sys.argv[1])
+        file = sys.argv[2]
+    except IndexError:
+        level = '1'
+        file = '/badc/mst/data/nerc-mstrf-radar-mst/v4-0/st-mode/cardinal/2015/09/nerc-mstrf-radar-mst_capel-dewi_20150901_st300_cardinal_33min-smoothing_v4-0.nc'
+
+    gf = GenericFile(file, level)
+    start = datetime.datetime.today()
+    print(gf.get_metadata())
+    end = datetime.datetime.today()
+    print(end - start)

@@ -15,6 +15,7 @@ from es_iface import index
 import json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
 from tqdm import tqdm
+from elasticsearch.helpers import bulk
 
 # Suppress requests logging messages
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -146,7 +147,7 @@ class ExtractSeq(object):
                 if fdata[2] is not None:
                     doc["info"]["spatial"] = fdata[2]
 
-        return json.dumps(doc)
+        return doc
 
     def create_bulk_index_json(self, file_list, level, blocksize):
         """
@@ -227,6 +228,53 @@ class ExtractSeq(object):
         for action, files in zip(action_list, files_to_index):
             r = self.es.bulk(body=action, request_timeout=60)
             self.process_response_for_errors(r, files)
+
+    def _generate_action_list(self, file_list, level):
+
+        self.logger.debug("Bulk indexing results")
+        start = datetime.datetime.now()
+
+        for file in file_list:
+
+            metadata = self.process_file_seq(file, level)
+
+            if metadata is not None:
+
+                # Get spot info
+                spot = self.spots.get_spot(file)
+
+                es_id = hashlib.sha1(str(file).encode('utf-8')).hexdigest()
+
+                body = self.create_body(metadata)
+
+                # Add spot to level1 metadata
+                if spot is not None:
+                    body['info']['spot_name'] = spot
+
+
+                doc = {
+                    '_index': self.es_index,
+                    '_id': es_id,
+                    '_source': body
+                }
+                yield doc
+
+            else:
+                end = datetime.datetime.now()
+                self.logger.error("%s|%s|%s|%s ms" % (
+                os.path.basename(file), os.path.dirname(file), self.FILE_PROPERTIES_ERROR, str(end - start)))
+                self.files_properties_errors = self.files_properties_errors + 1
+
+    def _bulk_index(self, file_list, level):
+        """
+        Scan the files and index them
+        :param file_list: File list to operate on
+        :param level: Level of detail to retrieve
+        :return:
+        """
+
+        bulk(self.es, self._generate_action_list(file_list, level))
+
 
     def process_response_for_errors(self, response, files):
         if response['errors']:
