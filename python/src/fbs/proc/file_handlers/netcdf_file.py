@@ -3,6 +3,7 @@ from fbs.proc.file_handlers.generic_file import GenericFile
 import fbs.proc.common_util.util as util
 import fbs.proc.common_util.geojson as geojson
 import six
+from dateutil.parser import parse
 
 class NetCdfFile(GenericFile):
     """
@@ -72,11 +73,20 @@ class NetCdfFile(GenericFile):
 
         time_name = self.find_var_by_standard_name(ncdf, "time")
 
-        times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
-                                      ncdf.variables[time_name].units))
+        # Try time coverage attributes
+        time1 = getattr(ncdf, 'time_coverage_start', None)
+        time2 = getattr(ncdf, 'time_coverage_end', None)
 
-        time1 = times[0]
-        time2 = times[-1]
+        if all([time1, time2]):
+            time1 = parse(time1)
+            time2 = parse(time2)
+
+        else:
+            # Extract from file
+            times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
+                                          ncdf.variables[time_name].units))
+            time1 = times[0]
+            time2 = times[-1]
 
         # Make sure start time is before end time
         start_time = time1 if time1 < time2 else time2
