@@ -74,13 +74,21 @@ class NetCdfFile(GenericFile):
 
         times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
                                       ncdf.variables[time_name].units))
+
+        time1 = times[0]
+        time2 = times[-1]
+
+        # Make sure start time is before end time
+        start_time = time1 if time1 < time2 else time2
+        end_time = time2 if time2 > time1 else time1
+
         return {
             "time_range": {
-                "gte": times[0].isoformat(),
-                "lte": times[-1].isoformat()
+                "gte": start_time.isoformat(),
+                "lte": end_time.isoformat()
             },
-            "start_time": times[0].isoformat(),
-            "end_time": times[-1].isoformat()
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat()
         }
 
     def get_phenomena(self, netcdf):
