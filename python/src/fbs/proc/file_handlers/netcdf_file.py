@@ -40,6 +40,19 @@ class NetCdfFile(GenericFile):
         :returns: Geospatial information as dict.
         """
 
+        lat_min = getattr(ncdf, 'geospatial_lat_min', None)
+        lat_max = getattr(ncdf, 'geospatial_lat_max', None)
+        lon_min = getattr(ncdf, 'geospatial_lon_min', None)
+        lon_max = getattr(ncdf, 'geospatial_lon_max', None)
+
+        if all([lat_min, lat_max, lon_min, lon_max]):
+            return {
+                "type": "track",
+                "lat": [lat_min, lat_max],
+                "lon": [lon_min, lon_max]
+            }
+
+
         lats = ncdf.variables[lat_name][:].ravel()
         lons = ncdf.variables[lon_name][:].ravel()
         return {
