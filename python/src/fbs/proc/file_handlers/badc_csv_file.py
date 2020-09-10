@@ -130,22 +130,12 @@ class BadcCsvFile(GenericFile):
         else:
             return None
 
-
     def get_metadata(self):
 
         if self.FILE_FORMAT == 'CSV':
-            res = self.get_metadata_level1()
+            return self.get_metadata_level1()
         else:
-            if self.level == "1":
-                res = self.get_metadata_level1()
-            elif self.level == "2":
-                res = self.get_metadata_level2()
-            elif self.level == "3":
-                res = self.get_metadata_level3()
-
-        res[0]["info"]["format"] = self.FILE_FORMAT
-
-        return res
+            return super().get_metadata()
 
     def __enter__(self):
         return self

@@ -4,10 +4,17 @@ from grp import getgrgid
 import datetime
 import fbs.proc.common_util.util as util
 
-class  GenericFile(object):
+
+class GenericFile(object):
     """
     Class for returning basic information about a file.
     """
+
+    LEVEL_MAP = {
+        "1": 'get_metadata_level1',
+        "2": 'get_metadata_level2',
+        "3": 'get_metadata_level3',
+    }
 
     def __init__(self, file_path, level, calculate_md5=False):
         self.file_path = file_path
@@ -68,6 +75,9 @@ class  GenericFile(object):
         if self.calculate_md5:
             info["md5"] = util.calculate_md5(self.file_path)
 
+        if getattr(self, 'FILE_FORMAT', None):
+            info["format"] = self.FILE_FORMAT
+
         file_info["info"] = info
         return (file_info, )
 
@@ -94,12 +104,10 @@ class  GenericFile(object):
 
     def get_metadata(self):
 
-        if self.level == "1":
-            return self.get_metadata_level1()
-        elif self.level == "2":
-            return self.get_metadata_level2()
-        elif self.level == "3":
-            return self.get_metadata_level3()
+        metadata_function = self.LEVEL_MAP.get(self.level)
+
+        if getattr(self, metadata_function, None):
+            return getattr(self, metadata_function)()
 
     def __enter__(self):
         return self

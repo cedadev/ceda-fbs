@@ -221,19 +221,6 @@ class NetCdfFile(GenericFile):
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
 
-    def get_metadata(self):
-
-        if self.level == "1":
-            res = self.get_metadata_level1()
-        elif self.level == "2":
-            res = self.get_metadata_level2()
-        elif self.level == "3":
-            res = self.get_metadata_level3()
-
-        res[0]["info"]["format"] = self.FILE_FORMAT
-
-        return res
-
     def __enter__(self):
         return self
 
