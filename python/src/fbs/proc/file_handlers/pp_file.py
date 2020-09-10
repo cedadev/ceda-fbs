@@ -3,7 +3,7 @@ from fbs.proc.file_handlers.generic_file import GenericFile
 import six
 import numpy as np
 import cf
-import re
+
 
 class PpFile(GenericFile):
     """
@@ -126,7 +126,6 @@ class PpFile(GenericFile):
                     return file_info + (None,)
 
             except Exception:
-                raise
                 file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
 

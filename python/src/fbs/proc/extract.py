@@ -14,10 +14,10 @@ from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
 import json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
-from tqdm import tqdm
 
 # Suppress requests logging messages
 logging.getLogger("requests").setLevel(logging.WARNING)
+
 
 class ExtractSeq(object):
 

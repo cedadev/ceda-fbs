@@ -8,7 +8,6 @@ import zipfile
 import xmltodict
 import os
 import re
-import datetime
 import dateutil.parser
 
 class Coordinates:
@@ -312,24 +311,26 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
+
     except IndexError:
         level = '1'
 
-    # Has key xml_dict["kml"]["Document"],Coordinates are points, string indices must be integers.
-    file = '/neodc/arsf/2011/GB11_05/GB11_05-2011_285_London/photography/GB11_05-2011_285.kml'
+        # Has key xml_dict["kml"]["Document"],Coordinates are points, string indices must be integers.
+        file = '/neodc/arsf/2011/GB11_05/GB11_05-2011_285_London/photography/GB11_05-2011_285.kml'
 
-    # Has key xml_dict["kml"]["folder"]
-    file='/badc/faam/data/2006/b237-aug-22/flight-track_faam_20060822_b237.kml'
+        # Has key xml_dict["kml"]["folder"]
+        file='/badc/faam/data/2006/b237-aug-22/flight-track_faam_20060822_b237.kml'
 
-    # Has key xml_dict["kml"]["Document"], coordinates are bbox
-    # file = '/neodc/sister/data/Festival/KML/2006/Alice_GE_2006W28_Festival.kmz'
+        # Has key xml_dict["kml"]["Document"], coordinates are bbox
+        # file = '/neodc/sister/data/Festival/KML/2006/Alice_GE_2006W28_Festival.kmz'
 
-    # Uncompressed file not named same as file eg not O3_18_20110119_1800.kml
-    # file = '/badc/ronoco/data/model-output-images/20110119/o3/kmz/O3_18_20110119_1800.kmz'
+        # Uncompressed file not named same as file eg not O3_18_20110119_1800.kml
+        # file = '/badc/ronoco/data/model-output-images/20110119/o3/kmz/O3_18_20110119_1800.kmz'
 
-    # Test
-    # file='/neodc/arsf/2014/GB12_03/GB12_03-2014_169_Loch_Lomond/photography/GB12_03-2014_169.kml'
-    file='/neodc/sister/data/QM2/KML/2011/Alice_GE_2011W06_QM2.kmz'
+        # Test
+        # file='/neodc/arsf/2014/GB12_03/GB12_03-2014_169_Loch_Lomond/photography/GB12_03-2014_169.kml'
+        file='/neodc/sister/data/QM2/KML/2011/Alice_GE_2011W06_QM2.kmz'
 
     kmf = KmzFile(file, level)
     start = datetime.datetime.today()

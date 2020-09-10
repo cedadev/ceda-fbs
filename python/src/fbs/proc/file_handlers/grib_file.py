@@ -104,7 +104,6 @@ class GribFile(GenericFile):
 
         # An error occurred
         except Exception:
-
             return
 
     @staticmethod
@@ -138,7 +137,8 @@ class GribFile(GenericFile):
 
             try:
                 dataset = xr.open_dataset(self.file_path, engine='cfgrib', backend_kwargs={'indexpath': ''})
-            except Exception:
+            except Exception as e:
+                print(e)
                 file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info + (None,)
 
@@ -150,7 +150,7 @@ class GribFile(GenericFile):
                 return file_info + (None,)
 
             else:
-                # todo Change this so that errors proagate back up and are caught, not just hidden by a None response.
+                # todo Change this so that errors propagate back up and are caught, not just hidden by a None response.
                 file_info[0]["info"]["read_status"] = "Successful"
                 return file_info + grib_phenomena
 
