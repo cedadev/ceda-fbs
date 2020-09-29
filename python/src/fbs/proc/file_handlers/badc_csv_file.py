@@ -44,9 +44,11 @@ class BadcCsvFile(GenericFile):
             else:
                 if row[1] in phenomena:
                     phenomena[row[1]]["attributes"] .append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
+
                 else:
                     new_phenomenon["attributes"] = []
                     new_phenomenon["attributes"].append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
+                    new_phenomenon["attributes"].append({"name": "units", "value": row[3]})
                     phenomena[row[1]] = new_phenomenon
 
         return (phenomena, date, location)
@@ -162,8 +164,8 @@ if __name__ == "__main__":
         level = str(sys.argv[1])
         file = sys.argv[2]
     except IndexError:
-        level = '1'
-        file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
+        level = '3'
+        file = '/Users/qxt64851/Desktop/RadialWind_MetOfficeUKV_20130601_Control.csv'
 
     baf = BadcCsvFile(file,level)
     start = datetime.datetime.today()
