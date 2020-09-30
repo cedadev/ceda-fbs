@@ -43,10 +43,22 @@ class BadcCsvFile(GenericFile):
                 continue
             else:
                 if row[1] in phenomena:
-                    phenomena[row[1]]["attributes"] .append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
+                    phenomena[row[1]]["attributes"].append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
+                    try:
+                        if row[0] in ["standard_name","long_name"] and len(row) == 4:
+                            phenomena[row[1]]["attributes"].append({"name": "units", "value": row[3]})
+                    except IndexError:
+                        pass
+
                 else:
                     new_phenomenon["attributes"] = []
                     new_phenomenon["attributes"].append({"name": row[0], "value": re.sub(r'[^\x00-\x7F]+',' ', row[2])})
+                    try:
+                        if row[0] in ["standard_name","long_name"] and len(row) == 4:
+                            new_phenomenon["attributes"].append({"name": "units", "value": row[3]})
+
+                    except IndexError:
+                        pass
                     phenomena[row[1]] = new_phenomenon
 
         return (phenomena, date, location)
