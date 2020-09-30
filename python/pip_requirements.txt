@@ -1,6 +1,6 @@
 ceda-elasticsearch-tools==2.2.0
 elasticsearch==7.6.0
--e git+https://github.com/cedadev/ceda-fbs@7a706a676eaaa1ff59610115e37f9bc51366c107#egg=fbs
+-e git+https://github.com/cedadev/ceda-fbs#egg=fbs
 filemagic==1.6
 nappy==1.2.1
 xmltodict==0.12.0
