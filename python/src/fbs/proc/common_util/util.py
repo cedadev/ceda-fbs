@@ -139,12 +139,8 @@ def cfg_read(filename):
 
     conf = {}
     section_options = {}
-    handlers_sections = []
 
     for section in sections:
-
-        if section in handlers_sections:
-            continue
 
         options = config.options(section)
 
@@ -153,9 +149,8 @@ def cfg_read(filename):
             try:
                 value = config.get(section, option)
                 parsed_value = value.replace("\"", "")
-                if section == "handlers":
-                    handlers_sections.append(value)
                 section_options[option] = parsed_value
+
                 if section_options[option] == -1:
                     section_options[option] = None
             except:
@@ -163,17 +158,6 @@ def cfg_read(filename):
 
         conf[section] = section_options.copy()
         section_options.clear()
-
-    regx_details = {}
-    regxs = {}
-    for handler in handlers_sections:
-        regx_pattern = config.get(handler, "regx")
-        regx_details["class"] = config.get(handler, "class")
-        regx_details["priority"] = config.get(handler, "priority")
-        regxs[regx_pattern] = regx_details.copy()
-        regx_details.clear()
-
-    conf["handlers"] = regxs.copy()
 
     return conf
 
@@ -389,7 +373,7 @@ def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
     empty_task_queue_string = "No unfinished job found\n"
     non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"
 
-    command_output = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True)
+    command_output = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True).decode('utf-8', errors='ignore')
 
     if command_output == empty_task_queue_string:
         num_of_running_tasks = 0

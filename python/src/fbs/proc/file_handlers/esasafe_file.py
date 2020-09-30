@@ -78,13 +78,19 @@ mappings = {
     }
 }
 
-class EsaSafeFile(GenericFile):
 
+class EsaSafeFile(GenericFile):
 
     """
     Class for returning basic information about the content
     of an manifest file.
     """
+
+    LEVEL_MAP = {
+        "1": 'get_metadata_level1',
+        "2": 'get_metadata_level1',
+        "3": 'get_metadata_level3',
+    }
 
     def __init__(self, file_path, level, additional_param=None, **kwargs):
         GenericFile.__init__(self, file_path, level, **kwargs)
@@ -190,19 +196,6 @@ class EsaSafeFile(GenericFile):
         phenomena = None
 
         return res + (phenomena, spatial,)
-
-    def get_metadata(self):
-
-        if self.level == "1":
-            res = self.get_metadata_level1()
-        elif self.level == "2":
-            res = self.get_metadata_level1()
-        elif self.level == "3":
-            res = self.get_metadata_level3()
-
-        res[0]["info"]["format"] = self.FILE_FORMAT
-
-        return res
 
     def __enter__(self):
         return self

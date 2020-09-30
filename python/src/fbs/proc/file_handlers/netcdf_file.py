@@ -3,6 +3,7 @@ from fbs.proc.file_handlers.generic_file import GenericFile
 import fbs.proc.common_util.util as util
 import fbs.proc.common_util.geojson as geojson
 import six
+from dateutil.parser import parse
 
 class NetCdfFile(GenericFile):
     """
@@ -39,6 +40,19 @@ class NetCdfFile(GenericFile):
         :returns: Geospatial information as dict.
         """
 
+        lat_min = getattr(ncdf, 'geospatial_lat_min', None)
+        lat_max = getattr(ncdf, 'geospatial_lat_max', None)
+        lon_min = getattr(ncdf, 'geospatial_lon_min', None)
+        lon_max = getattr(ncdf, 'geospatial_lon_max', None)
+
+        if all([lat_min, lat_max, lon_min, lon_max]):
+            return {
+                "type": "track",
+                "lat": [lat_min, lat_max],
+                "lon": [lon_min, lon_max]
+            }
+
+
         lats = ncdf.variables[lat_name][:].ravel()
         lons = ncdf.variables[lon_name][:].ravel()
         return {
@@ -72,15 +86,32 @@ class NetCdfFile(GenericFile):
 
         time_name = self.find_var_by_standard_name(ncdf, "time")
 
-        times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
-                                      ncdf.variables[time_name].units))
+        # Try time coverage attributes
+        time1 = getattr(ncdf, 'time_coverage_start', None)
+        time2 = getattr(ncdf, 'time_coverage_end', None)
+
+        if all([time1, time2]):
+            time1 = parse(time1)
+            time2 = parse(time2)
+
+        else:
+            # Extract from file
+            times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
+                                          ncdf.variables[time_name].units))
+            time1 = times[0]
+            time2 = times[-1]
+
+        # Make sure start time is before end time
+        start_time = time1 if time1 < time2 else time2
+        end_time = time2 if time2 > time1 else time1
+
         return {
             "time_range": {
-                "gte": times[0].isoformat(),
-                "lte": times[-1].isoformat()
+                "gte": start_time.isoformat(),
+                "lte": end_time.isoformat()
             },
-            "start_time": times[0].isoformat(),
-            "end_time": times[-1].isoformat()
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat()
         }
 
     def get_phenomena(self, netcdf):
@@ -189,19 +220,6 @@ class NetCdfFile(GenericFile):
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
-
-    def get_metadata(self):
-
-        if self.level == "1":
-            res = self.get_metadata_level1()
-        elif self.level == "2":
-            res = self.get_metadata_level2()
-        elif self.level == "3":
-            res = self.get_metadata_level3()
-
-        res[0]["info"]["format"] = self.FILE_FORMAT
-
-        return res
 
     def __enter__(self):
         return self

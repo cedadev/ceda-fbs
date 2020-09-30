@@ -44,6 +44,12 @@ class KmzFile(GenericFile):
     of an nasaames file.
     """
 
+    LEVEL_MAP = {
+        "1": 'get_metadata_level1',
+        "2": 'get_metadata_level1',
+        "3": 'get_metadata_level3',
+    }
+
     def __init__(self, file_path, level, additional_param=None, **kwargs):
         GenericFile.__init__(self, file_path, level, **kwargs)
         self.handler_id = "kmz file handler."
@@ -285,19 +291,6 @@ class KmzFile(GenericFile):
             file_info[0]["info"]["read_status"] = "Read Error"
             return file_info
 
-    def get_metadata(self):
-
-        if self.level == "1":
-            res = self.get_metadata_level1()
-        elif self.level == "2":
-            res = self.get_metadata_level1()
-        elif self.level == "3":
-            res = self.get_metadata_level3()
-
-        res[0]["info"]["format"] = self.FILE_FORMAT
-
-        return res
-
     def __enter__(self):
         return self
 
@@ -312,24 +305,25 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = str(sys.argv[2])
     except IndexError:
         level = '1'
 
-    # Has key xml_dict["kml"]["Document"],Coordinates are points, string indices must be integers.
-    file = '/neodc/arsf/2011/GB11_05/GB11_05-2011_285_London/photography/GB11_05-2011_285.kml'
+        # Has key xml_dict["kml"]["Document"],Coordinates are points, string indices must be integers.
+        file = '/neodc/arsf/2011/GB11_05/GB11_05-2011_285_London/photography/GB11_05-2011_285.kml'
 
-    # Has key xml_dict["kml"]["folder"]
-    file='/badc/faam/data/2006/b237-aug-22/flight-track_faam_20060822_b237.kml'
+        # Has key xml_dict["kml"]["folder"]
+        file='/badc/faam/data/2006/b237-aug-22/flight-track_faam_20060822_b237.kml'
 
-    # Has key xml_dict["kml"]["Document"], coordinates are bbox
-    # file = '/neodc/sister/data/Festival/KML/2006/Alice_GE_2006W28_Festival.kmz'
+        # Has key xml_dict["kml"]["Document"], coordinates are bbox
+        # file = '/neodc/sister/data/Festival/KML/2006/Alice_GE_2006W28_Festival.kmz'
 
-    # Uncompressed file not named same as file eg not O3_18_20110119_1800.kml
-    # file = '/badc/ronoco/data/model-output-images/20110119/o3/kmz/O3_18_20110119_1800.kmz'
+        # Uncompressed file not named same as file eg not O3_18_20110119_1800.kml
+        # file = '/badc/ronoco/data/model-output-images/20110119/o3/kmz/O3_18_20110119_1800.kmz'
 
-    # Test
-    # file='/neodc/arsf/2014/GB12_03/GB12_03-2014_169_Loch_Lomond/photography/GB12_03-2014_169.kml'
-    file='/neodc/sister/data/QM2/KML/2011/Alice_GE_2011W06_QM2.kmz'
+        # Test
+        # file='/neodc/arsf/2014/GB12_03/GB12_03-2014_169_Loch_Lomond/photography/GB12_03-2014_169.kml'
+        file='/neodc/sister/data/QM2/KML/2011/Alice_GE_2011W06_QM2.kmz'
 
     kmf = KmzFile(file, level)
     start = datetime.datetime.today()

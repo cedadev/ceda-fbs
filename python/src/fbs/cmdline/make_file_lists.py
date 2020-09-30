@@ -80,17 +80,15 @@ def store_datasets_to_files(status, config, host):
     filename = config["filename"]
     # Extract datasets ids and paths.
     datasets = util.find_dataset(filename, "all")
-    datasets_ids = datasets.keys()
-    num_datasets = len(datasets_ids)
     scan_commands = []
     directory_to_save_files = config["make-list"]
 
     # Create the commands that will create the
     # files containing the paths to data files.
-    for i in xrange(num_datasets):
+    for dataset in datasets:
 
         command = "python {}/scan_dataset.py -f {} -d  {} --make-list {}.txt".format(
-            SCRIPT_DIR, filename, datasets_ids[i], os.path.join(directory_to_save_files, datasets_ids[i])
+            SCRIPT_DIR, filename, dataset, os.path.join(directory_to_save_files, dataset)
         )
 
         # Add followlinks flag if follow links flag is used
