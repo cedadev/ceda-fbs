@@ -174,8 +174,8 @@ if __name__ == "__main__":
         level = str(sys.argv[1])
         file = sys.argv[2]
     except IndexError:
-        level = '3'
-        file = '/Users/qxt64851/Desktop/RadialWind_MetOfficeUKV_20130601_Control.csv'
+        level = '1'
+        file = '/badc/ukmo-metdb/data/amdars/2016/12/ukmo-metdb_amdars_20161222.csv'
 
     baf = BadcCsvFile(file,level)
     start = datetime.datetime.today()
