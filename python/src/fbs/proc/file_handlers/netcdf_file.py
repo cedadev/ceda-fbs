@@ -206,7 +206,7 @@ class NetCdfFile(GenericFile):
                     try:
                         temp_info = self.get_temporal(netcdf)
                         file_info[0]["info"]["temporal"] = temp_info
-                    except AttributeError:
+                    except (KeyError, AttributeError):
                         pass
 
                     file_info[0]["info"]["read_status"] = "Successful"
