@@ -133,6 +133,9 @@ class NetCdfFile(GenericFile):
         if all([start_time, end_time]):
             start_time, end_time = time_order(start_time, end_time)
 
+        if start_time and not end_time:
+            end_time = start_time
+
         # Build the response
         if start_time:
             temporal = {
