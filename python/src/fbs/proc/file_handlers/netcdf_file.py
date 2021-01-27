@@ -65,8 +65,8 @@ class NetCdfFile(GenericFile):
         if all([lat_min, lat_max, lon_min, lon_max]):
             return {
                 "type": "track",
-                "lat": [lat_min, lat_max],
-                "lon": [lon_min, lon_max]
+                "lat": [float(lat_min), float(lat_max)],
+                "lon": [float(lon_min), float(lon_max)]
             }
 
         lats = ncdf.variables[lat_name][:].ravel()
@@ -242,7 +242,7 @@ class NetCdfFile(GenericFile):
 
                         loc_dict["coordinates"] = spatial["geometries"]["search"]  # ["coordinates"]
                         spatial = loc_dict
-                    except AttributeError:
+                    except (AttributeError) as ex:
                         pass
 
                     try:
