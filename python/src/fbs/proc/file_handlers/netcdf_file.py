@@ -5,6 +5,23 @@ import fbs.proc.common_util.geojson as geojson
 import six
 from dateutil.parser import parse
 
+
+def time_order(time1, time2):
+    """
+    Make sure that the times are the correct way round
+    where start time is before end time.
+
+    :param time1: First time input
+    :param time2: Second time input
+
+    :return: start_time, end_time
+    """
+    start_time = time1 if time1 < time2 else time2
+    end_time = time2 if time2 > time1 else time1
+
+    return start_time, end_time
+
+
 class NetCdfFile(GenericFile):
     """
     Simple class for returning basic information about the content
@@ -52,7 +69,6 @@ class NetCdfFile(GenericFile):
                 "lon": [lon_min, lon_max]
             }
 
-
         lats = ncdf.variables[lat_name][:].ravel()
         lons = ncdf.variables[lon_name][:].ravel()
         return {
@@ -84,35 +100,58 @@ class NetCdfFile(GenericFile):
 
     def get_temporal(self, ncdf):
 
+        temporal = {}
+
         time_name = self.find_var_by_standard_name(ncdf, "time")
+        times = None
 
         # Try time coverage attributes
-        time1 = getattr(ncdf, 'time_coverage_start', None)
-        time2 = getattr(ncdf, 'time_coverage_end', None)
+        start_time = getattr(ncdf, 'time_coverage_start', None)
+        end_time = getattr(ncdf, 'time_coverage_end', None)
 
-        if all([time1, time2]):
-            time1 = parse(time1)
-            time2 = parse(time2)
+        # If extracting from the header not successful, try to retrieve the time
+        # coordinate, if we have a coordinate name
+        if not all([start_time, end_time]) and time_name:
+            try:
+                times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
+                                              ncdf.variables[time_name].units))
+            except AttributeError:
+                pass
 
-        else:
-            # Extract from file
-            times = list(netCDF4.num2date(list(ncdf.variables[time_name]),
-                                          ncdf.variables[time_name].units))
-            time1 = times[0]
-            time2 = times[-1]
+        # retrieve the start and end times
+        if start_time:
+            start_time = parse(start_time)
+        elif times:
+            start_time = times[0]
 
-        # Make sure start time is before end time
-        start_time = time1 if time1 < time2 else time2
-        end_time = time2 if time2 > time1 else time1
+        if end_time:
+            end_time = parse(end_time)
+        elif times:
+            end_time = times[-1]
 
-        return {
-            "time_range": {
-                "gte": start_time.isoformat(),
+        # Check the order if we have a start and end
+        if all([start_time, end_time]):
+            start_time, end_time = time_order(start_time, end_time)
+
+        # Build the response
+        if start_time:
+            temporal = {
+                "time_range": {
+                    "gte": start_time.isoformat()
+                },
+                "start_time": start_time.isoformat()
+            }
+
+        # Need to use get because it is possible that a start date
+        # was not found
+        if end_time:
+            time_range = temporal.get('time_range', {})
+            time_range.update({
                 "lte": end_time.isoformat()
-            },
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat()
-        }
+            })
+            temporal["end_time"] = end_time.isoformat()
+
+        return temporal
 
     def get_phenomena(self, netcdf):
         """
@@ -205,7 +244,9 @@ class NetCdfFile(GenericFile):
 
                     try:
                         temp_info = self.get_temporal(netcdf)
-                        file_info[0]["info"]["temporal"] = temp_info
+
+                        if temp_info:
+                            file_info[0]["info"]["temporal"] = temp_info
                     except (KeyError, AttributeError):
                         pass
 

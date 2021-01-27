@@ -19,7 +19,7 @@ with open("README.md") as readme_file:
 
 setup(
     name='fbs',
-    version=0.1,
+    version='0.1.1',
     description='File Based Search scanning code',
     author='Richard Smith',
     author_email='richard.d.smith@stfc.ac.uk',
