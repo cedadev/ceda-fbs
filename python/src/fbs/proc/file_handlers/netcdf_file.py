@@ -4,6 +4,7 @@ import fbs.proc.common_util.util as util
 import fbs.proc.common_util.geojson as geojson
 import six
 from dateutil.parser import parse
+import re
 
 
 def time_order(time1, time2):
@@ -20,6 +21,22 @@ def time_order(time1, time2):
     end_time = time2 if time2 > time1 else time1
 
     return start_time, end_time
+
+
+def sanitise_float(value):
+    """
+    Clean text input for the lat and lon values
+    Make sure that we return a float value.
+
+    Some cases the extracted value is of the form: -90.0f; // float
+    :param value:
+    :return:
+    """
+
+    # Clean all non-numeric characters
+    value = re.sub('[^-.\d]', '', value)
+
+    return float(value)
 
 
 class NetCdfFile(GenericFile):
@@ -65,8 +82,8 @@ class NetCdfFile(GenericFile):
         if all([lat_min, lat_max, lon_min, lon_max]):
             return {
                 "type": "track",
-                "lat": [float(lat_min), float(lat_max)],
-                "lon": [float(lon_min), float(lon_max)]
+                "lat": [sanitise_float(lat_min), sanitise_float(lat_max)],
+                "lon": [sanitise_float(lon_min), sanitise_float(lon_max)]
             }
 
         lats = ncdf.variables[lat_name][:].ravel()
