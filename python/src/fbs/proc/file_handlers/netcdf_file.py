@@ -235,13 +235,15 @@ class NetCdfFile(GenericFile):
                     try:
                         geo_info = self.get_geospatial(netcdf)
 
-                        loc_dict = {}
+                        if geo_info:
 
-                        gj = geojson.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
-                        spatial = gj.get_elasticsearch_geojson()
+                            loc_dict = {}
 
-                        loc_dict["coordinates"] = spatial["geometries"]["search"]  # ["coordinates"]
-                        spatial = loc_dict
+                            gj = geojson.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
+                            spatial = gj.get_elasticsearch_geojson()
+
+                            loc_dict["coordinates"] = spatial["geometries"]["search"]  # ["coordinates"]
+                            spatial = loc_dict
                     except (AttributeError) as ex:
                         pass
 
