@@ -186,23 +186,36 @@ class NetCdfFile(GenericFile):
             phen_attr_list = []
 
             # for all attributtes in phenomenon.
-            for key, value in six.iteritems(v_data.__dict__):
+            for key, value in six.iteritems(vars(v_data)):
 
                 if not util.is_valid_phenomena(key, value):
                     continue
 
-                phen_attr = {}
-
-                phen_attr["name"] = str(key.strip())
-                phen_attr["value"] = (value.strip()).encode('utf-8', 'ignore').decode()
-
+                phen_attr = dict(
+                    name=str(key.strip()),
+                    value=(value.strip()).encode('utf-8', 'ignore').decode()
+                )
                 phen_attr_list.append(phen_attr)
 
-            phen_attr = {}
-            phen_attr["name"] = "var_id"
-            phen_attr["value"] = str(v_name)
-
+            # Add the variable ID
+            phen_attr = dict(name='var_id', value=str(v_name))
             phen_attr_list.append(phen_attr)
+
+            # Extract extra information about each variable not in the __dict__ response
+            for attr in ["dtype", "shape", "_ChunkSizes", "_FillValue", "dimensions"]:
+                try:
+                    value = getattr(v_data, attr)
+
+                    # Convert value datatype to JSON compatible
+                    if type(value) not in (str, tuple, list):
+                        value = str(value)
+
+                    phen_attr = dict(name=attr, value=value)
+                    phen_attr_list.append(phen_attr)
+
+                except AttributeError:
+                    pass
+
             if len(phen_attr_list) > 0:
                 new_phenomenon["attributes"] = phen_attr_list
 
