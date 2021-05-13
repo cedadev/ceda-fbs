@@ -7,7 +7,6 @@ Usage:
   make_file_lists.py (-f <filename> | --filename <filename>)
                      (-m <location> | --make-list <location>)
                      (--host <hostname>)
-                     [-p <number_of_processes> | --num-processes <number_of_processes>]
                      [--followlinks]
 
 Options:
@@ -21,8 +20,6 @@ Options:
 
   -m --make-list=<location>                  Stores the list of filenames
                                              to a file.
-
-  -p --num-processes=<number_of_processes>   Number of processes to use.
 
   --host=<hostname>                          The name of the host where
                                              the script will run.
@@ -57,9 +54,6 @@ def get_stat_and_defs(com_args):
     # Creates a dictionary with default settings some of
     # them where loaded from the defaults file.
     config = util.get_settings(com_args["config"], com_args)
-
-    if "num-processes" not in config or not config["num-processes"]:
-        config["num-processes"] = config["scanning"]["num-processes"]
 
     status_and_defaults.append(config)
 
@@ -107,11 +101,8 @@ def store_datasets_to_files(status, config, host):
 
     # Execute commands on lotus
     if host == 'lotus':
-        lotus_max_processes = config["num-processes"]
-
-        # Run each command in lotus.
-        util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),
-                                user_wait_time=30, queue='short-serial')
+        lotus_runner = util.LotusRunner(queue='short-serial')
+        lotus_runner.run_tasks_in_lotus(scan_commands)
 
 
 def main():

@@ -7,14 +7,13 @@ import errno
 import sys
 import subprocess
 import json
-import time
 import six
-import logging
 import re
 import io
 import datetime
 from dateutil import parser
 import hashlib
+import logging
 
 # Python 2/3 compatibility
 if sys.version_info.major > 2:
@@ -30,6 +29,8 @@ log_levels = {"debug": logging.DEBUG,
               }
 
 MAX_ATTR_LENGTH = 256
+
+logger = logging.getLogger(__name__)
 
 
 class Parameter(object):
@@ -80,6 +81,82 @@ class FileFormatError(Exception):
     Exception to raise if there is a error in the file format
     """
     pass
+
+
+class LotusRunner:
+    """
+    Class to handle running of tasks using the LOTUS scheduler
+    """
+    def __init__(self, queue='par-single'):
+        self.queue = queue
+        self.task_list = []
+
+    def _run_tasks_in_lotus(self) -> None:
+        """
+        Submit all tasks in task list
+        """
+
+        for task in self.task_list:
+            self._submit_job(task)
+
+    def _submit_job(self, task: str) -> None:
+        """
+        Submit the job to LOTUS
+        :param task: Task to submit
+        """
+
+        if self.queue == 'short-serial':
+            wall_time = '24:00:00'
+        else:
+            wall_time = '48:00:00'
+
+        command = f'sbatch -p {self.queue} -t {wall_time} -e lotus_errors/%j.err {task}'
+
+        print(f'Executing command: {command}')
+
+        subprocess.call(command, shell=True)
+
+    def read_task_file(self, filename: str) -> None:
+        """
+        Read task file and add to task list
+        :param filename: Path to file containing list of tasks
+        """
+        with open(filename) as reader:
+            self.task_list = reader.read().splitlines()
+
+    @staticmethod
+    def remove_task_file(filename: str) -> None:
+        """
+        Delete the task file once the jobs have been submitted
+
+        :param filename: File to remove
+        """
+        os.remove(filename)
+
+    def run_tasks_in_lotus(self, task_list: list) -> None:
+        """
+        Run the tasks using the lotus scheduler
+
+        :param task_list: List of tasks to run
+        """
+
+        self.task_list = task_list
+
+        self._run_tasks_in_lotus()
+
+    def run_tasks_file_in_lotus(self, filename: str) -> None:
+        """
+        Load the tasks from file and run in lotus
+        scheduler
+
+        :param filename: Path to file containing list of tasks
+        """
+
+        self.read_task_file(filename)
+
+        self._run_tasks_in_lotus()
+
+        self.remove_task_file(filename)
 
 
 def delete_folder(folder):
@@ -198,38 +275,13 @@ def build_file_list(path):
     return file_list
 
 
-def write_list_to_file_nl(file_list, filename):
-    """
-    :param file_list : A list of files.
-    :param filename : Where the list of files is going to be saved.
-    """
+def write_list_to_file(task_list, filename):
+    with open(filename, 'w') as writer:
+        writer.writelines(
+            map(lambda x: x + "\n", task_list)
+        )
 
-    infile = open(filename, 'w')
-    items_written = 0
-
-    for item in file_list:
-        infile.write("%s\n" % item)
-        items_written += 1
-
-    infile.close()
-    return items_written
-
-
-def write_list_to_file(file_list, filename):
-    """
-    :param file_list : A list of files.
-    :param filename : Where the list of files is going to be saved.
-    """
-
-    infile = open(filename, 'w')
-    items_written = 0
-
-    for item in file_list:
-        infile.write("%s" % item)
-        items_written += 1
-
-    infile.close()
-    return items_written
+    return len(task_list)
 
 
 def read_file_into_list(filename):
@@ -365,26 +417,6 @@ def is_valid_phenomena(key, value):
     return True
 
 
-def get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit):
-    """
-    :returns: Number of tasks submitted in lotus.
-    """
-
-    empty_task_queue_string = "No unfinished job found\n"
-    non_empty_task_queue_string = "JOBID     USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME"
-
-    command_output = subprocess.check_output('bjobs', stderr=subprocess.STDOUT, shell=True).decode('utf-8', errors='ignore')
-
-    if command_output == empty_task_queue_string:
-        num_of_running_tasks = 0
-    elif command_output.startswith(non_empty_task_queue_string):
-        num_of_running_tasks = command_output.count("\n") - 1
-    else:
-        num_of_running_tasks = max_number_of_tasks_to_submit
-
-    return num_of_running_tasks
-
-
 def is_date_valid(date_text):
     try:
         datetime.datetime.strptime(date_text, '%Y-%m-%d')
@@ -392,226 +424,6 @@ def is_date_valid(date_text):
     except ValueError:
         return False
 
-
-def run_tasks_in_lotus(task_list, max_number_of_tasks_to_submit, user_wait_time=None, queue='par-single', logger=None):
-    """
-    :param task_list : list of commands to run.
-    :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
-    :param user_wait_time : polling time.
-    :param logger : object used for logging.
-
-    Submits the commands supplied in lotus making sure that
-    max_number_of_jobs is not exceeded.
-    """
-
-    if user_wait_time is None:
-        init_wait_time = 30
-    else:
-        init_wait_time = user_wait_time
-
-    wait_time = init_wait_time
-    dec = 1
-    iterations_counter = 0
-
-    info_msg = "Max number of jobs to submit in each step : %s.\
-               \nTotal number commands to run : %s." \
-               % (str(max_number_of_tasks_to_submit), str(len(task_list)))
-
-    if logger is not None:
-        logger.INFO(info_msg)
-        logger.INFO("===============================")
-
-    print( info_msg )
-    print( "===============================" )
-
-    while len(task_list) > 0:
-
-        # Find out if other jobs can be submitted.
-        try:
-            num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit)
-        except  subprocess.CalledProcessError:
-            continue
-
-        # num_of_running_tasks = 0
-        num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks
-        iterations_counter = iterations_counter + 1
-
-        info_msg = "Iteration : %s." % (str(iterations_counter))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        info_msg = "Number of jobs running  : %s." % (str(num_of_running_tasks))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        info_msg = "Number of jobs to submit in this step : %s." % (str(num_of_tasks_to_submit))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        # Submit jobs according to availability.
-        for i in range(0, num_of_tasks_to_submit):
-
-            if len(task_list) == 0:
-                break
-
-            # Is there an extract op ?
-            task = task_list[0]
-            task_list.remove(task)
-
-            command = _make_bsub_command(task, i, queue=queue, logger=logger)
-            subprocess.call(command, shell=True)
-
-        info_msg = "Number of tasks waiting to be submitted : %s." % len(task_list)
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        # Wait in case some process terminates.
-        info_msg = "Waiting for : %s secs." % (str(wait_time))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-        time.sleep(wait_time)
-
-        # If nothing can be submitted wait again.
-        if num_of_tasks_to_submit == 0:
-            wait_time = wait_time - dec
-            if wait_time == 0:
-                wait_time = init_wait_time
-
-        if logger is not None:
-            logger.INFO("===============================")
-
-        print( "===============================" )
-
-
-def run_tasks_file_in_lotus(task_file, max_number_of_tasks_to_submit, user_wait_time=None, queue='par-single', logger=None):
-    """
-    :param task_file : file of commands to run.
-    :param max_number_of_tasks_to_submit : max number of jobs to be run in parallel.
-    :param user_wait_time : polling time.
-    :param logger : object used for logging.
-
-    Submits the commands supplied in lotus making sure that
-    max_number_of_jobs is not exceeded.
-    """
-
-    if user_wait_time is None:
-        init_wait_time = 30
-    else:
-        init_wait_time = user_wait_time
-
-    wait_time = init_wait_time
-    dec = 1
-    iterations_counter = 0
-
-    task_list = read_file_into_list(task_file)
-
-    info_msg = "Max number of jobs to submit in each step : %s.\
-               \nTotal number commands to run : %s." \
-               % (str(max_number_of_tasks_to_submit), str(len(task_list)))
-
-    if logger is not None:
-        logger.INFO(info_msg)
-        logger.INFO("===============================")
-
-    print( info_msg )
-    print( "===============================" )
-
-    while len(task_list) > 0:
-
-        # Find out if other jobs can be submitted.
-        try:
-            # num_of_running_tasks = 1
-            num_of_running_tasks = get_number_of_submitted_lotus_tasks(max_number_of_tasks_to_submit)
-        except  subprocess.CalledProcessError:
-            continue
-
-        # num_of_running_tasks = 0
-        num_of_tasks_to_submit = max_number_of_tasks_to_submit - num_of_running_tasks
-        iterations_counter = iterations_counter + 1
-
-        info_msg = "Iteration : %s." % (str(iterations_counter))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        info_msg = "Number of jobs running: %s." % (str(num_of_running_tasks))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        info_msg = "Number of jobs to submit in this step: %s." % (str(num_of_tasks_to_submit))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        # Submit jobs according to availability.
-        for i in range(0, num_of_tasks_to_submit):
-
-            if len(task_list) == 0:
-                break
-
-            # Is there an extract op ?
-            task = task_list[0]
-            task_list.remove(task)
-
-            command = _make_bsub_command(task, i, queue=queue, logger=logger)
-            subprocess.call(command, shell=True)
-
-            # save list to file.
-            write_list_to_file(task_list, task_file)
-
-        info_msg = "Number of tasks waiting to be submitted : %s." % len(task_list)
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-
-        # Wait in case some process terminates.
-        info_msg = "Waiting for : %s secs." % (str(wait_time))
-        if logger is not None:
-            logger.INFO(info_msg)
-
-        print( info_msg )
-        time.sleep(wait_time)
-
-        # If nothing can be submitted wait again.
-        if num_of_tasks_to_submit == 0:
-            wait_time = wait_time - dec
-            if wait_time == 0:
-                wait_time = init_wait_time
-
-        if logger is not None:
-            logger.INFO("===============================")
-
-        print( "===============================" )
-
-
-def _make_bsub_command(task, count, queue, logger=None):
-
-    if queue == 'short-serial':
-        wall_time = '24:00'
-    else:
-        wall_time = '48:00'
-
-    "Construct bsub command for task and return it."
-    command = "bsub -q {queue} -W {wall_time} -e lotus_errors/%J.err {command}".format(queue=queue, wall_time=wall_time, command=task)
-    info_msg = "%s. Executing : %s" % ((count + 1), command)
-    if logger is not None: logger.INFO(info_msg)
-    print( info_msg )
-    return command
 
 def get_best_name(phenomena):
     """
@@ -714,14 +526,15 @@ def build_phenomena(data):
             phen_dict["agg_string"] = agg_string
             phenom_list.append(phen_dict)
 
-
     return (phenom_list,)
+
 
 def date2iso(date):
     date = parser.parse(date)
     iso_date = date.isoformat()
 
     return iso_date
+
 
 def calculate_md5(filename):
     hash_md5 = hashlib.md5()
