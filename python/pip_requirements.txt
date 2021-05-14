@@ -1,4 +1,4 @@
-ceda-elasticsearch-tools==2.2.0
+git+https://github.com/cedadev/ceda-elasticsearch-tools@2.3.1#egg=ceda_elasticsearch_tools
 elasticsearch==7.6.0
 -e git+https://github.com/cedadev/ceda-fbs#egg=fbs
 filemagic==1.6
