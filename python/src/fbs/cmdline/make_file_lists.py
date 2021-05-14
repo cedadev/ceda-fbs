@@ -81,9 +81,8 @@ def store_datasets_to_files(status, config, host):
     # files containing the paths to data files.
     for dataset in datasets:
 
-        command = "python {}/scan_dataset.py -f {} -d  {} --make-list {}.txt".format(
-            SCRIPT_DIR, filename, dataset, os.path.join(directory_to_save_files, dataset)
-        )
+
+        command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} -d  {dataset} --make-list {os.path.join(directory_to_save_files, dataset)}.txt"
 
         # Add followlinks flag if follow links flag is used
         if config['followlinks']:
