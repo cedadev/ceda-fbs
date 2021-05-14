@@ -109,17 +109,13 @@ def read_and_scan_datasets_in_lotus(config):
     level = config["level"]
 
     dataset_ids = util.find_dataset(file_paths_dir, "all")
-    keys = dataset_ids.keys()
-    number_of_datasets = len(keys)
     commands = []
 
-    for i in range(0, number_of_datasets):
+    for id in dataset_ids:
 
-        command = ("python %s/scan_dataset.py -f  %s -d  %s  -l  %s" 
-                   % (SCRIPT_DIR, file_paths_dir, keys[i], level))
+        command = f" {SCRIPT_DIR}/scan_dataset.py -f  {file_paths_dir} -d  {id}  -l  {level}"
 
-
-        print( "created command :" + command)
+        print( "created command: " + command)
         commands.append(command)
 
     lotus_runner = util.LotusRunner(queue='short-serial')

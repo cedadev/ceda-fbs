@@ -72,6 +72,7 @@ def store_datasets_to_files(status, config, host):
 
     # Get file.
     filename = config["filename"]
+
     # Extract datasets ids and paths.
     datasets = util.find_dataset(filename, "all")
     scan_commands = []
@@ -81,21 +82,19 @@ def store_datasets_to_files(status, config, host):
     # files containing the paths to data files.
     for dataset in datasets:
 
-
         command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} -d  {dataset} --make-list {os.path.join(directory_to_save_files, dataset)}.txt"
 
         # Add followlinks flag if follow links flag is used
         if config['followlinks']:
             command += ' --followlinks'
 
-        if host == 'localhost':
         # If using localhost, execute script immediately
-
-            print( "Executing: {}".format(command))
+        if host == 'localhost':
+            print(f"Executing: {command}")
             subprocess.call(command, shell=True)
 
-        else:
         # Otherwise append to list
+        else:
             scan_commands.append(command)
 
     # Execute commands on lotus
@@ -116,7 +115,7 @@ def main():
     status_and_defaults = get_stat_and_defs(com_args)
 
     start = datetime.datetime.now()
-    print( "Script started at: %s" % (str(start)))
+    print(f"Script started at: {start}")
 
     status = status_and_defaults[1]
     config = status_and_defaults[0]
@@ -127,7 +126,7 @@ def main():
         store_datasets_to_files(status, config, 'lotus')
 
     end = datetime.datetime.now()
-    print( "Script ended at : %s it ran for : %s" % (str(end), str(end - start)))
+    print(f"Script ended at : {end} it ran for : {end-start}")
 
 
 if __name__ == '__main__':
