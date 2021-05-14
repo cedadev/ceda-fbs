@@ -12,9 +12,7 @@ import fbs.proc.file_handlers.handler_picker as handler_picker
 from elasticsearch.exceptions import TransportError
 from es_iface.factory import ElasticsearchClientFactory
 from es_iface import index
-import json
 from ceda_elasticsearch_tools.core.log_reader import SpotMapping
-from tqdm import tqdm
 from elasticsearch.helpers import bulk
 
 # Suppress requests logging messages
