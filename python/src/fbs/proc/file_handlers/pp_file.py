@@ -20,7 +20,7 @@ class PpFile(GenericFile):
         return self.handler_id
 
     @staticmethod
-    def getBoundingBox(file):
+    def get_bounding_box(file):
         """
         Returns the horizontal domain as (north, south, east, west)
         """
@@ -40,7 +40,7 @@ class PpFile(GenericFile):
 
 
     @staticmethod
-    def getTemporalDomain(file):
+    def get_temporal_domain(file):
         """
         Returns the temporal domain as a tuple of start_time, end_time.
         """
@@ -152,8 +152,8 @@ class PpFile(GenericFile):
                 pp_files = cf.read(self.file_path)
                 for file in pp_files:
                     try:
-                        n, s, e, w = self.getBoundingBox(file)
-                        start, end = self.getTemporalDomain(file)
+                        n, s, e, w = self.get_bounding_box(file)
+                        start, end = self.get_temporal_domain(file)
 
                         # Geospatial data
                         north.append(n)
