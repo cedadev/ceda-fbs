@@ -30,7 +30,7 @@ def main():
     com_args = util.sanitise_args(docopt(__doc__, version=__version__))
     commands_file = com_args["filename"]
 
-    lotus_runner = util.LotuRunner(queue='short-serial')
+    lotus_runner = util.LotusRunner(queue='short-serial')
     lotus_runner.run_tasks_file_in_lotus(commands_file)
 
     end = datetime.datetime.now()
