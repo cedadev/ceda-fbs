@@ -172,7 +172,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
         remainder = num_of_lines % int(num_files)
 
         start = 0
-        for i in range(0, int(number_of_jobs)):
+        for i in range(int(number_of_jobs)):
             _add_scan_cmd_to_list(filename, step, start, level, commands)
             start += step
 
@@ -185,9 +185,8 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
 
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
-    cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s --calculate_md5"
-    command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
-    # print( "Created command: %s" % command)
+
+    command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} --num-files {num_files} --start {start} -l {level} --calculate_md5"
     commands_list.append(command)
 
 

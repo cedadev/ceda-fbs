@@ -77,6 +77,8 @@ class ExtractSeq(object):
 
         # directory where the files to be searched are.
         self.dataset_dir = util.find_dataset(datasets_file, self.dataset_id)
+        self.logger.debug(f'Datset directory: {self.dataset_dir}')
+        print(f'Datset directory: {self.dataset_dir}')
 
         if self.dataset_dir is not None:
             self.logger.debug("Scannning files in directory {}.".format(self.dataset_dir))
@@ -280,9 +282,9 @@ class ExtractSeq(object):
 
         if self.file_list is not None:
             file_to_store_paths = self.conf("make-list")
-            print(file_to_store_paths)
+
             try:
-                files_written = util.write_list_to_file_nl(self.file_list, file_to_store_paths)
+                files_written = util.write_list_to_file(self.file_list, file_to_store_paths)
             except Exception as ex:
                 self.logger.error("Could not save the python list of files to file...{}".format(ex))
             else:
