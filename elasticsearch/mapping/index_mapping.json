@@ -109,11 +109,11 @@
                 },
                 "end_time": {
                   "type": "date",
-                  "format": "dateOptionalTime"
+                  "format": "date_optional_time"
                 },
                 "start_time": {
                   "type": "date",
-                  "format": "dateOptionalTime"
+                  "format": "date_optional_time"
                 }
               }
             },
