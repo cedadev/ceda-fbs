@@ -7,7 +7,6 @@ Usage:
   make_file_lists.py (-f <filename> | --filename <filename>)
                      (-m <location> | --make-list <location>)
                      (--host <hostname>)
-                     [-p <number_of_processes> | --num-processes <number_of_processes>]
                      [--followlinks]
 
 Options:
@@ -21,8 +20,6 @@ Options:
 
   -m --make-list=<location>                  Stores the list of filenames
                                              to a file.
-
-  -p --num-processes=<number_of_processes>   Number of processes to use.
 
   --host=<hostname>                          The name of the host where
                                              the script will run.
@@ -58,9 +55,6 @@ def get_stat_and_defs(com_args):
     # them where loaded from the defaults file.
     config = util.get_settings(com_args["config"], com_args)
 
-    if "num-processes" not in config or not config["num-processes"]:
-        config["num-processes"] = config["scanning"]["num-processes"]
-
     status_and_defaults.append(config)
 
     if ("host" in config) and config["host"] == "localhost":
@@ -78,6 +72,7 @@ def store_datasets_to_files(status, config, host):
 
     # Get file.
     filename = config["filename"]
+
     # Extract datasets ids and paths.
     datasets = util.find_dataset(filename, "all")
     scan_commands = []
@@ -87,31 +82,25 @@ def store_datasets_to_files(status, config, host):
     # files containing the paths to data files.
     for dataset in datasets:
 
-        command = "python {}/scan_dataset.py -f {} -d  {} --make-list {}.txt".format(
-            SCRIPT_DIR, filename, dataset, os.path.join(directory_to_save_files, dataset)
-        )
+        command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} -d  {dataset} --make-list {os.path.join(directory_to_save_files, dataset)}.txt"
 
         # Add followlinks flag if follow links flag is used
         if config['followlinks']:
             command += ' --followlinks'
 
-        if host == 'localhost':
         # If using localhost, execute script immediately
-
-            print( "Executing: {}".format(command))
+        if host == 'localhost':
+            print(f"Executing: {command}")
             subprocess.call(command, shell=True)
 
-        else:
         # Otherwise append to list
+        else:
             scan_commands.append(command)
 
     # Execute commands on lotus
     if host == 'lotus':
-        lotus_max_processes = config["num-processes"]
-
-        # Run each command in lotus.
-        util.run_tasks_in_lotus(scan_commands, int(lotus_max_processes),
-                                user_wait_time=30, queue='short-serial')
+        lotus_runner = util.LotusRunner(queue='short-serial')
+        lotus_runner.run_tasks_in_lotus(scan_commands)
 
 
 def main():
@@ -126,7 +115,7 @@ def main():
     status_and_defaults = get_stat_and_defs(com_args)
 
     start = datetime.datetime.now()
-    print( "Script started at: %s" % (str(start)))
+    print(f"Script started at: {start}")
 
     status = status_and_defaults[1]
     config = status_and_defaults[0]
@@ -137,7 +126,7 @@ def main():
         store_datasets_to_files(status, config, 'lotus')
 
     end = datetime.datetime.now()
-    print( "Script ended at : %s it ran for : %s" % (str(end), str(end - start)))
+    print(f"Script ended at : {end} it ran for : {end-start}")
 
 
 if __name__ == '__main__':

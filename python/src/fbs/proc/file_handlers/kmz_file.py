@@ -8,7 +8,6 @@ import zipfile
 import xmltodict
 import os
 import re
-import datetime
 import dateutil.parser
 
 class Coordinates:

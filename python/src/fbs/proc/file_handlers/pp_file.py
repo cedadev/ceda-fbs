@@ -1,8 +1,8 @@
-import iris
 import fbs.proc.common_util.util as util
 from fbs.proc.file_handlers.generic_file import GenericFile
 import six
 import numpy as np
+import cf
 
 
 class PpFile(GenericFile):
@@ -20,29 +20,36 @@ class PpFile(GenericFile):
         return self.handler_id
 
     @staticmethod
-    def getBoundingBox(cube):
+    def get_bounding_box(file):
         """
         Returns the horizontal domain as (north, south, east, west)
         """
+        lats = file.coord('latitude').data
+        north = lats.max()
+        south = lats.min()
 
-        north = np.max(cube.coord('latitude').points)
-        south = np.min(cube.coord('latitude').points)
+        lons = file.coord('longitude').data
+        east = lons.max()
+        west = lons.min()
 
-        east = np.max(cube.coord('longitude').points)
-        west = np.min(cube.coord('longitude').points)
+        directions = []
+        for direction in north, south, east, west:
+            directions.append(direction.array[0])
 
-        return north, south, east, west
+        return directions
+
 
     @staticmethod
-    def getTemporalDomain(cube):
+    def get_temporal_domain(file):
         """
         Returns the temporal domain as a tuple of start_time, end_time.
         """
-        time = cube.coord('time')
-        dates = time.units.num2date(np.sort(time.points))
 
-        start_time = dates[0].isoformat()
-        end_time = dates[-1].isoformat()
+        time = file.dimension_coordinate('time')
+        dates = np.sort(time.dtarray)
+
+        start_time = dates[0].strftime('%Y-%m-%dT%H:%M:%S')
+        end_time = dates[-1].strftime('%Y-%m-%dT%H:%M:%S')
 
         return start_time, end_time
 
@@ -62,15 +69,14 @@ class PpFile(GenericFile):
 
         return coord
 
-    def get_phenomena(self, pp_cubes):
+    def get_phenomena(self, pp_files):
 
         try:
             self.handler_id = "pp handler level 2."
 
             phen_list = []
-            for cube in pp_cubes:
-                metadata = cube.metadata._asdict()
-
+            for file in pp_files:
+                metadata = file.properties()
                 phen_attr_list = []
                 for key, value in six.iteritems(metadata):
                     value = str(value)
@@ -109,8 +115,8 @@ class PpFile(GenericFile):
 
         if file_info is not None:
             try:
-                pp_cubes = iris.load(self.file_path)
-                phen_list = self.get_phenomena(pp_cubes)
+                pp_files = cf.read(self.file_path)
+                phen_list = self.get_phenomena(pp_files)
 
                 if phen_list is not None:
                     file_info[0]["info"]["read_status"] = "Successful"
@@ -120,7 +126,6 @@ class PpFile(GenericFile):
                     return file_info + (None,)
 
             except Exception:
-                raise
                 file_info[0]["info"]["read_status"] = "Read Error"
                 return file_info
 
@@ -144,11 +149,11 @@ class PpFile(GenericFile):
                 start_time_list = []
                 end_time_list = []
 
-                pp_cubes = iris.load(self.file_path)
-                for cube in pp_cubes:
+                pp_files = cf.read(self.file_path)
+                for file in pp_files:
                     try:
-                        n, s, e, w = self.getBoundingBox(cube)
-                        start, end = self.getTemporalDomain(cube)
+                        n, s, e, w = self.get_bounding_box(file)
+                        start, end = self.get_temporal_domain(file)
 
                         # Geospatial data
                         north.append(n)
@@ -161,6 +166,7 @@ class PpFile(GenericFile):
                         end_time_list.append(end)
 
                     except Exception as ex:
+                        print(ex)
                         continue
 
                 # Make sure that there are values in all the lists
@@ -193,7 +199,7 @@ class PpFile(GenericFile):
                         "end_time": max_time
                     }
 
-                phen_list = self.get_phenomena(pp_cubes)
+                phen_list = self.get_phenomena(pp_files)
 
                 file_info[0]["info"]["read_status"] = "Successful"
 
@@ -220,13 +226,14 @@ if __name__ == "__main__":
     # run test
     try:
         level = str(sys.argv[1])
+        file = sys.argv[2]
     except IndexError:
-        level = '1'
+        level = '3'
+        file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
 
-    # file = "/badc/amma/data/ukmo-nrt/africa-lam/pressure_level_split/af/fp/2006/07/02/affp2006070218_05201_33.pp"
-    file ="/Users/vdn73631/Documents/dev/ceda-fbs/python/src/test/files/affp2006070218_05201_33.pp"
     ppf = PpFile(file, level)
     start = datetime.datetime.today()
     print(ppf.get_metadata())
     end = datetime.datetime.today()
     print(end - start)
+

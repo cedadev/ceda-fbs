@@ -8,12 +8,10 @@ Usage:
                   (-d <dataset_id> | --dataset <dataset_id> )
                   (-l <level> | --level <level>)
                   (-h <hostname> | --host <hostname>)
-                  [-p <number_of_processes> | --num-processes <number_of_processes>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
  scan_archive.py  (-f <file_paths_dir> | --file-paths-dir <file_paths_dir>)
                   (-l <level> | --level <level>)
                   (-h <hostname> | --host <hostname>)
-                  [-p <number_of_processes> | --num-processes <number_of_processes>]
                   [-n <n_files> | --num-files <n_files>]
                   [-c <path_to_config_dir> | --config <path_to_config_dir>]
 
@@ -34,7 +32,6 @@ Options:
   -n --num-files=<n_files>                   Number of files to scan.
   -h --host=<hostname>                       The name of the host where
                                              the script will run.
-  -p --num-processes=<number_of_processes>   Number of processes to use.
  """
 
 import os
@@ -75,9 +72,6 @@ def get_stat_and_defs(com_args):
         config["start"] = config["scanning"]["start"]
     if "num-files" not in config or not config["num-files"]:
         config["num-files"] = config["scanning"]["num-files"]
-    if "num-processes" not in config or not config["num-processes"]:
-        config["num-processes"] = config["scanning"]["num-processes"]
-
 
     status_and_defaults.append(config)
 
@@ -108,29 +102,25 @@ def get_stat_and_defs(com_args):
 
     return status_and_defaults
 
+
 def read_and_scan_datasets_in_lotus(config):
 
     file_paths_dir = config["file-paths-dir"]
     level = config["level"]
 
     dataset_ids = util.find_dataset(file_paths_dir, "all")
-    keys = dataset_ids.keys()
-    number_of_datasets = len(keys)
     commands = []
 
+    for id in dataset_ids:
 
-    for i in range(0, number_of_datasets):
+        command = f" {SCRIPT_DIR}/scan_dataset.py -f  {file_paths_dir} -d  {id}  -l  {level}"
 
-        command = ("python %s/scan_dataset.py -f  %s -d  %s  -l  %s" 
-                   % (SCRIPT_DIR, file_paths_dir, keys[i], level))
-
-
-        print( "created command :" + command)
+        print( "created command: " + command)
         commands.append(command)
 
-    lotus_max_processes = config["num-processes"]
-    util.run_tasks_in_lotus(commands, int(lotus_max_processes),\
-                            user_wait_time=30)
+    lotus_runner = util.LotusRunner(queue='short-serial')
+    lotus_runner.run_tasks_in_lotus(commands)
+
 
 def read_and_scan_datasets_sub_in_lotus(config):
     file_paths_dir = config["file-paths-dir"]
@@ -182,7 +172,7 @@ def read_datasets_from_files_and_scan_in_lotus(config):
         remainder = num_of_lines % int(num_files)
 
         start = 0
-        for i in range(0, int(number_of_jobs)):
+        for i in range(int(number_of_jobs)):
             _add_scan_cmd_to_list(filename, step, start, level, commands)
             start += step
 
@@ -191,13 +181,12 @@ def read_datasets_from_files_and_scan_in_lotus(config):
             _add_scan_cmd_to_list(filename, remainder, start, level, commands)
 
     # Write each command to a file - which can then be issued to LOTUS
-    util.write_list_to_file_nl(commands, "lotus_commands.txt")
+    util.write_list_to_file(commands, "lotus_commands.txt")
 
 
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
-    cmd_tmpl = " python %s/scan_dataset.py -f %s --num-files %d --start %d -l %s --calculate_md5"
-    command = cmd_tmpl % (SCRIPT_DIR, filename, num_files, start, level)
-    # print( "Created command: %s" % command)
+
+    command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} --num-files {num_files} --start {start} -l {level} --calculate_md5"
     commands_list.append(command)
 
 
