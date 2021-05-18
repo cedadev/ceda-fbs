@@ -186,7 +186,8 @@ def read_datasets_from_files_and_scan_in_lotus(config):
 
 def _add_scan_cmd_to_list(filename, num_files, start, level, commands_list):
 
-    command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} --num-files {num_files} --start {start} -l {level} --calculate_md5"
+    command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} --num-files {num_files} --start {start} -l {level}" \
+              " --calculate_md5 -c $BASEDIR/ceda-fbs/python/config/ceda_fbs.ini"
     commands_list.append(command)
 
 

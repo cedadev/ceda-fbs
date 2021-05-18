@@ -90,7 +90,7 @@ badc__accmip=/badc/accmip/data
 Make directories ready for file lists and log files:
 
 ```
-$ mkdir logs datasets
+$ mkdir logs datasets lotus_errors
 ```
 
 *!WARNING: files lists can be *many Gbytes in size* so don't do this in your home directory.*
@@ -139,33 +139,29 @@ Next, run the `run_commands_in_lotus.py` script to work its way through the list
 On `jasmin-sci[12].ceda.ac.uk`, run:
 
 ```
-$ nohup run_commands_in_lotus.py -f lotus_commands.txt -p 128 2>&1 > scan.output.txt &
+$ run_commands_in_lotus.py -f lotus_commands.txt
 ```
 
 You can then view your job queue on lotus with:
 
 ```
-$ bjobs
+$ squeue -u $USER
 ```
 
 ## 5. Watch the file count building
 
 You can see how things are progressing in the web-interface:
 
- http://jasmin-es1.ceda.ac.uk:9200/_plugin/head/
+ https://kibana.ceda.ac.uk
  
-Or, you can use the `Sense` plugin in Chrome, and try: 
-
-`GET jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_count`
-
 ## 6. Make some optimisations to the Elasticsearch settings
 
-Make these settings using `curl`, `wget` or the `Sense` plugin.
+Make these settings using `curl`, `wget` or in kibana.
 
 Set the Index to NOT use replica shards by calling the following:
 
 ```
-PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
+PUT ceda-archive-level-2/_settings
 {
     "number_of_replicas": 0
 }
@@ -174,7 +170,7 @@ PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
 Set the number of shards for each host to 1 by calling the following:
 
 ```
-PUT jasmin-es1.ceda.ac.uk:9200/ceda-archive-level-2/_settings
+PUT /ceda-archive-level-2/_settings
 {
     "index.routing.allocation.total_shards_per_node": 1
 
