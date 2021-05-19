@@ -202,7 +202,7 @@ class NetCdfFile(GenericFile):
             phen_attr_list.append(phen_attr)
 
             # Extract extra information about each variable not in the __dict__ response
-            for attr in ["dtype", "shape", "_ChunkSizes", "_FillValue", "dimensions"]:
+            for attr in ["dtype", "shape", "_ChunkSizes", "_FillValue", "dimensions", "size"]:
                 try:
                     value = getattr(v_data, attr)
 
