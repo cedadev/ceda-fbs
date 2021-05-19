@@ -494,21 +494,22 @@ def build_phenomena(data):
             value = attr["value"]
             name = attr["name"]
 
-            # Remove extra spaces and any quotation marks which will interfere with creating the agg_string
-            value = re.sub('  +', ' ', value).replace('"', '')
-
             if name in name_filter:
+                # Remove extra spaces and any quotation marks which will interfere with creating the agg_string
+                value = re.sub('  +', ' ', value).replace('"', '')
                 phen_dict[name] = value
                 agg_string_list.append('"{}":"{}"'.format(name, value))
 
             if name in names_list_filter and value not in names:
 
-                # if long_name containes "_" and is the same as standard name, include a version in the names
+                # if long_name contains "_" and is the same as standard name, include a version in the names
                 # list with the "_" replaced by " "
                 if name == "long_name" and long_name_check:
                     value = value.replace("_"," ")
 
                 names.append('"{}"'.format(value))
+
+            phen_dict[name] = value
 
         if names:
             names.sort()
