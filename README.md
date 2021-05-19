@@ -98,10 +98,10 @@ $ mkdir logs datasets lotus_errors
 Now run the first LOTUS jobs to generate lists of all files in each dataset.
 
 ```
-$ make_file_lists.py -f ceda_all_datasets.ini -m $BASEDIR/datasets --host lotus -p 256
+$ make_file_lists.py -f ceda_all_datasets.ini -m $BASEDIR/datasets --host lotus
 ```
 
-This will submit lots of jobs to LOTUS...and wait...and try to submit more.
+This will submit lots of jobs to LOTUS.
 
 *NOTE:* To run a subset of these jobs locally you might do:
 
