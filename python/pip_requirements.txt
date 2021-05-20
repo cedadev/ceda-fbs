@@ -1,6 +1,7 @@
 git+https://github.com/cedadev/ceda-elasticsearch-tools@2.3.1#egg=ceda_elasticsearch_tools
 elasticsearch==7.6.0
 -e git+https://github.com/cedadev/ceda-fbs#egg=fbs
+ldap3==2.9
 nappy==1.2.1
 xmltodict==0.12.0
 python-magic==0.4.22

@@ -40,6 +40,10 @@ class ExtractSeq(object):
         # Spot data
         self.spots = SpotMapping(spot_file='ceda_all_datasets.ini')
 
+        # LDAP lookup
+        ldap_hosts = self.conf('ldap-configuration')['hosts'].split(',')
+        self.ldap_interface = util.LDAPIdentifier(ldap_hosts)
+
         # Define constants
         self.blocksize = 800
         self.FILE_PROPERTIES_ERROR = "0"
