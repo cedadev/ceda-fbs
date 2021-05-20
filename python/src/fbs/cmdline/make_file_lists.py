@@ -82,7 +82,9 @@ def store_datasets_to_files(status, config, host):
     # files containing the paths to data files.
     for dataset in datasets:
 
-        command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} -d  {dataset} --make-list {os.path.join(directory_to_save_files, dataset)}.txt"
+        command = f"{SCRIPT_DIR}/scan_dataset.py -f {filename} -d  {dataset} --make-list {os.path.join(directory_to_save_files, dataset)}.txt" \
+                  " -c $BASEDIR/ceda-fbs/python/config/ceda_fbs.ini"
+
 
         # Add followlinks flag if follow links flag is used
         if config['followlinks']:
