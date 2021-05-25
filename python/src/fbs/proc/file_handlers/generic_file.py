@@ -1,7 +1,4 @@
 import os
-from pwd import getpwuid
-from grp import getgrgid
-import datetime
 import fbs.proc.common_util.util as util
 
 
@@ -23,10 +20,11 @@ class GenericFile(object):
         self.calculate_md5 = calculate_md5
 
     def _get_file_ownership(self):
-        return (
-            getpwuid(os.stat(self.file_path).st_uid).pw_name,
-            getgrgid(os.stat(self.file_path).st_gid).gr_name
-        )
+
+        uid = os.stat(self.file_path).st_uid
+        gid = os.stat(self.file_path).st_gid
+
+        return uid, gid
 
     def get_metadata_level1(self):
         """

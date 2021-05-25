@@ -14,6 +14,10 @@ import datetime
 from dateutil import parser
 import hashlib
 import logging
+import ldap3
+from typing import Optional, Union, List
+from pwd import getpwuid
+from grp import getgrgid
 
 # Python 2/3 compatibility
 if sys.version_info.major > 2:
@@ -157,6 +161,119 @@ class LotusRunner:
         self._run_tasks_in_lotus()
 
         self.remove_task_file(filename)
+
+
+class LDAPIdentifier:
+    """
+    Provides interface to interact with LDAP and get user names
+    and group names. The results are cached, as this information
+    doesn't change, to reduce load on LDAP.
+    """
+    def __init__(self, host: Union[str, List]):
+        """
+        :param host: Host URI string or list of host URI strings
+        """
+        self.conn = ldap3.Connection(host, auto_bind=True)
+        self.users = {}
+        self.groups = {}
+
+    def _process_result(self, key: str) -> Optional[str]:
+        """
+        Process LDAP response object and return the first value for the
+        given key.
+
+        :param result: LDAP response object
+        :param key: key to return
+        :return: value
+        """
+        if self.conn.entries:
+            entry = self.conn.entries[0]
+            return getattr(entry, key).value
+
+    def _get_ldap_user(self, uid: Union[str, int]) -> Optional[str]:
+        """
+        Get the user listed in LDAP with the given UID
+
+        :param uid: UID to search for
+        :return: Username related to UID
+        """
+        result = None
+
+        try:
+            result = getpwuid(uid).pw_name
+
+        except KeyError:
+            self.conn.search(
+                'ou=jasmin,ou=People,o=hpc,dc=rl,dc=ac,dc=uk',
+                f'(&(objectClass=posixAccount)(uidNumber={uid}))',
+                attributes='uid',
+                size_limit=1
+            )
+
+            result = self._process_result('uid')
+
+        finally:
+            self.users[uid] = result
+
+        return result
+
+    def _get_ldap_group(self, gid: Union[str, int]) -> Optional[str]:
+        """
+        Get the group name linked to the given GID
+        :param gid: The GID to search for
+        :return: Common Name for given GID
+        """
+        result = None
+
+        try:
+            result = getgrgid(gid).gr_name
+
+        except KeyError:
+            self.conn.search(
+                'ou=ceda,ou=Groups,o=hpc,dc=rl,dc=ac,dc=uk',
+                f'(&(objectClass=posixGroup)(gidNumber={gid}))',
+                attributes='cn',
+                size_limit=1
+            )
+
+            result = self._process_result('gid')
+
+        finally:
+            self.users[gid] = result
+
+        return result
+
+    def get_user(self, uid: Union[str, int]) -> Optional[str]:
+        """
+        Either return from the cache, filesystem or search LDAP for the LDAP user
+        :param uid: user ID
+        :return:
+        """
+
+        # Try the cache to see if the user ID is stored
+        if self.users.get(uid):
+            return self.users.get(uid)
+
+        # Try to get the username from the filesystem
+        # If the names are not mounted for the uids then
+        # query LDAP directly
+        return self._get_ldap_user(uid)
+
+    def get_group(self, gid: Union[str, int]) -> Optional[str]:
+        """
+        Either return from the cache, filesystem or search LDAP for the LDAP group
+
+        :param gid: group ID
+        :return:
+        """
+
+        # Try the cache
+        if self.groups.get(gid):
+            return self.users.get(gid)
+
+        # Try to get the group name from file system.
+        # If names not mounted, query LDAP direct
+        return self._get_ldap_group(gid)
 
 
 def delete_folder(folder):
