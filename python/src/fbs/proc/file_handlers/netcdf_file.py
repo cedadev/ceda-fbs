@@ -206,6 +206,9 @@ class NetCdfFile(GenericFile):
                 try:
                     value = getattr(v_data, attr)
 
+                    if attr == 'dtype':
+                        value = value.name
+
                     # Convert value datatype to JSON compatible
                     if type(value) not in (str, tuple, list):
                         value = str(value)
