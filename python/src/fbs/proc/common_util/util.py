@@ -236,7 +236,7 @@ class LDAPIdentifier:
                 size_limit=1
             )
 
-            result = self._process_result('gid')
+            result = self._process_result('cn')
 
         finally:
             self.users[gid] = result
