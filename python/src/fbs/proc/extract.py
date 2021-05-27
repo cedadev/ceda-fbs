@@ -177,6 +177,11 @@ class ExtractSeq(object):
                 if spot is not None:
                     body['info']['spot_name'] = spot
 
+                uid = body['info']['user']
+                gid = body['info']['group']
+
+                body['info']['user'] = self.ldap_interface.get_user(uid)
+                body['info']['group'] = self.ldap_interface.get_group(gid)
 
                 doc = {
                     '_index': self.es_index,

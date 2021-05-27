@@ -190,14 +190,14 @@ class LDAPIdentifier:
             entry = self.conn.entries[0]
             return getattr(entry, key).value
 
-    def _get_ldap_user(self, uid: Union[str, int]) -> Optional[str]:
+    def _get_ldap_user(self, uid: Union[str, int]) -> Union[str, int]:
         """
         Get the user listed in LDAP with the given UID
 
         :param uid: UID to search for
-        :return: Username related to UID
+        :return: Username related to UID or UID
         """
-        result = None
+        result = uid
 
         try:
             result = getpwuid(uid).pw_name
@@ -217,13 +217,13 @@ class LDAPIdentifier:
 
         return result
 
-    def _get_ldap_group(self, gid: Union[str, int]) -> Optional[str]:
+    def _get_ldap_group(self, gid: Union[str, int]) -> Union[str, int]:
         """
         Get the group name linked to the given GID
         :param gid: The GID to search for
-        :return: Common Name for given GID
+        :return: Common Name for given GID or GID
         """
-        result = None
+        result = gid
 
         try:
             result = getgrgid(gid).gr_name
@@ -243,11 +243,11 @@ class LDAPIdentifier:
 
         return result
 
-    def get_user(self, uid: Union[str, int]) -> Optional[str]:
+    def get_user(self, uid: Union[str, int]) -> Union[str, int]:
         """
         Either return from the cache, filesystem or search LDAP for the LDAP user
         :param uid: user ID
-        :return:
+        :return: Username with UID or UID
         """
 
         # Try the cache to see if the user ID is stored
@@ -259,12 +259,12 @@ class LDAPIdentifier:
         # query LDAP directly
         return self._get_ldap_user(uid)
 
-    def get_group(self, gid: Union[str, int]) -> Optional[str]:
+    def get_group(self, gid: Union[str, int]) -> Union[str, int]:
         """
         Either return from the cache, filesystem or search LDAP for the LDAP group
 
         :param gid: group ID
-        :return:
+        :return: Groupname with GID or GID
         """
 
         # Try the cache
