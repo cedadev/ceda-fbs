@@ -42,7 +42,7 @@ class ExtractSeq(object):
 
         # LDAP lookup
         ldap_hosts = self.conf('ldap-configuration')['hosts'].split(',')
-        self.ldap_interface = util.LDAPIdentifier(ldap_hosts)
+        self.ldap_interface = util.LDAPIdentifier(server=ldap_hosts, auto_bind=True)
 
         # Define constants
         self.blocksize = 800

@@ -15,6 +15,7 @@ from dateutil import parser
 import hashlib
 import logging
 import ldap3
+from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from typing import Optional, Union, List
 from pwd import getpwuid
 from grp import getgrgid
@@ -169,11 +170,11 @@ class LDAPIdentifier:
     and group names. The results are cached, as this information
     doesn't change, to reduce load on LDAP.
     """
-    def __init__(self, host: Union[str, List]):
+    def __init__(self, **kwargs):
         """
-        :param host: Host URI string or list of host URI strings
+        :param kwargs: ldap3 Connection kwargs
         """
-        self.conn = ldap3.Connection(host, auto_bind=True)
+        self.conn = ldap3.Connection(**kwargs)
         self.users = {}
         self.groups = {}
 
@@ -190,6 +191,22 @@ class LDAPIdentifier:
             entry = self.conn.entries[0]
             return getattr(entry, key).value
 
+    def _ldap_query(self, *args, **kwargs) -> None:
+        """
+        Wraps the LDAP search operation to catch errors
+        caused by a closed connection. This method
+        restarts the connection and tries the search again.
+
+        :param args: args to pass to ldap3.Connection.search()
+        :param kwargs: kwargs to pass to ldap3.Connection.search()
+        :return: None
+        """
+        try:
+            self.conn.search(*args, **kwargs)
+        except LDAPSessionTerminatedByServerError:
+            self.conn.bind()
+            self.conn.search(*args, **kwargs)
+
     def _get_ldap_user(self, uid: Union[str, int]) -> Union[str, int]:
         """
         Get the user listed in LDAP with the given UID
@@ -203,7 +220,7 @@ class LDAPIdentifier:
             result = getpwuid(uid).pw_name
 
         except KeyError:
-            self.conn.search(
+            self._ldap_query(
                 'ou=jasmin,ou=People,o=hpc,dc=rl,dc=ac,dc=uk',
                 f'(&(objectClass=posixAccount)(uidNumber={uid}))',
                 attributes='uid',
@@ -229,7 +246,7 @@ class LDAPIdentifier:
             result = getgrgid(gid).gr_name
 
         except KeyError:
-            self.conn.search(
+            self._ldap_query(
                 'ou=ceda,ou=Groups,o=hpc,dc=rl,dc=ac,dc=uk',
                 f'(&(objectClass=posixGroup)(gidNumber={gid}))',
                 attributes='cn',
