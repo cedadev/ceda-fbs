@@ -5,6 +5,10 @@ import fbs.proc.common_util.geojson as geojson
 import six
 from dateutil.parser import parse
 import re
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 
 
 def time_order(time1, time2):
@@ -292,6 +296,7 @@ class NetCdfFile(GenericFile):
 
                     return file_info + netcdf_phenomena + (spatial,)
             except Exception as ex:
+                logger.error(traceback.format_exc())
                 if netcdf_phenomena is not None:
 
                     file_info[0]["info"]["read_status"] = "Successful"
