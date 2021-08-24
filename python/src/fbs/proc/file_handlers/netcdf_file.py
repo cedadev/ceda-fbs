@@ -38,7 +38,7 @@ def sanitise_float(value):
     """
 
     # Clean all non-numeric characters
-    value = re.sub('[^-.\d]', '', value)
+    value = re.sub('[^-.\d]', '', str(value))
 
     return float(value)
 
@@ -274,14 +274,14 @@ class NetCdfFile(GenericFile):
 
                         if geo_info:
 
-                            loc_dict = {}
+                            spatial = None
 
                             gj = geojson.GeoJSONGenerator(geo_info["lat"], geo_info["lon"])
                             spatial = gj.get_elasticsearch_geojson()
+                            if spatial:
+                                spatial = {"coordinates": spatial["geometries"]["search"]}
 
-                            loc_dict["coordinates"] = spatial["geometries"]["search"]  # ["coordinates"]
-                            spatial = loc_dict
-                    except (AttributeError) as ex:
+                    except AttributeError as ex:
                         pass
 
                     try:
@@ -293,7 +293,6 @@ class NetCdfFile(GenericFile):
                         pass
 
                     file_info[0]["info"]["read_status"] = "Successful"
-
                     return file_info + netcdf_phenomena + (spatial,)
             except Exception as ex:
                 logger.error(traceback.format_exc())
