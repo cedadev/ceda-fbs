@@ -302,7 +302,7 @@ class NetCdfFile(GenericFile):
                 if netcdf_phenomena is not None:
 
                     file_info[0]["info"]["read_status"] = "Successful"
-                    return file_info + (netcdf_phenomena,)
+                    return file_info + netcdf_phenomena
                 else:
                     file_info[0]["info"]["read_status"] = "Read Error"
                     return file_info
