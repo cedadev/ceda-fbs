@@ -37,8 +37,11 @@ def sanitise_float(value):
     :return:
     """
 
-    # Clean all non-numeric characters
-    value = re.sub('[^-.\d]', '', str(value))
+    try:
+        return float(value)
+    except ValueError:
+        # Clean all non-numeric characters
+        value = re.sub('[^-.\d]', '', str(value))
 
     return float(value)
 
